@@ -1480,7 +1480,7 @@ window.AdminApp = (function () {
   }
 
 
-  return {
+    return {
 
     init: init,
 
@@ -1492,5 +1492,28 @@ window.AdminApp = (function () {
 
 
 })();
+
+
+/**
+ * ============================================================
+ * AUTO INIT DASHBOARD ADMIN
+ * ============================================================
+ */
+document.addEventListener(
+  'DOMContentLoaded',
+  function () {
+
+    if (
+      window.AdminApp &&
+      typeof window.AdminApp.init ===
+        'function'
+    ) {
+
+      window.AdminApp.init();
+
+    }
+
+  }
+);
 
 </script>

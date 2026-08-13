@@ -1,396 +1,43 @@
-<style>
-/* ============================================================
-   ADMIN MODULE UI
-   ============================================================ */
-
-.admin-module {
-  width: 100%;
-}
-
-.admin-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 18px;
-}
-
-.admin-toolbar input,
-.admin-toolbar select,
-.admin-form input,
-.admin-form select,
-.admin-form textarea {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 42px;
-  padding: 10px 12px;
-  border: 1px solid #d9e0ec;
-  border-radius: 9px;
-  background: #fff;
-  font: inherit;
-  outline: none;
-}
-
-.admin-toolbar input:focus,
-.admin-toolbar select:focus,
-.admin-form input:focus,
-.admin-form select:focus,
-.admin-form textarea:focus {
-  border-color: #315bea;
-  box-shadow: 0 0 0 3px rgba(49,91,234,.10);
-}
-
-.admin-filter {
-  flex: 1 1 160px;
-  min-width: 140px;
-}
-
-.admin-btn {
-  border: 0;
-  border-radius: 9px;
-  min-height: 40px;
-  padding: 9px 14px;
-  cursor: pointer;
-  font-weight: 600;
-  font: inherit;
-}
-
-.admin-btn-primary {
-  background: #315bea;
-  color: #fff;
-}
-
-.admin-btn-success {
-  background: #168a55;
-  color: #fff;
-}
-
-.admin-btn-warning {
-  background: #e68a00;
-  color: #fff;
-}
-
-.admin-btn-danger {
-  background: #d93025;
-  color: #fff;
-}
-
-.admin-btn-secondary {
-  background: #eef2f7;
-  color: #253047;
-}
-
-.admin-btn:disabled {
-  opacity: .55;
-  cursor: not-allowed;
-}
-
-.admin-table-wrap {
-  width: 100%;
-  overflow-x: auto;
-  border: 1px solid #e4e8f0;
-  border-radius: 12px;
-}
-
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 850px;
-  background: #fff;
-}
-
-.admin-table th,
-.admin-table td {
-  padding: 12px 13px;
-  border-bottom: 1px solid #edf0f5;
-  text-align: left;
-  vertical-align: middle;
-  font-size: 13px;
-}
-
-.admin-table th {
-  background: #f7f9fc;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.admin-table tr:last-child td {
-  border-bottom: 0;
-}
-
-.admin-table td .admin-btn {
-  margin: 2px;
-}
-
-.admin-empty {
-  padding: 35px 20px;
-  text-align: center;
-  color: #718096;
-}
-
-.admin-loading {
-  padding: 30px;
-  text-align: center;
-  color: #718096;
-}
-
-.admin-error {
-  padding: 14px;
-  border-radius: 9px;
-  background: #fff0f0;
-  border: 1px solid #ffcaca;
-  color: #c62828;
-  margin-bottom: 15px;
-}
-
-.admin-pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-top: 15px;
-  flex-wrap: wrap;
-}
-
-.admin-pagination-info {
-  color: #68758a;
-  font-size: 13px;
-}
-
-.admin-pagination-buttons {
-  display: flex;
-  gap: 7px;
-}
-
-.admin-form {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 15px;
-}
-
-.admin-field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.admin-field.full {
-  grid-column: 1 / -1;
-}
-
-.admin-field label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #273449;
-}
-
-.admin-field textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-.admin-form-actions {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.admin-panel {
-  padding: 18px;
-  border: 1px solid #e4e8f0;
-  border-radius: 12px;
-  background: #fff;
-  margin-bottom: 18px;
-}
-
-.admin-panel h3 {
-  margin: 0 0 5px;
-}
-
-.admin-panel p {
-  margin: 0 0 15px;
-  color: #718096;
-  font-size: 13px;
-}
-
-.admin-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 9px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.admin-badge-green {
-  background: #e5f7ed;
-  color: #147a48;
-}
-
-.admin-badge-orange {
-  background: #fff2d9;
-  color: #a15b00;
-}
-
-.admin-badge-red {
-  background: #ffe7e7;
-  color: #b42318;
-}
-
-.admin-badge-blue {
-  background: #e7efff;
-  color: #2854bd;
-}
-
-.admin-detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: 12px;
-}
-
-.admin-detail-item {
-  padding: 12px;
-  background: #f7f9fc;
-  border-radius: 9px;
-}
-
-.admin-detail-item small {
-  display: block;
-  color: #718096;
-  margin-bottom: 4px;
-}
-
-.admin-detail-item strong {
-  color: #263247;
-  word-break: break-word;
-}
-
-.admin-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.admin-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgba(15,23,42,.52);
-}
-
-.admin-modal.hidden {
-  display: none;
-}
-
-.admin-modal-card {
-  width: min(700px, 100%);
-  max-height: 90vh;
-  overflow-y: auto;
-  background: #fff;
-  border-radius: 15px;
-  padding: 22px;
-  box-shadow: 0 20px 50px rgba(0,0,0,.20);
-}
-
-.admin-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 18px;
-}
-
-.admin-modal-header h3 {
-  margin: 0;
-}
-
-.admin-close {
-  border: 0;
-  background: transparent;
-  font-size: 25px;
-  cursor: pointer;
-  color: #68758a;
-}
-
-.admin-image {
-  max-width: 100%;
-  max-height: 260px;
-  border-radius: 10px;
-  object-fit: contain;
-  border: 1px solid #e4e8f0;
-}
-
-.admin-link {
-  color: #315bea;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.admin-link:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 700px) {
-  .admin-form,
-  .admin-detail-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-field.full {
-    grid-column: auto;
-  }
-
-  .admin-form-actions {
-    grid-column: auto;
-  }
-}
-</style>
-
 <script>
+
 (function () {
 
   'use strict';
 
-  /* ============================================================
-     GLOBAL STATE
-     ============================================================ */
+  var TOKEN_KEY =
+    'absensi_session_token';
 
-  var TOKEN_KEY = 'absensi_session_token';
-  var USER_KEY = 'absensi_session_user';
+  var USER_KEY =
+    'absensi_session_user';
 
-  var initialized = false;
-  var currentPage = 'dashboard';
-  var dashboardLoading = false;
-  var clockTimer = null;
-  var toastTimer = null;
+  var currentPage =
+    'dashboard';
 
-  var rekapPage = 1;
-  var izinPage = 1;
-  var usersPage = 1;
+  var initialized =
+    false;
 
-  var rekapUsers = [];
-  var izinUsers = [];
+  var loading =
+    false;
 
-  /* ============================================================
+  var toastTimer =
+    null;
+
+
+  /* =========================================================
      INIT
-     ============================================================ */
+     ========================================================= */
 
   function init() {
 
     if (initialized) {
+      loadDashboard();
       return;
     }
 
     initialized = true;
 
-    var token = getToken();
+    var token =
+      getToken();
 
     if (!token) {
       redirectLogin();
@@ -399,153 +46,204 @@
 
     setupNavigation();
     setupQuickActions();
-    setupMobileMenu();
     setupLogout();
     setupRefresh();
-    startClock();
+    setupMobileMenu();
+
     loadStoredUser();
 
-    verifyAdminSession(token);
+    startClock();
+
+    verifyAdminSession(
+      token
+    );
+
   }
 
-  /* ============================================================
-     STORAGE
-     ============================================================ */
+
+  /* =========================================================
+     SESSION
+     ========================================================= */
 
   function getToken() {
 
     try {
-      return localStorage.getItem(TOKEN_KEY) || '';
+
+      return (
+        localStorage.getItem(
+          TOKEN_KEY
+        ) || ''
+      );
+
     } catch (e) {
+
       return '';
+
     }
+
   }
 
-  function getStoredUser() {
+
+  function getUser() {
 
     try {
 
       var raw =
-        localStorage.getItem(USER_KEY);
+        localStorage.getItem(
+          USER_KEY
+        );
 
       return raw
         ? JSON.parse(raw)
         : null;
 
     } catch (e) {
+
       return null;
+
     }
+
   }
 
-  function saveUser(user) {
+
+  function saveUser(
+    user
+  ) {
 
     try {
 
       localStorage.setItem(
         USER_KEY,
-        JSON.stringify(user || {})
+        JSON.stringify(
+          user || {}
+        )
       );
 
     } catch (e) {}
+
   }
+
 
   function clearSession() {
 
     try {
 
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(
+        TOKEN_KEY
+      );
+
+      localStorage.removeItem(
+        USER_KEY
+      );
 
     } catch (e) {}
+
   }
 
-  /* ============================================================
-     SESSION
-     ============================================================ */
 
-  function verifyAdminSession(token) {
+  function verifyAdminSession(
+    token
+  ) {
 
-    showLoading('Memeriksa sesi admin...');
+    showLoading(
+      'Memeriksa sesi admin...'
+    );
 
     google.script.run
 
-      .withSuccessHandler(function (response) {
+      .withSuccessHandler(
+        function (response) {
 
-        if (
-          !response ||
-          response.valid !== true ||
-          !response.user
-        ) {
+          if (
+            !response ||
+            response.valid !== true ||
+            !response.user
+          ) {
 
-          hideLoading();
-          clearSession();
-          redirectLogin();
-          return;
+            clearSession();
+
+            redirectLogin();
+
+            return;
+
+          }
+
+          var role =
+            String(
+              response.user.role || ''
+            )
+            .trim()
+            .toLowerCase();
+
+          if (
+            role !== 'admin'
+          ) {
+
+            clearSession();
+
+            redirectLogin();
+
+            return;
+
+          }
+
+          saveUser(
+            response.user
+          );
+
+          applyUser(
+            response.user
+          );
+
+          loadDashboard();
+
         }
+      )
 
-        var role =
-          String(
-            response.user.role || ''
-          )
-          .trim()
-          .toLowerCase();
-
-        if (role !== 'admin') {
+      .withFailureHandler(
+        function (error) {
 
           hideLoading();
-          clearSession();
+
           showToast(
-            'Akses hanya untuk administrator.',
+            normalizeError(error),
             'error'
           );
 
           setTimeout(
             redirectLogin,
-            800
+            1500
           );
 
-          return;
         }
+      )
 
-        saveUser(response.user);
-        applyUser(response.user);
-        loadDashboard();
+      .verifySession(
+        token
+      );
 
-      })
-
-      .withFailureHandler(function (error) {
-
-        hideLoading();
-
-        showToast(
-          normalizeError(error),
-          'error'
-        );
-
-        setTimeout(
-          redirectLogin,
-          1000
-        );
-
-      })
-
-      .verifySession(token);
   }
 
-  /* ============================================================
-     USER UI
-     ============================================================ */
+
+  /* =========================================================
+     USER
+     ========================================================= */
 
   function loadStoredUser() {
 
-    var user = getStoredUser();
+    var user =
+      getUser();
 
     if (user) {
       applyUser(user);
     }
+
   }
 
-  function applyUser(user) {
+
+  function applyUser(
+    user
+  ) {
 
     var name =
       String(
@@ -578,7 +276,9 @@
       return;
     }
 
-    if (user.foto_profil) {
+    if (
+      user.foto_profil
+    ) {
 
       avatar.innerHTML =
         '<img src="' +
@@ -591,27 +291,31 @@
 
       avatar.textContent =
         getInitial(name);
+
     }
+
   }
 
-  /* ============================================================
+
+  /* =========================================================
      DASHBOARD
-     ============================================================ */
+     ========================================================= */
 
   function loadDashboard() {
 
-    if (dashboardLoading) {
+    if (loading) {
       return;
     }
 
-    var token = getToken();
+    var token =
+      getToken();
 
     if (!token) {
       redirectLogin();
       return;
     }
 
-    dashboardLoading = true;
+    loading = true;
 
     showLoading(
       'Memuat dashboard...'
@@ -619,120 +323,163 @@
 
     google.script.run
 
-      .withSuccessHandler(function (response) {
+      .withSuccessHandler(
+        function (response) {
 
-        dashboardLoading = false;
-        hideLoading();
+          loading = false;
 
-        if (
-          !response ||
-          response.success !== true
-        ) {
+          hideLoading();
+
+          if (
+            !response ||
+            response.success !== true
+          ) {
+
+            showToast(
+              response &&
+              response.message
+                ? response.message
+                : 'Dashboard gagal dimuat.',
+              'error'
+            );
+
+            return;
+
+          }
+
+          applyDashboard(
+            response.data || {}
+          );
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          loading = false;
+
+          hideLoading();
 
           showToast(
-            response &&
-            response.message
-              ? response.message
-              : 'Dashboard gagal dimuat.',
+            normalizeError(error),
             'error'
           );
 
-          return;
         }
+      )
 
-        applyDashboard(
-          response.data || {}
-        );
+      .getDashboardAdmin(
+        token
+      );
 
-      })
-
-      .withFailureHandler(function (error) {
-
-        dashboardLoading = false;
-        hideLoading();
-
-        showToast(
-          normalizeError(error),
-          'error'
-        );
-
-      })
-
-      .getDashboardAdmin(token);
   }
 
-  function applyDashboard(data) {
+
+  function applyDashboard(
+    data
+  ) {
 
     setText(
       'statPegawai',
-      numberFormat(data.total_pegawai)
+      numberFormat(
+        data.total_pegawai
+      )
     );
 
     setText(
       'statHadir',
-      numberFormat(data.hadir_hari_ini)
+      numberFormat(
+        data.hadir_hari_ini
+      )
     );
 
     setText(
       'statTerlambat',
-      numberFormat(data.terlambat_hari_ini)
+      numberFormat(
+        data.terlambat_hari_ini
+      )
     );
 
     setText(
       'statBelumAbsen',
-      numberFormat(data.belum_absen_hari_ini)
+      numberFormat(
+        data.belum_absen_hari_ini
+      )
     );
 
     setText(
       'statIzinPending',
-      numberFormat(data.izin_pending)
+      numberFormat(
+        data.izin_pending
+      )
     );
 
     setText(
       'statAdmin',
-      numberFormat(data.total_admin)
+      numberFormat(
+        data.total_admin
+      )
     );
 
     setText(
       'summaryHadir',
-      numberFormat(data.hadir_hari_ini)
+      numberFormat(
+        data.hadir_hari_ini
+      )
     );
 
     setText(
       'summaryTerlambat',
-      numberFormat(data.terlambat_hari_ini)
+      numberFormat(
+        data.terlambat_hari_ini
+      )
     );
 
     setText(
       'summaryBelumAbsen',
-      numberFormat(data.belum_absen_hari_ini)
+      numberFormat(
+        data.belum_absen_hari_ini
+      )
     );
 
     setText(
       'summaryIzin',
-      numberFormat(data.izin_pending)
+      numberFormat(
+        data.izin_pending
+      )
     );
 
-    if (data.tanggal) {
+    if (
+      data.tanggal
+    ) {
 
       var date =
-        parseDate(data.tanggal);
+        parseDate(
+          data.tanggal
+        );
 
       if (date) {
 
         setText(
           'todayDate',
-          formatDateLong(date)
+          formatDateLong(
+            date
+          )
         );
+
       }
+
     }
 
     loadAppSettings();
+
   }
 
-  /* ============================================================
+
+  /* =========================================================
      NAVIGATION
-     ============================================================ */
+     ========================================================= */
 
   function setupNavigation() {
 
@@ -740,23 +487,27 @@
       .querySelectorAll(
         '#adminApp .nav-item[data-page]'
       )
-      .forEach(function (item) {
+      .forEach(
+        function (item) {
 
-        item.addEventListener(
-          'click',
-          function () {
+          item.addEventListener(
+            'click',
+            function () {
 
-            navigate(
-              item.getAttribute(
-                'data-page'
-              )
-            );
+              navigate(
+                item.getAttribute(
+                  'data-page'
+                )
+              );
 
-          }
-        );
+            }
+          );
 
-      });
+        }
+      );
+
   }
+
 
   function setupQuickActions() {
 
@@ -764,60 +515,71 @@
       .querySelectorAll(
         '#adminApp .quick-card[data-go]'
       )
-      .forEach(function (item) {
+      .forEach(
+        function (item) {
 
-        item.addEventListener(
-          'click',
-          function () {
+          item.addEventListener(
+            'click',
+            function () {
 
-            navigate(
-              item.getAttribute(
-                'data-go'
-              )
-            );
+              navigate(
+                item.getAttribute(
+                  'data-go'
+                )
+              );
 
-          }
-        );
+            }
+          );
 
-      });
+        }
+      );
+
   }
 
-  function navigate(page) {
+
+  function navigate(
+    page
+  ) {
 
     if (!page) {
       return;
     }
 
-    currentPage = page;
+    currentPage =
+      page;
 
     document
       .querySelectorAll(
         '#adminApp .app-page'
       )
-      .forEach(function (section) {
+      .forEach(
+        function (section) {
 
-        section.classList.toggle(
-          'active',
-          section.id ===
-          'page-' + page
-        );
+          section.classList.toggle(
+            'active',
+            section.id ===
+            'page-' + page
+          );
 
-      });
+        }
+      );
 
     document
       .querySelectorAll(
         '#adminApp .nav-item[data-page]'
       )
-      .forEach(function (item) {
+      .forEach(
+        function (item) {
 
-        item.classList.toggle(
-          'active',
-          item.getAttribute(
-            'data-page'
-          ) === page
-        );
+          item.classList.toggle(
+            'active',
+            item.getAttribute(
+              'data-page'
+            ) === page
+          );
 
-      });
+        }
+      );
 
     var titles = {
 
@@ -864,26 +626,1779 @@
 
     closeMobileMenu();
 
-    if (page === 'rekap') {
+    if (
+      page === 'rekap'
+    ) {
       loadRekap();
     }
 
-    if (page === 'izin') {
+    if (
+      page === 'izin'
+    ) {
       loadIzin();
     }
 
-    if (page === 'users') {
+    if (
+      page === 'users'
+    ) {
       loadUsers();
     }
 
-    if (page === 'pengaturan') {
-      loadSettingsPage();
+    if (
+      page === 'pengaturan'
+    ) {
+      loadSettings();
     }
+
   }
 
-  /* ============================================================
+
+  /* =========================================================
+     REKAP
+     ========================================================= */
+
+  function loadRekap() {
+
+    var container =
+      document.getElementById(
+        'rekapContent'
+      );
+
+    if (!container) {
+      return;
+    }
+
+    container.innerHTML =
+      '<div class="admin-module">' +
+
+      '<div class="module-toolbar">' +
+
+      '<input id="rekapTanggal" type="date">' +
+
+      '<input id="rekapBulan" type="month">' +
+
+      '<select id="rekapUser">' +
+      '<option value="">Semua Pegawai</option>' +
+      '</select>' +
+
+      '<select id="rekapStatus">' +
+      '<option value="">Semua Status</option>' +
+      '<option value="Hadir">Hadir</option>' +
+      '<option value="Terlambat">Terlambat</option>' +
+      '<option value="Alpa">Alpa</option>' +
+      '</select>' +
+
+      '<button type="button" id="btnLoadRekap">Cari</button>' +
+
+      '<button type="button" id="btnExportRekap">Export PDF</button>' +
+
+      '</div>' +
+
+      '<div id="rekapResult">' +
+      'Memuat data...' +
+      '</div>' +
+
+      '</div>';
+
+    loadPegawaiDropdown(
+      'rekapUser'
+    );
+
+    document
+      .getElementById(
+        'btnLoadRekap'
+      )
+      .onclick =
+      function () {
+        fetchRekap(1);
+      };
+
+    document
+      .getElementById(
+        'btnExportRekap'
+      )
+      .onclick =
+      exportRekap;
+
+    fetchRekap(1);
+
+  }
+
+
+  function fetchRekap(
+    page
+  ) {
+
+    var token =
+      getToken();
+
+    var tanggal =
+      valueOf(
+        'rekapTanggal'
+      );
+
+    var bulan =
+      valueOf(
+        'rekapBulan'
+      );
+
+    var user =
+      valueOf(
+        'rekapUser'
+      );
+
+    var status =
+      valueOf(
+        'rekapStatus'
+      );
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          if (
+            !response ||
+            !response.success
+          ) {
+
+            setHtml(
+              'rekapResult',
+              errorBox(
+                response &&
+                response.message
+                  ? response.message
+                  : 'Gagal memuat rekap.'
+              )
+            );
+
+            return;
+
+          }
+
+          renderRekap(
+            response
+          );
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          setHtml(
+            'rekapResult',
+            errorBox(
+              normalizeError(error)
+            )
+          );
+
+        }
+      )
+
+      .getRekapAbsensiAdmin(
+        token,
+        page,
+        20,
+        tanggal,
+        bulan,
+        user,
+        status
+      );
+
+  }
+
+
+  function renderRekap(
+    response
+  ) {
+
+    var rows =
+      response.data || [];
+
+    if (!rows.length) {
+
+      setHtml(
+        'rekapResult',
+        '<div class="empty-state">Tidak ada data absensi.</div>'
+      );
+
+      return;
+
+    }
+
+    var html =
+      '<div style="overflow:auto">' +
+      '<table class="admin-table">' +
+      '<thead><tr>' +
+      '<th>Tanggal</th>' +
+      '<th>Nama</th>' +
+      '<th>Jabatan</th>' +
+      '<th>Masuk</th>' +
+      '<th>Pulang</th>' +
+      '<th>Status</th>' +
+      '<th>Jarak Masuk</th>' +
+      '</tr></thead><tbody>';
+
+    rows.forEach(
+      function (row) {
+
+        html +=
+          '<tr>' +
+          '<td>' +
+          safe(row.tanggal) +
+          '</td>' +
+          '<td>' +
+          safe(row.nama) +
+          '</td>' +
+          '<td>' +
+          safe(row.jabatan) +
+          '</td>' +
+          '<td>' +
+          safe(row.jam_masuk || '-') +
+          '</td>' +
+          '<td>' +
+          safe(row.jam_pulang || '-') +
+          '</td>' +
+          '<td>' +
+          safe(row.status || '-') +
+          '</td>' +
+          '<td>' +
+          safe(row.jarak_masuk_meter || '-') +
+          '</td>' +
+          '</tr>';
+
+      }
+    );
+
+    html +=
+      '</tbody></table></div>';
+
+    var pagination =
+      response.pagination || {};
+
+    html +=
+      '<div class="module-pagination">' +
+
+      '<button type="button" ' +
+      'onclick="AdminApp.rekapPage(' +
+      ((pagination.page || 1) - 1) +
+      ')" ' +
+      (
+        (pagination.page || 1) <= 1
+          ? 'disabled'
+          : ''
+      ) +
+      '>‹</button>' +
+
+      '<span>Halaman ' +
+      (pagination.page || 1) +
+      ' / ' +
+      (pagination.totalPage || 1) +
+      '</span>' +
+
+      '<button type="button" ' +
+      'onclick="AdminApp.rekapPage(' +
+      ((pagination.page || 1) + 1) +
+      ')" ' +
+      (
+        (pagination.page || 1) >=
+        (pagination.totalPage || 1)
+          ? 'disabled'
+          : ''
+      ) +
+      '>›</button>' +
+
+      '</div>';
+
+    setHtml(
+      'rekapResult',
+      html
+    );
+
+  }
+
+
+  function exportRekap() {
+
+    var token =
+      getToken();
+
+    showLoading(
+      'Membuat PDF...'
+    );
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          hideLoading();
+
+          if (
+            !response ||
+            !response.success
+          ) {
+
+            showToast(
+              response &&
+              response.message
+                ? response.message
+                : 'Export gagal.',
+              'error'
+            );
+
+            return;
+
+          }
+
+          showToast(
+            'PDF berhasil dibuat.',
+            'success'
+          );
+
+          downloadPdf(
+            response.data.fileId
+          );
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          hideLoading();
+
+          showToast(
+            normalizeError(error),
+            'error'
+          );
+
+        }
+      )
+
+      .exportRekapAbsensiPDF(
+        token,
+        valueOf('rekapTanggal'),
+        valueOf('rekapBulan'),
+        valueOf('rekapUser')
+      );
+
+  }
+
+
+  function downloadPdf(
+    fileId
+  ) {
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          if (
+            !response ||
+            !response.success ||
+            !response.data
+          ) {
+
+            showToast(
+              'PDF tidak dapat diunduh.',
+              'error'
+            );
+
+            return;
+
+          }
+
+          var bytes =
+            base64ToArrayBuffer(
+              response.data.base64
+            );
+
+          var blob =
+            new Blob(
+              [bytes],
+              {
+                type:
+                  response.data.mimeType ||
+                  'application/pdf'
+              }
+            );
+
+          var url =
+            URL.createObjectURL(
+              blob
+            );
+
+          var a =
+            document.createElement(
+              'a'
+            );
+
+          a.href = url;
+
+          a.download =
+            response.data.fileName ||
+            'Rekap_Absensi.pdf';
+
+          document.body.appendChild(a);
+
+          a.click();
+
+          a.remove();
+
+          setTimeout(
+            function () {
+              URL.revokeObjectURL(
+                url
+              );
+            },
+            1000
+          );
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          showToast(
+            normalizeError(error),
+            'error'
+          );
+
+        }
+      )
+
+      .downloadRekapAbsensiPDF(
+        getToken(),
+        fileId
+      );
+
+  }
+
+
+  /* =========================================================
+     IZIN
+     ========================================================= */
+
+  function loadIzin() {
+
+    var container =
+      document.getElementById(
+        'izinContent'
+      );
+
+    if (!container) {
+      return;
+    }
+
+    container.innerHTML =
+      '<div class="admin-module">' +
+
+      '<div class="module-toolbar">' +
+
+      '<select id="izinStatus">' +
+      '<option value="">Semua Status</option>' +
+      '<option value="Menunggu">Menunggu</option>' +
+      '<option value="Disetujui">Disetujui</option>' +
+      '<option value="Ditolak">Ditolak</option>' +
+      '</select>' +
+
+      '<input id="izinBulan" type="month">' +
+
+      '<select id="izinUser">' +
+      '<option value="">Semua Pegawai</option>' +
+      '</select>' +
+
+      '<button type="button" id="btnLoadIzin">Cari</button>' +
+
+      '</div>' +
+
+      '<div id="izinResult">' +
+      'Memuat data...' +
+      '</div>' +
+
+      '</div>';
+
+    loadPegawaiDropdown(
+      'izinUser'
+    );
+
+    document
+      .getElementById(
+        'btnLoadIzin'
+      )
+      .onclick =
+      function () {
+        fetchIzin(1);
+      };
+
+    fetchIzin(1);
+
+  }
+
+
+  function fetchIzin(
+    page
+  ) {
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          if (
+            !response ||
+            !response.success
+          ) {
+
+            setHtml(
+              'izinResult',
+              errorBox(
+                response &&
+                response.message
+                  ? response.message
+                  : 'Gagal memuat izin.'
+              )
+            );
+
+            return;
+
+          }
+
+          renderIzin(
+            response
+          );
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          setHtml(
+            'izinResult',
+            errorBox(
+              normalizeError(error)
+            )
+          );
+
+        }
+      )
+
+      .getDaftarIzinAdmin(
+        getToken(),
+        page,
+        20,
+        valueOf('izinStatus'),
+        valueOf('izinBulan'),
+        valueOf('izinUser')
+      );
+
+  }
+
+
+  function renderIzin(
+    response
+  ) {
+
+    var rows =
+      response.data || [];
+
+    if (!rows.length) {
+
+      setHtml(
+        'izinResult',
+        '<div class="empty-state">Tidak ada pengajuan izin.</div>'
+      );
+
+      return;
+
+    }
+
+    var html =
+      '<div style="overflow:auto">' +
+      '<table class="admin-table">' +
+      '<thead><tr>' +
+      '<th>Tanggal</th>' +
+      '<th>Pegawai</th>' +
+      '<th>Jenis</th>' +
+      '<th>Periode</th>' +
+      '<th>Keterangan</th>' +
+      '<th>Status</th>' +
+      '<th>Aksi</th>' +
+      '</tr></thead><tbody>';
+
+    rows.forEach(
+      function (row) {
+
+        var action = '';
+
+        if (
+          row.status ===
+          'Menunggu'
+        ) {
+
+          action =
+            '<button class="btn-mini success" ' +
+            'onclick="AdminApp.prosesIzin(\'' +
+            escapeJs(row.id_izin) +
+            '\',\'Disetujui\')">' +
+            'Setujui' +
+            '</button> ' +
+
+            '<button class="btn-mini danger" ' +
+            'onclick="AdminApp.prosesIzin(\'' +
+            escapeJs(row.id_izin) +
+            '\',\'Ditolak\')">' +
+            'Tolak' +
+            '</button>';
+
+        }
+
+        html +=
+          '<tr>' +
+          '<td>' +
+          safe(row.tanggal_pengajuan) +
+          '</td>' +
+          '<td>' +
+          safe(row.nama_pegawai) +
+          '</td>' +
+          '<td>' +
+          safe(row.jenis_izin) +
+          '</td>' +
+          '<td>' +
+          safe(row.tanggal_mulai) +
+          ' s/d ' +
+          safe(row.tanggal_selesai) +
+          '</td>' +
+          '<td>' +
+          safe(row.keterangan) +
+          '</td>' +
+          '<td>' +
+          safe(row.status) +
+          '</td>' +
+          '<td>' +
+          action +
+          '</td>' +
+          '</tr>';
+
+      }
+    );
+
+    html +=
+      '</tbody></table></div>';
+
+    setHtml(
+      'izinResult',
+      html
+    );
+
+  }
+
+
+  function prosesIzin(
+    idIzin,
+    status
+  ) {
+
+    var catatan =
+      '';
+
+    if (
+      status ===
+      'Ditolak'
+    ) {
+
+      catatan =
+        window.prompt(
+          'Catatan penolakan:',
+          ''
+        ) || '';
+
+    }
+
+    if (
+      !window.confirm(
+        status ===
+        'Disetujui'
+          ? 'Setujui pengajuan ini?'
+          : 'Tolak pengajuan ini?'
+      )
+    ) {
+      return;
+    }
+
+    showLoading(
+      'Memproses pengajuan...'
+    );
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          hideLoading();
+
+          if (
+            !response ||
+            !response.success
+          ) {
+
+            showToast(
+              response &&
+              response.message
+                ? response.message
+                : 'Gagal memproses izin.',
+              'error'
+            );
+
+            return;
+
+          }
+
+          showToast(
+            response.message ||
+            'Pengajuan berhasil diproses.',
+            'success'
+          );
+
+          fetchIzin(1);
+
+          loadDashboard();
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          hideLoading();
+
+          showToast(
+            normalizeError(error),
+            'error'
+          );
+
+        }
+      )
+
+      .prosesIzin(
+        getToken(),
+        idIzin,
+        status,
+        catatan
+      );
+
+  }
+
+
+  /* =========================================================
+     USERS
+     ========================================================= */
+
+  function loadUsers() {
+
+    var container =
+      document.getElementById(
+        'usersContent'
+      );
+
+    if (!container) {
+      return;
+    }
+
+    container.innerHTML =
+      '<div class="admin-module">' +
+
+      '<div class="module-toolbar">' +
+
+      '<input id="userSearch" ' +
+      'placeholder="Cari nama, username, jabatan...">' +
+
+      '<select id="userRole">' +
+      '<option value="">Semua Role</option>' +
+      '<option value="admin">Admin</option>' +
+      '<option value="pegawai">Pegawai</option>' +
+      '</select>' +
+
+      '<select id="userStatus">' +
+      '<option value="">Semua Status</option>' +
+      '<option value="aktif">Aktif</option>' +
+      '<option value="nonaktif">Nonaktif</option>' +
+      '</select>' +
+
+      '<button type="button" id="btnLoadUsers">Cari</button>' +
+
+      '<button type="button" id="btnAddUser">+ Tambah User</button>' +
+
+      '</div>' +
+
+      '<div id="userFormBox"></div>' +
+
+      '<div id="usersResult">' +
+      'Memuat data...' +
+      '</div>' +
+
+      '</div>';
+
+    document
+      .getElementById(
+        'btnLoadUsers'
+      )
+      .onclick =
+      function () {
+        fetchUsers(1);
+      };
+
+    document
+      .getElementById(
+        'btnAddUser'
+      )
+      .onclick =
+      showAddUserForm;
+
+    fetchUsers(1);
+
+  }
+
+
+  function fetchUsers(
+    page
+  ) {
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          if (
+            !response ||
+            !response.success
+          ) {
+
+            setHtml(
+              'usersResult',
+              errorBox(
+                response &&
+                response.message
+                  ? response.message
+                  : 'Gagal memuat user.'
+              )
+            );
+
+            return;
+
+          }
+
+          renderUsers(
+            response
+          );
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          setHtml(
+            'usersResult',
+            errorBox(
+              normalizeError(error)
+            )
+          );
+
+        }
+      )
+
+      .getDaftarUsers(
+        getToken(),
+        page,
+        20,
+        valueOf('userSearch'),
+        valueOf('userRole'),
+        valueOf('userStatus')
+      );
+
+  }
+
+
+  function renderUsers(
+    response
+  ) {
+
+    var rows =
+      response.data || [];
+
+    if (!rows.length) {
+
+      setHtml(
+        'usersResult',
+        '<div class="empty-state">Tidak ada user.</div>'
+      );
+
+      return;
+
+    }
+
+    var html =
+      '<div style="overflow:auto">' +
+      '<table class="admin-table">' +
+      '<thead><tr>' +
+      '<th>Nama</th>' +
+      '<th>Username</th>' +
+      '<th>Role</th>' +
+      '<th>Jabatan</th>' +
+      '<th>Status</th>' +
+      '<th>Aksi</th>' +
+      '</tr></thead><tbody>';
+
+    rows.forEach(
+      function (row) {
+
+        html +=
+          '<tr>' +
+
+          '<td>' +
+          safe(row.nama) +
+          '</td>' +
+
+          '<td>' +
+          safe(row.username) +
+          '</td>' +
+
+          '<td>' +
+          safe(row.role) +
+          '</td>' +
+
+          '<td>' +
+          safe(row.jabatan) +
+          '</td>' +
+
+          '<td>' +
+          safe(row.status_aktif) +
+          '</td>' +
+
+          '<td>' +
+
+          '<button class="btn-mini" ' +
+          'onclick="AdminApp.editUser(\'' +
+          escapeJs(row.id_user) +
+          '\')">' +
+          'Edit' +
+          '</button> ' +
+
+          '<button class="btn-mini" ' +
+          'onclick="AdminApp.resetPassword(\'' +
+          escapeJs(row.id_user) +
+          '\')">' +
+          'Reset Password' +
+          '</button>' +
+
+          '</td>' +
+
+          '</tr>';
+
+      }
+    );
+
+    html +=
+      '</tbody></table></div>';
+
+    setHtml(
+      'usersResult',
+      html
+    );
+
+  }
+
+
+  function showAddUserForm() {
+
+    var box =
+      document.getElementById(
+        'userFormBox'
+      );
+
+    if (!box) {
+      return;
+    }
+
+    box.innerHTML =
+      '<div class="admin-form">' +
+
+      '<h3>Tambah User</h3>' +
+
+      '<input id="newNama" placeholder="Nama lengkap">' +
+
+      '<input id="newUsername" placeholder="Username">' +
+
+      '<input id="newPassword" type="password" placeholder="Password minimal 8 karakter">' +
+
+      '<select id="newRole">' +
+      '<option value="pegawai">Pegawai</option>' +
+      '<option value="admin">Admin</option>' +
+      '</select>' +
+
+      '<input id="newJabatan" placeholder="Jabatan">' +
+
+      '<input id="newFoto" placeholder="URL foto profil (opsional)">' +
+
+      '<button type="button" onclick="AdminApp.saveNewUser()">' +
+      'Simpan' +
+      '</button>' +
+
+      '<button type="button" onclick="AdminApp.closeUserForm()">' +
+      'Batal' +
+      '</button>' +
+
+      '</div>';
+
+  }
+
+
+  function closeUserForm() {
+
+    var box =
+      document.getElementById(
+        'userFormBox'
+      );
+
+    if (box) {
+      box.innerHTML = '';
+    }
+
+  }
+
+
+  function saveNewUser() {
+
+    showLoading(
+      'Menyimpan user...'
+    );
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          hideLoading();
+
+          if (
+            !response ||
+            !response.success
+          ) {
+
+            showToast(
+              response &&
+              response.message
+                ? response.message
+                : 'Gagal menambah user.',
+              'error'
+            );
+
+            return;
+
+          }
+
+          showToast(
+            'User berhasil ditambahkan.',
+            'success'
+          );
+
+          closeUserForm();
+
+          fetchUsers(1);
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          hideLoading();
+
+          showToast(
+            normalizeError(error),
+            'error'
+          );
+
+        }
+      )
+
+      .tambahUser(
+        getToken(),
+        valueOf('newNama'),
+        valueOf('newUsername'),
+        valueOf('newPassword'),
+        valueOf('newRole'),
+        valueOf('newJabatan'),
+        valueOf('newFoto')
+      );
+
+  }
+
+
+  function editUser(
+    idUser
+  ) {
+
+    var nama =
+      window.prompt(
+        'Nama baru:'
+      );
+
+    if (
+      nama === null
+    ) {
+      return;
+    }
+
+    var username =
+      window.prompt(
+        'Username baru:'
+      );
+
+    if (
+      username === null
+    ) {
+      return;
+    }
+
+    var role =
+      window.prompt(
+        'Role (admin/pegawai):',
+        'pegawai'
+      );
+
+    if (
+      role === null
+    ) {
+      return;
+    }
+
+    var jabatan =
+      window.prompt(
+        'Jabatan:',
+        ''
+      );
+
+    if (
+      jabatan === null
+    ) {
+      return;
+    }
+
+    var status =
+      window.prompt(
+        'Status (aktif/nonaktif):',
+        'aktif'
+      );
+
+    if (
+      status === null
+    ) {
+      return;
+    }
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          if (
+            !response ||
+            !response.success
+          ) {
+
+            showToast(
+              response &&
+              response.message
+                ? response.message
+                : 'Gagal mengubah user.',
+              'error'
+            );
+
+            return;
+
+          }
+
+          showToast(
+            'User berhasil diperbarui.',
+            'success'
+          );
+
+          fetchUsers(1);
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          showToast(
+            normalizeError(error),
+            'error'
+          );
+
+        }
+      )
+
+      .editUser(
+        getToken(),
+        idUser,
+        nama,
+        username,
+        role,
+        jabatan,
+        '',
+        status
+      );
+
+  }
+
+
+  function resetPassword(
+    idUser
+  ) {
+
+    var password =
+      window.prompt(
+        'Password baru minimal 8 karakter:'
+      );
+
+    if (
+      !password
+    ) {
+      return;
+    }
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          if (
+            !response ||
+            !response.success
+          ) {
+
+            showToast(
+              response &&
+              response.message
+                ? response.message
+                : 'Gagal reset password.',
+              'error'
+            );
+
+            return;
+
+          }
+
+          showToast(
+            'Password berhasil direset.',
+            'success'
+          );
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          showToast(
+            normalizeError(error),
+            'error'
+          );
+
+        }
+      )
+
+      .resetPasswordUser(
+        getToken(),
+        idUser,
+        password
+      );
+
+  }
+
+
+  /* =========================================================
+     PENGATURAN
+     ========================================================= */
+
+  function loadSettings() {
+
+    var container =
+      document.getElementById(
+        'pengaturanContent'
+      );
+
+    if (!container) {
+      return;
+    }
+
+    container.innerHTML =
+      '<div class="admin-form">' +
+
+      '<h3>Konfigurasi Aplikasi</h3>' +
+
+      '<label>Nama Aplikasi</label>' +
+      '<input id="settingNamaApp">' +
+
+      '<label>URL Logo</label>' +
+      '<input id="settingLogoUrl">' +
+
+      '<label>Latitude Kantor</label>' +
+      '<input id="settingLat" type="number" step="any">' +
+
+      '<label>Longitude Kantor</label>' +
+      '<input id="settingLong" type="number" step="any">' +
+
+      '<label>Radius Kantor (meter)</label>' +
+      '<input id="settingRadius" type="number">' +
+
+      '<label>Jam Masuk</label>' +
+      '<input id="settingJamMasuk" type="time">' +
+
+      '<label>Jam Pulang</label>' +
+      '<input id="settingJamPulang" type="time">' +
+
+      '<label>Toleransi Keterlambatan (menit)</label>' +
+      '<input id="settingToleransi" type="number" min="0" max="300">' +
+
+      '<button type="button" id="btnSaveSettings">' +
+      'Simpan Pengaturan' +
+      '</button>' +
+
+      '</div>';
+
+    document
+      .getElementById(
+        'btnSaveSettings'
+      )
+      .onclick =
+      saveSettings;
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          if (
+            !response ||
+            !response.success
+          ) {
+
+            showToast(
+              response &&
+              response.message
+                ? response.message
+                : 'Gagal memuat pengaturan.',
+              'error'
+            );
+
+            return;
+
+          }
+
+          var data =
+            response.data || {};
+
+          setValue(
+            'settingNamaApp',
+            data.nama_app
+          );
+
+          setValue(
+            'settingLogoUrl',
+            data.logo_url
+          );
+
+          setValue(
+            'settingLat',
+            data.lat_kantor
+          );
+
+          setValue(
+            'settingLong',
+            data.long_kantor
+          );
+
+          setValue(
+            'settingRadius',
+            data.radius_meter
+          );
+
+          setValue(
+            'settingJamMasuk',
+            data.jam_masuk
+          );
+
+          setValue(
+            'settingJamPulang',
+            data.jam_pulang
+          );
+
+          setValue(
+            'settingToleransi',
+            data.toleransi_menit
+          );
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          showToast(
+            normalizeError(error),
+            'error'
+          );
+
+        }
+      )
+
+      .getPengaturanAdmin(
+        getToken()
+      );
+
+  }
+
+
+  function saveSettings() {
+
+    showLoading(
+      'Menyimpan pengaturan...'
+    );
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          hideLoading();
+
+          if (
+            !response ||
+            !response.success
+          ) {
+
+            showToast(
+              response &&
+              response.message
+                ? response.message
+                : 'Gagal menyimpan pengaturan.',
+              'error'
+            );
+
+            return;
+
+          }
+
+          showToast(
+            'Pengaturan berhasil disimpan.',
+            'success'
+          );
+
+          loadAppSettings();
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          hideLoading();
+
+          showToast(
+            normalizeError(error),
+            'error'
+          );
+
+        }
+      )
+
+      .simpanPengaturan(
+        getToken(),
+        valueOf('settingNamaApp'),
+        valueOf('settingLogoUrl'),
+        valueOf('settingLat'),
+        valueOf('settingLong'),
+        valueOf('settingRadius'),
+        valueOf('settingJamMasuk'),
+        valueOf('settingJamPulang'),
+        valueOf('settingToleransi')
+      );
+
+  }
+
+
+  function loadAppSettings() {
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          if (
+            response &&
+            response.success &&
+            response.data
+          ) {
+
+            setText(
+              'sidebarAppName',
+              response.data.nama_app ||
+              'Absensi'
+            );
+
+          }
+
+        }
+      )
+
+      .withFailureHandler(
+        function () {}
+
+      )
+
+      .getPengaturanAdmin(
+        getToken()
+      );
+
+  }
+
+
+  /* =========================================================
+     PEGAWAI DROPDOWN
+     ========================================================= */
+
+  function loadPegawaiDropdown(
+    elementId
+  ) {
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          if (
+            !response ||
+            !response.success
+          ) {
+            return;
+          }
+
+          var select =
+            document.getElementById(
+              elementId
+            );
+
+          if (!select) {
+            return;
+          }
+
+          (response.data || [])
+            .forEach(
+              function (user) {
+
+                var option =
+                  document.createElement(
+                    'option'
+                  );
+
+                option.value =
+                  user.id_user;
+
+                option.textContent =
+                  user.nama +
+                  (
+                    user.jabatan
+                      ? ' - ' +
+                        user.jabatan
+                      : ''
+                  );
+
+                select.appendChild(
+                  option
+                );
+
+              }
+            );
+
+        }
+      )
+
+      .withFailureHandler(
+        function () {}
+      )
+
+      .getDaftarPegawaiAktif(
+        getToken()
+      );
+
+  }
+
+
+  /* =========================================================
+     LOGOUT
+     ========================================================= */
+
+  function setupLogout() {
+
+    var button =
+      document.getElementById(
+        'sidebarLogout'
+      );
+
+    var cancel =
+      document.getElementById(
+        'cancelLogout'
+      );
+
+    var confirm =
+      document.getElementById(
+        'confirmLogout'
+      );
+
+    if (button) {
+
+      button.addEventListener(
+        'click',
+        function () {
+
+          var modal =
+            document.getElementById(
+              'logoutModal'
+            );
+
+          if (modal) {
+            modal.classList.remove(
+              'hidden'
+            );
+          }
+
+        }
+      );
+
+    }
+
+    if (cancel) {
+
+      cancel.addEventListener(
+        'click',
+        function () {
+
+          var modal =
+            document.getElementById(
+              'logoutModal'
+            );
+
+          if (modal) {
+            modal.classList.add(
+              'hidden'
+            );
+          }
+
+        }
+      );
+
+    }
+
+    if (confirm) {
+
+      confirm.addEventListener(
+        'click',
+        performLogout
+      );
+
+    }
+
+  }
+
+
+  function performLogout() {
+
+    var token =
+      getToken();
+
+    clearSession();
+
+    var modal =
+      document.getElementById(
+        'logoutModal'
+      );
+
+    if (modal) {
+      modal.classList.add(
+        'hidden'
+      );
+    }
+
+    showLoading(
+      'Keluar...'
+    );
+
+    if (!token) {
+
+      redirectLogin();
+
+      return;
+
+    }
+
+    google.script.run
+
+      .withSuccessHandler(
+        function () {
+
+          redirectLogin();
+
+        }
+      )
+
+      .withFailureHandler(
+        function () {
+
+          /*
+           * Session browser sudah dibersihkan.
+           * Tetap kembali ke Login walaupun server
+           * gagal menghapus token.
+           */
+
+          redirectLogin();
+
+        }
+      )
+
+      .logout(
+        token
+      );
+
+  }
+
+
+  function redirectLogin() {
+
+    clearSession();
+
+    var base =
+      window.location.href
+        .split('?')[0];
+
+    window.top.location.href =
+      base +
+      '?page=Login';
+
+  }
+
+
+  /* =========================================================
      MOBILE
-     ============================================================ */
+     ========================================================= */
 
   function setupMobileMenu() {
 
@@ -921,10 +2436,12 @@
             overlay.classList.toggle(
               'show'
             );
+
           }
 
         }
       );
+
     }
 
     if (overlay) {
@@ -933,8 +2450,11 @@
         'click',
         closeMobileMenu
       );
+
     }
+
   }
+
 
   function closeMobileMenu() {
 
@@ -953,6 +2473,7 @@
       sidebar.classList.remove(
         'open'
       );
+
     }
 
     if (overlay) {
@@ -960,34 +2481,32 @@
       overlay.classList.remove(
         'show'
       );
+
     }
+
   }
 
-  /* ============================================================
+
+  /* =========================================================
      CLOCK
-     ============================================================ */
+     ========================================================= */
 
   function startClock() {
 
     updateClock();
 
-    if (clockTimer) {
+    setInterval(
+      updateClock,
+      1000
+    );
 
-      clearInterval(
-        clockTimer
-      );
-    }
-
-    clockTimer =
-      setInterval(
-        updateClock,
-        1000
-      );
   }
+
 
   function updateClock() {
 
-    var now = new Date();
+    var now =
+      new Date();
 
     setText(
       'todayClock',
@@ -1002,11 +2521,9 @@
       'todayDate',
       formatDateLong(now)
     );
+
   }
 
-  /* ============================================================
-     REFRESH
-     ============================================================ */
 
   function setupRefresh() {
 
@@ -1021,2451 +2538,53 @@
 
     button.addEventListener(
       'click',
-      function () {
-
-        loadDashboard();
-
-      }
-    );
-  }
-
-  /* ============================================================
-     LOGOUT
-     ============================================================ */
-
-  function setupLogout() {
-
-    var button =
-      document.getElementById(
-        'sidebarLogout'
-      );
-
-    var cancel =
-      document.getElementById(
-        'cancelLogout'
-      );
-
-    var confirm =
-      document.getElementById(
-        'confirmLogout'
-      );
-
-    if (button) {
-
-      button.addEventListener(
-        'click',
-        function () {
-
-          var modal =
-            document.getElementById(
-              'logoutModal'
-            );
-
-          if (modal) {
-
-            modal.classList.remove(
-              'hidden'
-            );
-          }
-
-        }
-      );
-    }
-
-    if (cancel) {
-
-      cancel.addEventListener(
-        'click',
-        function () {
-
-          var modal =
-            document.getElementById(
-              'logoutModal'
-            );
-
-          if (modal) {
-
-            modal.classList.add(
-              'hidden'
-            );
-          }
-
-        }
-      );
-    }
-
-    if (confirm) {
-
-      confirm.addEventListener(
-        'click',
-        performLogout
-      );
-    }
-  }
-
-  function performLogout() {
-
-    var token =
-      getToken();
-
-    clearSession();
-
-    var modal =
-      document.getElementById(
-        'logoutModal'
-      );
-
-    if (modal) {
-
-      modal.classList.add(
-        'hidden'
-      );
-    }
-
-    showLoading(
-      'Keluar...'
+      loadDashboard
     );
 
-    if (!token) {
-
-      redirectLogin();
-      return;
-    }
-
-    google.script.run
-
-      .withSuccessHandler(function () {
-
-        redirectLogin();
-
-      })
-
-      .withFailureHandler(function () {
-
-        /*
-         * Session lokal sudah dihapus.
-         * Tetap kembali ke Login walaupun
-         * penghapusan server gagal.
-         */
-
-        redirectLogin();
-
-      })
-
-      .logout(token);
   }
 
-  /* ============================================================
-     REKAP ABSENSI
-     ============================================================ */
 
-  function loadRekap() {
+  /* =========================================================
+     HELPERS
+     ========================================================= */
 
-    var container =
+  function valueOf(
+    id
+  ) {
+
+    var el =
       document.getElementById(
-        'rekapContent'
-      );
-
-    if (!container) {
-      return;
-    }
-
-    container.innerHTML =
-      '<div class="admin-module">' +
-
-      '<div class="admin-toolbar">' +
-
-      '<div class="admin-filter">' +
-      '<input id="rekapTanggal" type="date">' +
-      '</div>' +
-
-      '<div class="admin-filter">' +
-      '<input id="rekapBulan" type="month">' +
-      '</div>' +
-
-      '<div class="admin-filter">' +
-      '<select id="rekapUser">' +
-      '<option value="">Semua Pegawai</option>' +
-      '</select>' +
-      '</div>' +
-
-      '<div class="admin-filter">' +
-      '<select id="rekapStatus">' +
-      '<option value="">Semua Status</option>' +
-      '<option value="Hadir">Hadir</option>' +
-      '<option value="Terlambat">Terlambat</option>' +
-      '</select>' +
-      '</div>' +
-
-      '<button class="admin-btn admin-btn-primary" id="btnCariRekap">' +
-      '🔎 Cari' +
-      '</button>' +
-
-      '<button class="admin-btn admin-btn-secondary" id="btnResetRekap">' +
-      'Reset' +
-      '</button>' +
-
-      '<button class="admin-btn admin-btn-success" id="btnExportRekap">' +
-      '📄 Export PDF' +
-      '</button>' +
-
-      '</div>' +
-
-      '<div id="rekapTable"></div>' +
-
-      '</div>';
-
-    loadEmployeeDropdown(
-      'rekapUser'
-    );
-
-    document
-      .getElementById(
-        'btnCariRekap'
-      )
-      .onclick = function () {
-
-        rekapPage = 1;
-        fetchRekap();
-
-      };
-
-    document
-      .getElementById(
-        'btnResetRekap'
-      )
-      .onclick = function () {
-
-        document.getElementById(
-          'rekapTanggal'
-        ).value = '';
-
-        document.getElementById(
-          'rekapBulan'
-        ).value = '';
-
-        document.getElementById(
-          'rekapUser'
-        ).value = '';
-
-        document.getElementById(
-          'rekapStatus'
-        ).value = '';
-
-        rekapPage = 1;
-        fetchRekap();
-
-      };
-
-    document
-      .getElementById(
-        'btnExportRekap'
-      )
-      .onclick = exportRekap;
-
-    fetchRekap();
-  }
-
-  function fetchRekap() {
-
-    var table =
-      document.getElementById(
-        'rekapTable'
-      );
-
-    if (!table) {
-      return;
-    }
-
-    table.innerHTML =
-      '<div class="admin-loading">Memuat rekap absensi...</div>';
-
-    var tanggal =
-      getValue('rekapTanggal');
-
-    var bulan =
-      getValue('rekapBulan');
-
-    var user =
-      getValue('rekapUser');
-
-    var status =
-      getValue('rekapStatus');
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          table.innerHTML =
-            errorBox(
-              response &&
-              response.message
-                ? response.message
-                : 'Gagal memuat rekap.'
-            );
-
-          return;
-        }
-
-        renderRekap(
-          response.data || [],
-          response.pagination || {}
-        );
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        table.innerHTML =
-          errorBox(
-            normalizeError(error)
-          );
-
-      })
-
-      .getRekapAbsensiAdmin(
-        getToken(),
-        rekapPage,
-        20,
-        tanggal,
-        bulan,
-        user,
-        status
-      );
-  }
-
-  function renderRekap(data, pagination) {
-
-    var table =
-      document.getElementById(
-        'rekapTable'
-      );
-
-    if (!table) {
-      return;
-    }
-
-    if (!data.length) {
-
-      table.innerHTML =
-        '<div class="admin-empty">' +
-        'Tidak ada data absensi untuk filter yang dipilih.' +
-        '</div>';
-
-      return;
-    }
-
-    var html =
-      '<div class="admin-table-wrap">' +
-      '<table class="admin-table">' +
-      '<thead><tr>' +
-      '<th>Tanggal</th>' +
-      '<th>Pegawai</th>' +
-      '<th>Jabatan</th>' +
-      '<th>Masuk</th>' +
-      '<th>Pulang</th>' +
-      '<th>Status</th>' +
-      '<th>Aksi</th>' +
-      '</tr></thead><tbody>';
-
-    data.forEach(function (row) {
-
-      html +=
-        '<tr>' +
-
-        '<td>' +
-        esc(row.tanggal) +
-        '</td>' +
-
-        '<td>' +
-        '<strong>' +
-        esc(row.nama) +
-        '</strong><br>' +
-        '<small>' +
-        esc(row.username) +
-        '</small>' +
-        '</td>' +
-
-        '<td>' +
-        esc(row.jabatan || '-') +
-        '</td>' +
-
-        '<td>' +
-        esc(row.jam_masuk || '-') +
-        '</td>' +
-
-        '<td>' +
-        esc(row.jam_pulang || '-') +
-        '</td>' +
-
-        '<td>' +
-        statusBadge(row.status) +
-        '</td>' +
-
-        '<td>' +
-        '<button class="admin-btn admin-btn-secondary" ' +
-        'onclick="window.AdminApp.detailAbsensi(\'' +
-        jsArg(row.id_absen) +
-        '\')">' +
-        'Detail' +
-        '</button>' +
-        '</td>' +
-
-        '</tr>';
-
-    });
-
-    html +=
-      '</tbody></table></div>' +
-      paginationHtml(
-        pagination,
-        'rekap'
-      );
-
-    table.innerHTML = html;
-  }
-
-  function detailAbsensi(id) {
-
-    openModal(
-      'Detail Absensi',
-      '<div class="admin-loading">Memuat detail...</div>'
-    );
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          setModalBody(
-            errorBox(
-              response &&
-              response.message
-                ? response.message
-                : 'Detail tidak ditemukan.'
-            )
-          );
-
-          return;
-        }
-
-        var d =
-          response.data || {};
-
-        var html =
-          '<div class="admin-detail-grid">' +
-
-          detailItem(
-            'ID Absensi',
-            d.id_absen
-          ) +
-
-          detailItem(
-            'Tanggal',
-            d.tanggal
-          ) +
-
-          detailItem(
-            'Nama',
-            d.user
-              ? d.user.nama
-              : '-'
-          ) +
-
-          detailItem(
-            'Jabatan',
-            d.user
-              ? d.user.jabatan
-              : '-'
-          ) +
-
-          detailItem(
-            'Jam Masuk',
-            d.masuk
-              ? d.masuk.jam
-              : '-'
-          ) +
-
-          detailItem(
-            'Jarak Masuk',
-            d.masuk &&
-            d.masuk.jarak_meter !== ''
-              ? d.masuk.jarak_meter + ' meter'
-              : '-'
-          ) +
-
-          detailItem(
-            'Jam Pulang',
-            d.pulang
-              ? d.pulang.jam
-              : '-'
-          ) +
-
-          detailItem(
-            'Jarak Pulang',
-            d.pulang &&
-            d.pulang.jarak_meter !== ''
-              ? d.pulang.jarak_meter + ' meter'
-              : '-'
-          ) +
-
-          detailItem(
-            'Status',
-            d.status
-          ) +
-
-          '</div>';
-
-        if (
-          d.masuk &&
-          d.masuk.foto
-        ) {
-
-          html +=
-            '<div class="admin-panel" style="margin-top:15px">' +
-            '<strong>Foto Masuk</strong><br><br>' +
-            '<img class="admin-image" src="' +
-            escapeAttribute(
-              d.masuk.foto
-            ) +
-            '" alt="Foto masuk">' +
-            '</div>';
-        }
-
-        if (
-          d.pulang &&
-          d.pulang.foto
-        ) {
-
-          html +=
-            '<div class="admin-panel">' +
-            '<strong>Foto Pulang</strong><br><br>' +
-            '<img class="admin-image" src="' +
-            escapeAttribute(
-              d.pulang.foto
-            ) +
-            '" alt="Foto pulang">' +
-            '</div>';
-        }
-
-        setModalBody(html);
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        setModalBody(
-          errorBox(
-            normalizeError(error)
-          )
-        );
-
-      })
-
-      .getDetailAbsensiAdmin(
-        getToken(),
         id
       );
+
+    return el
+      ? String(
+          el.value || ''
+        ).trim()
+      : '';
+
   }
 
-  function exportRekap() {
 
-    var tanggal =
-      getValue('rekapTanggal');
-
-    var bulan =
-      getValue('rekapBulan');
-
-    var user =
-      getValue('rekapUser');
-
-    showLoading(
-      'Membuat PDF rekap...'
-    );
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          hideLoading();
-
-          showToast(
-            response &&
-            response.message
-              ? response.message
-              : 'Export gagal.',
-            'error'
-          );
-
-          return;
-        }
-
-        var fileId =
-          response.data &&
-          response.data.fileId;
-
-        if (!fileId) {
-
-          hideLoading();
-
-          showToast(
-            'File PDF tidak ditemukan.',
-            'error'
-          );
-
-          return;
-        }
-
-        google.script.run
-
-          .withSuccessHandler(function (pdf) {
-
-            hideLoading();
-
-            if (
-              !pdf ||
-              pdf.success !== true ||
-              !pdf.data
-            ) {
-
-              showToast(
-                pdf &&
-                pdf.message
-                  ? pdf.message
-                  : 'PDF gagal diambil.',
-                'error'
-              );
-
-              return;
-            }
-
-            downloadBase64File(
-              pdf.data.base64,
-              pdf.data.mimeType ||
-              'application/pdf',
-              pdf.data.fileName ||
-              'Rekap_Absensi.pdf'
-            );
-
-            showToast(
-              'Rekap PDF berhasil dibuat.',
-              'success'
-            );
-
-          })
-
-          .withFailureHandler(function (error) {
-
-            hideLoading();
-
-            showToast(
-              normalizeError(error),
-              'error'
-            );
-
-          })
-
-          .downloadRekapAbsensiPDF(
-            getToken(),
-            fileId
-          );
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        hideLoading();
-
-        showToast(
-          normalizeError(error),
-          'error'
-        );
-
-      })
-
-      .exportRekapAbsensiPDF(
-        getToken(),
-        tanggal,
-        bulan,
-        user
-      );
-  }
-
-  /* ============================================================
-     IZIN
-     ============================================================ */
-
-  function loadIzin() {
-
-    var container =
-      document.getElementById(
-        'izinContent'
-      );
-
-    if (!container) {
-      return;
-    }
-
-    container.innerHTML =
-      '<div class="admin-module">' +
-
-      '<div class="admin-toolbar">' +
-
-      '<div class="admin-filter">' +
-      '<select id="izinStatus">' +
-      '<option value="">Semua Status</option>' +
-      '<option value="Menunggu">Menunggu</option>' +
-      '<option value="Disetujui">Disetujui</option>' +
-      '<option value="Ditolak">Ditolak</option>' +
-      '</select>' +
-      '</div>' +
-
-      '<div class="admin-filter">' +
-      '<input id="izinBulan" type="month">' +
-      '</div>' +
-
-      '<div class="admin-filter">' +
-      '<select id="izinUser">' +
-      '<option value="">Semua Pegawai</option>' +
-      '</select>' +
-      '</div>' +
-
-      '<button class="admin-btn admin-btn-primary" id="btnCariIzin">' +
-      '🔎 Cari' +
-      '</button>' +
-
-      '<button class="admin-btn admin-btn-secondary" id="btnResetIzin">' +
-      'Reset' +
-      '</button>' +
-
-      '</div>' +
-
-      '<div id="izinTable"></div>' +
-
-      '</div>';
-
-    loadEmployeeDropdown(
-      'izinUser'
-    );
-
-    document
-      .getElementById(
-        'btnCariIzin'
-      )
-      .onclick = function () {
-
-        izinPage = 1;
-        fetchIzin();
-
-      };
-
-    document
-      .getElementById(
-        'btnResetIzin'
-      )
-      .onclick = function () {
-
-        document.getElementById(
-          'izinStatus'
-        ).value = '';
-
-        document.getElementById(
-          'izinBulan'
-        ).value = '';
-
-        document.getElementById(
-          'izinUser'
-        ).value = '';
-
-        izinPage = 1;
-        fetchIzin();
-
-      };
-
-    fetchIzin();
-  }
-
-  function fetchIzin() {
-
-    var table =
-      document.getElementById(
-        'izinTable'
-      );
-
-    if (!table) {
-      return;
-    }
-
-    table.innerHTML =
-      '<div class="admin-loading">Memuat pengajuan izin...</div>';
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          table.innerHTML =
-            errorBox(
-              response &&
-              response.message
-                ? response.message
-                : 'Gagal memuat pengajuan izin.'
-            );
-
-          return;
-        }
-
-        renderIzin(
-          response.data || [],
-          response.pagination || {}
-        );
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        table.innerHTML =
-          errorBox(
-            normalizeError(error)
-          );
-
-      })
-
-      .getDaftarIzinAdmin(
-        getToken(),
-        izinPage,
-        20,
-        getValue('izinStatus'),
-        getValue('izinBulan'),
-        getValue('izinUser')
-      );
-  }
-
-  function renderIzin(data, pagination) {
-
-    var table =
-      document.getElementById(
-        'izinTable'
-      );
-
-    if (!table) {
-      return;
-    }
-
-    if (!data.length) {
-
-      table.innerHTML =
-        '<div class="admin-empty">' +
-        'Tidak ada pengajuan izin.' +
-        '</div>';
-
-      return;
-    }
-
-    var html =
-      '<div class="admin-table-wrap">' +
-      '<table class="admin-table">' +
-      '<thead><tr>' +
-      '<th>Pengajuan</th>' +
-      '<th>Pegawai</th>' +
-      '<th>Jenis</th>' +
-      '<th>Periode</th>' +
-      '<th>Keterangan</th>' +
-      '<th>Status</th>' +
-      '<th>Aksi</th>' +
-      '</tr></thead><tbody>';
-
-    data.forEach(function (row) {
-
-      var pending =
-        String(row.status || '') ===
-        'Menunggu';
-
-      html +=
-        '<tr>' +
-
-        '<td>' +
-        esc(row.id || '-') +
-        '<br><small>' +
-        esc(row.tanggal_pengajuan || '-') +
-        '</small>' +
-        '</td>' +
-
-        '<td>' +
-        '<strong>' +
-        esc(
-          row.nama ||
-          row.nama_user ||
-          '-'
-        ) +
-        '</strong>' +
-        '</td>' +
-
-        '<td>' +
-        esc(row.jenis_izin || '-') +
-        '</td>' +
-
-        '<td>' +
-        esc(row.tanggal_mulai || '-') +
-        ' s/d ' +
-        esc(row.tanggal_selesai || '-') +
-        '</td>' +
-
-        '<td>' +
-        esc(
-          row.keterangan || '-'
-        ) +
-        '</td>' +
-
-        '<td>' +
-        statusBadge(row.status) +
-        '</td>' +
-
-        '<td>';
-
-      if (row.lampiran) {
-
-        html +=
-          '<a class="admin-link" target="_blank" href="' +
-          escapeAttribute(
-            row.lampiran
-          ) +
-          '">Lampiran</a><br>';
-      }
-
-      if (pending) {
-
-        html +=
-          '<button class="admin-btn admin-btn-success" ' +
-          'onclick="window.AdminApp.prosesIzin(\'' +
-          jsArg(row.id) +
-          '\',\'Disetujui\')">' +
-          'Setujui' +
-          '</button>' +
-
-          '<button class="admin-btn admin-btn-danger" ' +
-          'onclick="window.AdminApp.prosesIzin(\'' +
-          jsArg(row.id) +
-          '\',\'Ditolak\')">' +
-          'Tolak' +
-          '</button>';
-
-      } else {
-
-        html +=
-          '<span style="color:#718096;font-size:12px">' +
-          'Sudah diproses' +
-          '</span>';
-      }
-
-      html +=
-        '</td>' +
-        '</tr>';
-
-    });
-
-    html +=
-      '</tbody></table></div>' +
-      paginationHtml(
-        pagination,
-        'izin'
-      );
-
-    table.innerHTML = html;
-  }
-
-  function prosesIzin(id, status) {
-
-    var catatan =
-      prompt(
-        status === 'Disetujui'
-          ? 'Catatan admin (opsional):'
-          : 'Alasan penolakan:'
-      );
-
-    if (
-      catatan === null
-    ) {
-      return;
-    }
-
-    if (
-      status === 'Ditolak' &&
-      !String(catatan).trim()
-    ) {
-
-      showToast(
-        'Alasan penolakan wajib diisi.',
-        'error'
-      );
-
-      return;
-    }
-
-    showLoading(
-      status === 'Disetujui'
-        ? 'Menyetujui izin...'
-        : 'Menolak izin...'
-    );
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        hideLoading();
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          showToast(
-            response &&
-            response.message
-              ? response.message
-              : 'Gagal memproses izin.',
-            'error'
-          );
-
-          return;
-        }
-
-        showToast(
-          response.message ||
-          'Pengajuan berhasil diproses.',
-          'success'
-        );
-
-        fetchIzin();
-        loadDashboard();
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        hideLoading();
-
-        showToast(
-          normalizeError(error),
-          'error'
-        );
-
-      })
-
-      .prosesIzin(
-        getToken(),
-        id,
-        status,
-        catatan
-      );
-  }
-
-  /* ============================================================
-     USERS
-     ============================================================ */
-
-  function loadUsers() {
-
-    var container =
-      document.getElementById(
-        'usersContent'
-      );
-
-    if (!container) {
-      return;
-    }
-
-    container.innerHTML =
-      '<div class="admin-module">' +
-
-      '<div class="admin-toolbar">' +
-
-      '<div class="admin-filter">' +
-      '<input id="usersSearch" type="search" placeholder="Cari nama, username, jabatan...">' +
-      '</div>' +
-
-      '<div class="admin-filter">' +
-      '<select id="usersRole">' +
-      '<option value="">Semua Role</option>' +
-      '<option value="admin">Admin</option>' +
-      '<option value="pegawai">Pegawai</option>' +
-      '</select>' +
-      '</div>' +
-
-      '<div class="admin-filter">' +
-      '<select id="usersStatus">' +
-      '<option value="">Semua Status</option>' +
-      '<option value="aktif">Aktif</option>' +
-      '<option value="nonaktif">Nonaktif</option>' +
-      '</select>' +
-      '</div>' +
-
-      '<button class="admin-btn admin-btn-primary" id="btnCariUsers">' +
-      '🔎 Cari' +
-      '</button>' +
-
-      '<button class="admin-btn admin-btn-success" id="btnTambahUser">' +
-      '+ Tambah User' +
-      '</button>' +
-
-      '</div>' +
-
-      '<div id="usersTable"></div>' +
-
-      '</div>';
-
-    document
-      .getElementById(
-        'btnCariUsers'
-      )
-      .onclick = function () {
-
-        usersPage = 1;
-        fetchUsers();
-
-      };
-
-    document
-      .getElementById(
-        'btnTambahUser'
-      )
-      .onclick = function () {
-
-        openUserForm();
-
-      };
-
-    document
-      .getElementById(
-        'usersSearch'
-      )
-      .addEventListener(
-        'keydown',
-        function (event) {
-
-          if (
-            event.key === 'Enter'
-          ) {
-
-            usersPage = 1;
-            fetchUsers();
-
-          }
-
-        }
-      );
-
-    fetchUsers();
-  }
-
-  function fetchUsers() {
-
-    var table =
-      document.getElementById(
-        'usersTable'
-      );
-
-    if (!table) {
-      return;
-    }
-
-    table.innerHTML =
-      '<div class="admin-loading">Memuat pengguna...</div>';
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          table.innerHTML =
-            errorBox(
-              response &&
-              response.message
-                ? response.message
-                : 'Gagal memuat user.'
-            );
-
-          return;
-        }
-
-        renderUsers(
-          response.data || [],
-          response.pagination || {}
-        );
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        table.innerHTML =
-          errorBox(
-            normalizeError(error)
-          );
-
-      })
-
-      .getDaftarUsers(
-        getToken(),
-        usersPage,
-        20,
-        getValue('usersSearch'),
-        getValue('usersRole'),
-        getValue('usersStatus')
-      );
-  }
-
-  function renderUsers(data, pagination) {
-
-    var table =
-      document.getElementById(
-        'usersTable'
-      );
-
-    if (!table) {
-      return;
-    }
-
-    if (!data.length) {
-
-      table.innerHTML =
-        '<div class="admin-empty">' +
-        'Tidak ada pengguna ditemukan.' +
-        '</div>';
-
-      return;
-    }
-
-    var html =
-      '<div class="admin-table-wrap">' +
-      '<table class="admin-table">' +
-      '<thead><tr>' +
-      '<th>ID</th>' +
-      '<th>Nama</th>' +
-      '<th>Username</th>' +
-      '<th>Role</th>' +
-      '<th>Jabatan</th>' +
-      '<th>Status</th>' +
-      '<th>Aksi</th>' +
-      '</tr></thead><tbody>';
-
-    data.forEach(function (row) {
-
-      html +=
-        '<tr>' +
-
-        '<td>' +
-        esc(row.id_user) +
-        '</td>' +
-
-        '<td>' +
-        '<strong>' +
-        esc(row.nama) +
-        '</strong>' +
-        '</td>' +
-
-        '<td>' +
-        esc(row.username) +
-        '</td>' +
-
-        '<td>' +
-        statusBadge(
-          row.role,
-          row.role === 'admin'
-            ? 'blue'
-            : 'green'
-        ) +
-        '</td>' +
-
-        '<td>' +
-        esc(row.jabatan || '-') +
-        '</td>' +
-
-        '<td>' +
-        statusBadge(
-          row.status_aktif,
-          row.status_aktif === 'aktif'
-            ? 'green'
-            : 'red'
-        ) +
-        '</td>' +
-
-        '<td>' +
-
-        '<button class="admin-btn admin-btn-secondary" ' +
-        'onclick="window.AdminApp.editUser(' +
-        JSON.stringify(row).replace(
-          /"/g,
-          '&quot;'
-        ) +
-        ')">' +
-        'Edit' +
-        '</button>' +
-
-        '<button class="admin-btn admin-btn-warning" ' +
-        'onclick="window.AdminApp.resetPassword(\'' +
-        jsArg(row.id_user) +
-        '\')">' +
-        'Reset Password' +
-        '</button>';
-
-      if (
-        String(row.status_aktif) ===
-        'aktif'
-      ) {
-
-        html +=
-          '<button class="admin-btn admin-btn-danger" ' +
-          'onclick="window.AdminApp.hapusUser(\'' +
-          jsArg(row.id_user) +
-          '\')">' +
-          'Nonaktifkan' +
-          '</button>';
-      }
-
-      html +=
-        '</td>' +
-        '</tr>';
-    });
-
-    html +=
-      '</tbody></table></div>' +
-      paginationHtml(
-        pagination,
-        'users'
-      );
-
-    table.innerHTML = html;
-  }
-
-  function openUserForm(existing) {
-
-    var edit =
-      !!existing;
-
-    var title =
-      edit
-        ? 'Edit User'
-        : 'Tambah User';
-
-    var html =
-      '<form id="adminUserForm" class="admin-form">' +
-
-      '<div class="admin-field">' +
-      '<label>Nama</label>' +
-      '<input id="userNama" required value="' +
-      escapeAttribute(
-        existing
-          ? existing.nama
-          : ''
-      ) +
-      '">' +
-      '</div>' +
-
-      '<div class="admin-field">' +
-      '<label>Username</label>' +
-      '<input id="userUsername" required value="' +
-      escapeAttribute(
-        existing
-          ? existing.username
-          : ''
-      ) +
-      '">' +
-      '</div>' +
-
-      '<div class="admin-field">' +
-      '<label>Role</label>' +
-      '<select id="userRole">' +
-      '<option value="pegawai">Pegawai</option>' +
-      '<option value="admin">Admin</option>' +
-      '</select>' +
-      '</div>' +
-
-      '<div class="admin-field">' +
-      '<label>Jabatan</label>' +
-      '<input id="userJabatan" value="' +
-      escapeAttribute(
-        existing
-          ? existing.jabatan
-          : ''
-      ) +
-      '">' +
-      '</div>' +
-
-      '<div class="admin-field">' +
-      '<label>Status</label>' +
-      '<select id="userStatus">' +
-      '<option value="aktif">Aktif</option>' +
-      '<option value="nonaktif">Nonaktif</option>' +
-      '</select>' +
-      '</div>' +
-
-      '<div class="admin-field">' +
-      '<label>URL Foto Profil</label>' +
-      '<input id="userFoto" value="' +
-      escapeAttribute(
-        existing
-          ? existing.foto_profil
-          : ''
-      ) +
-      '">' +
-      '</div>';
-
-    if (!edit) {
-
-      html +=
-        '<div class="admin-field full">' +
-        '<label>Password</label>' +
-        '<input id="userPassword" type="password" minlength="8" required>' +
-        '</div>';
-    }
-
-    html +=
-      '<div class="admin-form-actions">' +
-
-      '<button type="button" class="admin-btn admin-btn-secondary" onclick="window.AdminApp.closeModal()">' +
-      'Batal' +
-      '</button>' +
-
-      '<button type="submit" class="admin-btn admin-btn-primary">' +
-      (
-        edit
-          ? 'Simpan Perubahan'
-          : 'Tambah User'
-      ) +
-      '</button>' +
-
-      '</div>' +
-
-      '</form>';
-
-    openModal(
-      title,
-      html
-    );
-
-    var role =
-      document.getElementById(
-        'userRole'
-      );
-
-    if (role && existing) {
-      role.value =
-        existing.role || 'pegawai';
-    }
-
-    var status =
-      document.getElementById(
-        'userStatus'
-      );
-
-    if (status && existing) {
-      status.value =
-        existing.status_aktif ||
-        'aktif';
-    }
-
-    document
-      .getElementById(
-        'adminUserForm'
-      )
-      .addEventListener(
-        'submit',
-        function (event) {
-
-          event.preventDefault();
-
-          if (edit) {
-
-            submitEditUser(
-              existing.id_user
-            );
-
-          } else {
-
-            submitAddUser();
-
-          }
-
-        }
-      );
-  }
-
-  function submitAddUser() {
-
-    showLoading(
-      'Menambahkan user...'
-    );
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        hideLoading();
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          showToast(
-            response &&
-            response.message
-              ? response.message
-              : 'Gagal menambah user.',
-            'error'
-          );
-
-          return;
-        }
-
-        closeModal();
-
-        showToast(
-          response.message ||
-          'User berhasil ditambahkan.',
-          'success'
-        );
-
-        fetchUsers();
-
-        loadDashboard();
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        hideLoading();
-
-        showToast(
-          normalizeError(error),
-          'error'
-        );
-
-      })
-
-      .tambahUser(
-        getToken(),
-        getValue('userNama'),
-        getValue('userUsername'),
-        getValue('userPassword'),
-        getValue('userRole'),
-        getValue('userJabatan'),
-        getValue('userFoto')
-      );
-  }
-
-  function editUser(row) {
-
-    openUserForm(row);
-  }
-
-  function submitEditUser(idUser) {
-
-    showLoading(
-      'Menyimpan user...'
-    );
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        hideLoading();
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          showToast(
-            response &&
-            response.message
-              ? response.message
-              : 'Gagal mengubah user.',
-            'error'
-          );
-
-          return;
-        }
-
-        closeModal();
-
-        showToast(
-          response.message ||
-          'User berhasil diubah.',
-          'success'
-        );
-
-        fetchUsers();
-        loadDashboard();
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        hideLoading();
-
-        showToast(
-          normalizeError(error),
-          'error'
-        );
-
-      })
-
-      .editUser(
-        getToken(),
-        idUser,
-        getValue('userNama'),
-        getValue('userUsername'),
-        getValue('userRole'),
-        getValue('userJabatan'),
-        getValue('userFoto'),
-        getValue('userStatus')
-      );
-  }
-
-  function resetPassword(idUser) {
-
-    var password =
-      prompt(
-        'Masukkan password baru minimal 8 karakter:'
-      );
-
-    if (password === null) {
-      return;
-    }
-
-    password =
-      String(password);
-
-    if (
-      password.length < 8
-    ) {
-
-      showToast(
-        'Password minimal 8 karakter.',
-        'error'
-      );
-
-      return;
-    }
-
-    var konfirmasi =
-      prompt(
-        'Ketik password baru sekali lagi untuk konfirmasi:'
-      );
-
-    if (
-      konfirmasi !== password
-    ) {
-
-      showToast(
-        'Konfirmasi password tidak cocok.',
-        'error'
-      );
-
-      return;
-    }
-
-    showLoading(
-      'Mereset password...'
-    );
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        hideLoading();
-
-        showToast(
-          response &&
-          response.message
-            ? response.message
-            : (
-              response &&
-              response.success
-                ? 'Password berhasil direset.'
-                : 'Reset password gagal.'
-            ),
-          response &&
-          response.success
-            ? 'success'
-            : 'error'
-        );
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        hideLoading();
-
-        showToast(
-          normalizeError(error),
-          'error'
-        );
-
-      })
-
-      .resetPasswordUser(
-        getToken(),
-        idUser,
-        password
-      );
-  }
-
-  function hapusUser(idUser) {
-
-    if (
-      !confirm(
-        'Nonaktifkan user ini? Data absensi dan riwayat izin tetap dipertahankan.'
-      )
-    ) {
-      return;
-    }
-
-    showLoading(
-      'Menonaktifkan user...'
-    );
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        hideLoading();
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          showToast(
-            response &&
-            response.message
-              ? response.message
-              : 'Gagal menonaktifkan user.',
-            'error'
-          );
-
-          return;
-        }
-
-        showToast(
-          response.message ||
-          'User berhasil dinonaktifkan.',
-          'success'
-        );
-
-        fetchUsers();
-        loadDashboard();
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        hideLoading();
-
-        showToast(
-          normalizeError(error),
-          'error'
-        );
-
-      })
-
-      .hapusUser(
-        getToken(),
-        idUser
-      );
-  }
-
-  /* ============================================================
-     SETTINGS
-     ============================================================ */
-
-  function loadSettingsPage() {
-
-    var container =
-      document.getElementById(
-        'pengaturanContent'
-      );
-
-    if (!container) {
-      return;
-    }
-
-    container.innerHTML =
-      '<div class="admin-module">' +
-      '<div class="admin-loading">Memuat pengaturan...</div>' +
-      '</div>';
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          container.innerHTML =
-            errorBox(
-              response &&
-              response.message
-                ? response.message
-                : 'Gagal mengambil pengaturan.'
-            );
-
-          return;
-        }
-
-        renderSettings(
-          response.data || {}
-        );
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        container.innerHTML =
-          errorBox(
-            normalizeError(error)
-          );
-
-      })
-
-      .getPengaturanAdmin(
-        getToken()
-      );
-  }
-
-  function renderSettings(data) {
-
-    var container =
-      document.getElementById(
-        'pengaturanContent'
-      );
-
-    if (!container) {
-      return;
-    }
-
-    container.innerHTML =
-      '<form id="adminSettingsForm" class="admin-form">' +
-
-      '<div class="admin-field full">' +
-      '<label>Nama Aplikasi</label>' +
-      '<input id="settingNamaApp" required value="' +
-      escapeAttribute(
-        data.nama_app || ''
-      ) +
-      '">' +
-      '</div>' +
-
-      '<div class="admin-field full">' +
-      '<label>URL Logo</label>' +
-      '<input id="settingLogoUrl" value="' +
-      escapeAttribute(
-        data.logo_url || ''
-      ) +
-      '">' +
-      '</div>' +
-
-      '<div class="admin-field">' +
-      '<label>Latitude Kantor</label>' +
-      '<input id="settingLat" type="number" step="any" required value="' +
-      escapeAttribute(
-        data.lat_kantor != null
-          ? data.lat_kantor
-          : ''
-      ) +
-      '">' +
-      '</div>' +
-
-      '<div class="admin-field">' +
-      '<label>Longitude Kantor</label>' +
-      '<input id="settingLong" type="number" step="any" required value="' +
-      escapeAttribute(
-        data.long_kantor != null
-          ? data.long_kantor
-          : ''
-      ) +
-      '">' +
-      '</div>' +
-
-      '<div class="admin-field">' +
-      '<label>Radius Absensi (meter)</label>' +
-      '<input id="settingRadius" type="number" min="1" max="10000" required value="' +
-      escapeAttribute(
-        data.radius_meter != null
-          ? data.radius_meter
-          : ''
-      ) +
-      '">' +
-      '</div>' +
-
-      '<div class="admin-field">' +
-      '<label>Toleransi Terlambat (menit)</label>' +
-      '<input id="settingToleransi" type="number" min="0" max="300" required value="' +
-      escapeAttribute(
-        data.toleransi_menit != null
-          ? data.toleransi_menit
-          : ''
-      ) +
-      '">' +
-      '</div>' +
-
-      '<div class="admin-field">' +
-      '<label>Jam Masuk</label>' +
-      '<input id="settingJamMasuk" type="time" required value="' +
-      escapeAttribute(
-        data.jam_masuk || ''
-      ) +
-      '">' +
-      '</div>' +
-
-      '<div class="admin-field">' +
-      '<label>Jam Pulang</label>' +
-      '<input id="settingJamPulang" type="time" required value="' +
-      escapeAttribute(
-        data.jam_pulang || ''
-      ) +
-      '">' +
-      '</div>' +
-
-      '<div class="admin-form-actions">' +
-      '<button type="submit" class="admin-btn admin-btn-primary">' +
-      '💾 Simpan Pengaturan' +
-      '</button>' +
-      '</div>' +
-
-      '</form>' +
-
-      '<div class="admin-panel" style="margin-top:18px">' +
-      '<h3>Informasi</h3>' +
-      '<p>' +
-      'Pengaturan ini digunakan oleh sistem absensi untuk nama aplikasi, lokasi kantor, radius, jam kerja, dan toleransi keterlambatan.' +
-      '</p>' +
-      '</div>';
-
-    document
-      .getElementById(
-        'adminSettingsForm'
-      )
-      .addEventListener(
-        'submit',
-        function (event) {
-
-          event.preventDefault();
-
-          saveSettings();
-
-        }
-      );
-  }
-
-  function saveSettings() {
-
-    showLoading(
-      'Menyimpan pengaturan...'
-    );
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        hideLoading();
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-
-          showToast(
-            response &&
-            response.message
-              ? response.message
-              : 'Gagal menyimpan pengaturan.',
-            'error'
-          );
-
-          return;
-        }
-
-        showToast(
-          response.message ||
-          'Pengaturan berhasil disimpan.',
-          'success'
-        );
-
-        setText(
-          'sidebarAppName',
-          getValue('settingNamaApp')
-        );
-
-      })
-
-      .withFailureHandler(function (error) {
-
-        hideLoading();
-
-        showToast(
-          normalizeError(error),
-          'error'
-        );
-
-      })
-
-      .simpanPengaturan(
-        getToken(),
-        getValue('settingNamaApp'),
-        getValue('settingLogoUrl'),
-        getValue('settingLat'),
-        getValue('settingLong'),
-        getValue('settingRadius'),
-        getValue('settingJamMasuk'),
-        getValue('settingJamPulang'),
-        getValue('settingToleransi')
-      );
-  }
-
-  /* ============================================================
-     EMPLOYEE DROPDOWN
-     ============================================================ */
-
-  function loadEmployeeDropdown(selectId) {
-
-    var select =
-      document.getElementById(
-        selectId
-      );
-
-    if (!select) {
-      return;
-    }
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        if (
-          !response ||
-          response.success !== true
-        ) {
-          return;
-        }
-
-        var list =
-          response.data || [];
-
-        list.forEach(function (user) {
-
-          var option =
-            document.createElement(
-              'option'
-            );
-
-          option.value =
-            user.id_user;
-
-          option.textContent =
-            user.nama +
-            (
-              user.jabatan
-                ? ' - ' + user.jabatan
-                : ''
-            );
-
-          select.appendChild(
-            option
-          );
-
-        });
-
-      })
-
-      .withFailureHandler(function () {})
-
-      .getDaftarPegawaiAktif(
-        getToken()
-      );
-  }
-
-  /* ============================================================
-     PAGINATION
-     ============================================================ */
-
-  function paginationHtml(
-    pagination,
-    type
+  function setValue(
+    id,
+    value
   ) {
-
-    var page =
-      Number(
-        pagination.page || 1
-      );
-
-    var totalPage =
-      Number(
-        pagination.totalPage || 0
-      );
-
-    var total =
-      Number(
-        pagination.total || 0
-      );
-
-    if (totalPage <= 1) {
-
-      return (
-        '<div class="admin-pagination">' +
-        '<div class="admin-pagination-info">' +
-        total +
-        ' data' +
-        '</div>' +
-        '</div>'
-      );
-    }
-
-    var prevDisabled =
-      page <= 1
-        ? ' disabled'
-        : '';
-
-    var nextDisabled =
-      page >= totalPage
-        ? ' disabled'
-        : '';
-
-    return (
-
-      '<div class="admin-pagination">' +
-
-      '<div class="admin-pagination-info">' +
-      'Halaman ' +
-      page +
-      ' dari ' +
-      totalPage +
-      ' • ' +
-      total +
-      ' data' +
-      '</div>' +
-
-      '<div class="admin-pagination-buttons">' +
-
-      '<button class="admin-btn admin-btn-secondary" ' +
-      prevDisabled +
-      ' onclick="window.AdminApp.page(\'' +
-      type +
-      '\',' +
-      (page - 1) +
-      ')">' +
-      '‹ Sebelumnya' +
-      '</button>' +
-
-      '<button class="admin-btn admin-btn-secondary" ' +
-      nextDisabled +
-      ' onclick="window.AdminApp.page(\'' +
-      type +
-      '\',' +
-      (page + 1) +
-      ')">' +
-      'Berikutnya ›' +
-      '</button>' +
-
-      '</div>' +
-
-      '</div>'
-    );
-  }
-
-  function changePage(
-    type,
-    page
-  ) {
-
-    if (page < 1) {
-      return;
-    }
-
-    if (type === 'rekap') {
-
-      rekapPage = page;
-      fetchRekap();
-
-    }
-
-    if (type === 'izin') {
-
-      izinPage = page;
-      fetchIzin();
-
-    }
-
-    if (type === 'users') {
-
-      usersPage = page;
-      fetchUsers();
-
-    }
-  }
-
-  /* ============================================================
-     MODAL
-     ============================================================ */
-
-  function openModal(
-    title,
-    body
-  ) {
-
-    closeModal();
-
-    var modal =
-      document.createElement(
-        'div'
-      );
-
-    modal.id =
-      'adminDynamicModal';
-
-    modal.className =
-      'admin-modal';
-
-    modal.innerHTML =
-      '<div class="admin-modal-card">' +
-
-      '<div class="admin-modal-header">' +
-
-      '<h3>' +
-      esc(title) +
-      '</h3>' +
-
-      '<button class="admin-close" onclick="window.AdminApp.closeModal()">' +
-      '×' +
-      '</button>' +
-
-      '</div>' +
-
-      '<div id="adminModalBody">' +
-      body +
-      '</div>' +
-
-      '</div>';
-
-    document.body.appendChild(
-      modal
-    );
-
-    modal.addEventListener(
-      'click',
-      function (event) {
-
-        if (
-          event.target === modal
-        ) {
-
-          closeModal();
-
-        }
-
-      }
-    );
-  }
-
-  function setModalBody(
-    html
-  ) {
-
-    var body =
-      document.getElementById(
-        'adminModalBody'
-      );
-
-    if (body) {
-      body.innerHTML = html;
-    }
-  }
-
-  function closeModal() {
-
-    var modal =
-      document.getElementById(
-        'adminDynamicModal'
-      );
-
-    if (modal) {
-      modal.remove();
-    }
-  }
-
-  /* ============================================================
-     SETTINGS / APP NAME
-     ============================================================ */
-
-  function loadAppSettings() {
-
-    var token =
-      getToken();
-
-    if (!token) {
-      return;
-    }
-
-    google.script.run
-
-      .withSuccessHandler(function (response) {
-
-        if (
-          response &&
-          response.success &&
-          response.data
-        ) {
-
-          setText(
-            'sidebarAppName',
-            response.data.nama_app ||
-            'Absensi'
-          );
-
-        }
-
-      })
-
-      .withFailureHandler(function () {})
-
-      .getPengaturanAdmin(
-        token
-      );
-  }
-
-  /* ============================================================
-     REDIRECT
-     ============================================================ */
-
-  function redirectLogin() {
-
-    var base =
-      window.location.href
-        .split('?')[0];
-
-    window.top.location.href =
-      base +
-      '?page=Login';
-  }
-
-  /* ============================================================
-     LOADING
-     ============================================================ */
-
-  function showLoading(text) {
 
     var el =
       document.getElementById(
-        'globalLoading'
-      );
-
-    var textEl =
-      document.getElementById(
-        'loadingText'
-      );
-
-    if (textEl) {
-
-      textEl.textContent =
-        text ||
-        'Memuat...';
-    }
-
-    if (el) {
-
-      el.classList.remove(
-        'hidden'
-      );
-    }
-  }
-
-  function hideLoading() {
-
-    var el =
-      document.getElementById(
-        'globalLoading'
+        id
       );
 
     if (el) {
-
-      el.classList.add(
-        'hidden'
-      );
-    }
-  }
-
-  /* ============================================================
-     TOAST
-     ============================================================ */
-
-  function showToast(
-    message,
-    type
-  ) {
-
-    var toast =
-      document.getElementById(
-        'toast'
-      );
-
-    if (!toast) {
-      return;
+      el.value =
+        value == null
+          ? ''
+          : value;
     }
 
-    clearTimeout(
-      toastTimer
-    );
-
-    toast.textContent =
-      message || '';
-
-    toast.className =
-      'toast show ' +
-      (
-        type || ''
-      );
-
-    toastTimer =
-      setTimeout(
-        function () {
-
-          toast.classList.remove(
-            'show'
-          );
-
-        },
-        3500
-      );
   }
 
-  /* ============================================================
-     HELPERS
-     ============================================================ */
 
   function setText(
     id,
@@ -3483,11 +2602,15 @@
         value == null
           ? ''
           : String(value);
+
     }
+
   }
 
-  function getValue(
-    id
+
+  function setHtml(
+    id,
+    value
   ) {
 
     var el =
@@ -3495,26 +2618,33 @@
         id
       );
 
-    return el
-      ? el.value
-      : '';
+    if (el) {
+      el.innerHTML =
+        value || '';
+    }
+
   }
+
 
   function numberFormat(
     value
   ) {
 
-    var n =
+    var number =
       Number(value);
 
-    if (isNaN(n)) {
-      n = 0;
+    if (
+      isNaN(number)
+    ) {
+      number = 0;
     }
 
-    return n.toLocaleString(
+    return number.toLocaleString(
       'id-ID'
     );
+
   }
+
 
   function parseDate(
     value
@@ -3530,7 +2660,7 @@
       return null;
     }
 
-    var d =
+    var date =
       new Date(
         Number(parts[0]),
         Number(parts[1]) - 1,
@@ -3538,11 +2668,13 @@
       );
 
     return isNaN(
-      d.getTime()
+      date.getTime()
     )
       ? null
-      : d;
+      : date;
+
   }
+
 
   function formatDateLong(
     date
@@ -3582,16 +2714,23 @@
       ' ' +
       date.getFullYear()
     );
+
   }
 
-  function pad(n) {
 
-    return String(n)
-      .padStart(
-        2,
-        '0'
-      );
+  function pad(
+    number
+  ) {
+
+    return String(
+      number
+    ).padStart(
+      2,
+      '0'
+    );
+
   }
+
 
   function getInitial(
     name
@@ -3603,63 +2742,13 @@
       ).trim();
 
     return value
-      ? value
-          .charAt(0)
-          .toUpperCase()
+      ? value.charAt(0).toUpperCase()
       : 'A';
+
   }
 
-  function normalizeError(
-    error
-  ) {
 
-    if (!error) {
-
-      return (
-        'Terjadi kesalahan pada server.'
-      );
-    }
-
-    if (
-      typeof error ===
-      'string'
-    ) {
-
-      return error;
-    }
-
-    return (
-      error.message ||
-      'Terjadi kesalahan pada server.'
-    );
-  }
-
-  function escapeAttribute(
-    value
-  ) {
-
-    return String(
-      value || ''
-    )
-      .replace(
-        /&/g,
-        '&amp;'
-      )
-      .replace(
-        /"/g,
-        '&quot;'
-      )
-      .replace(
-        /</g,
-        '&lt;'
-      )
-      .replace(
-        />/g,
-        '&gt;'
-      );
-  }
-
-  function esc(
+  function safe(
     value
   ) {
 
@@ -3688,16 +2777,27 @@
         /'/g,
         '&#039;'
       );
+
   }
 
-  function jsArg(
+
+  function escapeAttribute(
+    value
+  ) {
+
+    return safe(
+      value
+    );
+
+  }
+
+
+  function escapeJs(
     value
   ) {
 
     return String(
-      value == null
-        ? ''
-        : value
+      value || ''
     )
       .replace(
         /\\/g,
@@ -3706,200 +2806,249 @@
       .replace(
         /'/g,
         "\\'"
-      )
-      .replace(
-        /\r/g,
-        ''
-      )
-      .replace(
-        /\n/g,
-        '\\n'
-      );
-  }
-
-  function statusBadge(
-    value,
-    forcedColor
-  ) {
-
-    var text =
-      String(
-        value || '-'
       );
 
-    var color =
-      forcedColor;
-
-    if (!color) {
-
-      if (
-        text === 'Disetujui' ||
-        text === 'aktif' ||
-        text === 'Hadir'
-      ) {
-
-        color = 'green';
-
-      } else if (
-        text === 'Menunggu' ||
-        text === 'Terlambat'
-      ) {
-
-        color = 'orange';
-
-      } else if (
-        text === 'Ditolak' ||
-        text === 'nonaktif'
-      ) {
-
-        color = 'red';
-
-      } else {
-
-        color = 'blue';
-      }
-    }
-
-    return (
-      '<span class="admin-badge admin-badge-' +
-      color +
-      '">' +
-      esc(text) +
-      '</span>'
-    );
   }
 
-  function detailItem(
-    label,
-    value
-  ) {
-
-    return (
-      '<div class="admin-detail-item">' +
-      '<small>' +
-      esc(label) +
-      '</small>' +
-      '<strong>' +
-      esc(
-        value == null ||
-        value === ''
-          ? '-'
-          : value
-      ) +
-      '</strong>' +
-      '</div>'
-    );
-  }
 
   function errorBox(
     message
   ) {
 
     return (
-      '<div class="admin-error">' +
-      esc(message) +
+      '<div class="message error">' +
+      safe(message) +
       '</div>'
     );
+
   }
 
-  function downloadBase64File(
-    base64,
-    mimeType,
-    fileName
+
+  function showLoading(
+    text
+  ) {
+
+    var el =
+      document.getElementById(
+        'globalLoading'
+      );
+
+    var textEl =
+      document.getElementById(
+        'loadingText'
+      );
+
+    if (textEl) {
+      textEl.textContent =
+        text ||
+        'Memuat...';
+    }
+
+    if (el) {
+      el.classList.remove(
+        'hidden'
+      );
+    }
+
+  }
+
+
+  function hideLoading() {
+
+    var el =
+      document.getElementById(
+        'globalLoading'
+      );
+
+    if (el) {
+      el.classList.add(
+        'hidden'
+      );
+    }
+
+  }
+
+
+  function showToast(
+    message,
+    type
+  ) {
+
+    var toast =
+      document.getElementById(
+        'toast'
+      );
+
+    if (!toast) {
+      return;
+    }
+
+    clearTimeout(
+      toastTimer
+    );
+
+    toast.textContent =
+      message || '';
+
+    toast.className =
+      'toast show ' +
+      (
+        type || ''
+      );
+
+    toastTimer =
+      setTimeout(
+        function () {
+
+          toast.classList.remove(
+            'show'
+          );
+
+        },
+        3500
+      );
+
+  }
+
+
+  function normalizeError(
+    error
+  ) {
+
+    if (!error) {
+
+      return (
+        'Terjadi kesalahan pada server.'
+      );
+
+    }
+
+    if (
+      typeof error ===
+      'string'
+    ) {
+
+      return error;
+
+    }
+
+    return (
+      error.message ||
+      'Terjadi kesalahan pada server.'
+    );
+
+  }
+
+
+  function base64ToArrayBuffer(
+    base64
   ) {
 
     var binary =
       atob(base64);
 
-    var length =
+    var len =
       binary.length;
 
     var bytes =
       new Uint8Array(
-        length
+        len
       );
 
     for (
       var i = 0;
-      i < length;
+      i < len;
       i++
     ) {
 
       bytes[i] =
         binary.charCodeAt(i);
+
     }
 
-    var blob =
-      new Blob(
-        [bytes],
-        {
-          type:
-            mimeType ||
-            'application/octet-stream'
-        }
-      );
+    return bytes;
 
-    var url =
-      URL.createObjectURL(
-        blob
-      );
-
-    var a =
-      document.createElement(
-        'a'
-      );
-
-    a.href = url;
-    a.download =
-      fileName || 'download';
-
-    document.body.appendChild(a);
-
-    a.click();
-
-    a.remove();
-
-    setTimeout(
-      function () {
-        URL.revokeObjectURL(url);
-      },
-      1000
-    );
   }
 
-  /* ============================================================
-     PUBLIC API
-     ============================================================ */
+
+  /* =========================================================
+     PUBLIC
+     ========================================================= */
 
   window.AdminApp = {
 
-    init: init,
+    init:
+      init,
 
-    navigate: navigate,
+    navigate:
+      navigate,
 
-    refresh: loadDashboard,
+    refresh:
+      loadDashboard,
 
-    page: changePage,
+    rekapPage:
+      function(page) {
 
-    detailAbsensi:
-      detailAbsensi,
+        if (
+          page < 1
+        ) {
+          page = 1;
+        }
+
+        fetchRekap(
+          page
+        );
+
+      },
 
     prosesIzin:
       prosesIzin,
+
+    saveNewUser:
+      saveNewUser,
+
+    closeUserForm:
+      closeUserForm,
 
     editUser:
       editUser,
 
     resetPassword:
-      resetPassword,
-
-    hapusUser:
-      hapusUser,
-
-    closeModal:
-      closeModal
+      resetPassword
 
   };
 
+
+  /* =========================================================
+     AUTO INIT
+     ========================================================= */
+
+  document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+      try {
+
+        init();
+
+      } catch (error) {
+
+        console.error(
+          'Dashboard Admin error:',
+          error
+        );
+
+        showToast(
+          error.message ||
+          'Dashboard gagal dijalankan.',
+          'error'
+        );
+
+      }
+
+    }
+  );
+
 })();
+
 </script>

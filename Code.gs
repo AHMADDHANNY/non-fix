@@ -880,7 +880,17 @@ function createSession_(
 
 }
 
+function getWebAppUrl() {
+  var url = ScriptApp.getService().getUrl();
 
+  if (!url) {
+    throw new Error(
+      'URL Web App tidak tersedia. Pastikan project sudah di-deploy sebagai Web App.'
+    );
+  }
+
+  return url;
+}
 /* ============================================================
  * TEST SYSTEM
  * ============================================================ */

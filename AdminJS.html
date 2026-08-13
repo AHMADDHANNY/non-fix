@@ -1,0 +1,1252 @@
+<script>
+(function () {
+
+  'use strict';
+
+  /* =========================================================
+     STORAGE
+     ========================================================= */
+
+  var TOKEN_KEY = 'absensi_session_token';
+  var USER_KEY  = 'absensi_session_user';
+
+
+  /* =========================================================
+     STATE
+     ========================================================= */
+
+  var currentPage = 'dashboard';
+  var clockTimer = null;
+  var toastTimer = null;
+  var dashboardLoading = false;
+
+
+  /* =========================================================
+     INIT
+     ========================================================= */
+
+  document.addEventListener('DOMContentLoaded', init);
+
+
+  function init() {
+
+    setupNavigation();
+    setupMobileMenu();
+    setupLogout();
+    setupQuickActions();
+    setupRefresh();
+
+    loadStoredUser();
+    startClock();
+
+    var token = getToken();
+
+    if (!token) {
+      redirectLogin();
+      return;
+    }
+
+    verifyAdminSession(token);
+  }
+
+
+  /* =========================================================
+     SESSION
+     ========================================================= */
+
+  function getToken() {
+
+    try {
+      return localStorage.getItem(TOKEN_KEY) || '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+
+  function getStoredUser() {
+
+    try {
+
+      var raw = localStorage.getItem(USER_KEY);
+
+      return raw ? JSON.parse(raw) : null;
+
+    } catch (e) {
+
+      return null;
+    }
+  }
+
+
+  function saveUser(user) {
+
+    try {
+
+      localStorage.setItem(
+        USER_KEY,
+        JSON.stringify(user || {})
+      );
+
+    } catch (e) {}
+  }
+
+
+  function clearSession() {
+
+    try {
+
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+
+    } catch (e) {}
+  }
+
+
+  /* =========================================================
+     VERIFY ADMIN
+     ========================================================= */
+
+  function verifyAdminSession(token) {
+
+    showLoading('Memeriksa sesi...');
+
+    google.script.run
+
+      .withSuccessHandler(function (response) {
+
+        if (
+          !response ||
+          response.valid !== true ||
+          !response.user
+        ) {
+
+          hideLoading();
+          clearSession();
+          redirectLogin();
+
+          return;
+        }
+
+
+        var user = response.user;
+
+        var role = String(
+          user.role || ''
+        )
+          .trim()
+          .toLowerCase();
+
+
+        /*
+         * PENTING:
+         * DashboardAdmin hanya boleh digunakan admin.
+         */
+
+        if (role !== 'admin') {
+
+          hideLoading();
+          clearSession();
+
+          showToast(
+            'Akses ditolak. Halaman ini khusus administrator.',
+            'error'
+          );
+
+          setTimeout(
+            redirectLogin,
+            1000
+          );
+
+          return;
+        }
+
+
+        saveUser(user);
+        applyUser(user);
+
+        loadDashboard();
+
+      })
+
+      .withFailureHandler(function (error) {
+
+        hideLoading();
+
+        showToast(
+          normalizeError(error),
+          'error'
+        );
+
+        setTimeout(
+          redirectLogin,
+          1200
+        );
+
+      })
+
+      .verifySession(token);
+  }
+
+
+  /* =========================================================
+     USER UI
+     ========================================================= */
+
+  function loadStoredUser() {
+
+    var user = getStoredUser();
+
+    if (user) {
+      applyUser(user);
+    }
+  }
+
+
+  function applyUser(user) {
+
+    var name = String(
+      user.nama ||
+      user.username ||
+      'Administrator'
+    );
+
+
+    setText(
+      'welcomeName',
+      name
+    );
+
+
+    setText(
+      'topbarUserName',
+      name
+    );
+
+
+    setText(
+      'topbarUserRole',
+      'Administrator'
+    );
+
+
+    var avatar = document.getElementById(
+      'topbarAvatar'
+    );
+
+
+    if (!avatar) {
+      return;
+    }
+
+
+    if (user.foto_profil) {
+
+      avatar.innerHTML = '';
+
+      var img = document.createElement('img');
+
+      img.src = user.foto_profil;
+      img.alt = 'Foto profil';
+
+      avatar.appendChild(img);
+
+    } else {
+
+      avatar.textContent = getInitial(name);
+    }
+  }
+
+
+  /* =========================================================
+     DASHBOARD
+     ========================================================= */
+
+  function loadDashboard() {
+
+    if (dashboardLoading) {
+      return;
+    }
+
+
+    var token = getToken();
+
+    if (!token) {
+
+      redirectLogin();
+      return;
+    }
+
+
+    dashboardLoading = true;
+
+    showLoading('Memuat dashboard...');
+
+
+    google.script.run
+
+      .withSuccessHandler(function (response) {
+
+        dashboardLoading = false;
+
+        hideLoading();
+
+
+        if (
+          !response ||
+          response.success !== true
+        ) {
+
+          showToast(
+            response && response.message
+              ? response.message
+              : 'Gagal mengambil data dashboard.',
+            'error'
+          );
+
+          return;
+        }
+
+
+        applyDashboard(
+          response.data || {}
+        );
+
+      })
+
+      .withFailureHandler(function (error) {
+
+        dashboardLoading = false;
+
+        hideLoading();
+
+        showToast(
+          normalizeError(error),
+          'error'
+        );
+
+      })
+
+      .getDashboardAdmin(token);
+  }
+
+
+  function applyDashboard(data) {
+
+    var totalPegawai =
+      toNumber(data.total_pegawai);
+
+    var hadir =
+      toNumber(data.hadir_hari_ini);
+
+    var terlambat =
+      toNumber(data.terlambat_hari_ini);
+
+    var belumAbsen =
+      toNumber(data.belum_absen_hari_ini);
+
+    var izinPending =
+      toNumber(data.izin_pending);
+
+    var totalAdmin =
+      toNumber(data.total_admin);
+
+
+    setText(
+      'statPegawai',
+      numberFormat(totalPegawai)
+    );
+
+
+    setText(
+      'statHadir',
+      numberFormat(hadir)
+    );
+
+
+    setText(
+      'statTerlambat',
+      numberFormat(terlambat)
+    );
+
+
+    setText(
+      'statBelumAbsen',
+      numberFormat(belumAbsen)
+    );
+
+
+    setText(
+      'statIzinPending',
+      numberFormat(izinPending)
+    );
+
+
+    setText(
+      'statAdmin',
+      numberFormat(totalAdmin)
+    );
+
+
+    setText(
+      'summaryHadir',
+      numberFormat(hadir)
+    );
+
+
+    setText(
+      'summaryTerlambat',
+      numberFormat(terlambat)
+    );
+
+
+    setText(
+      'summaryBelumAbsen',
+      numberFormat(belumAbsen)
+    );
+
+
+    /*
+     * FIX ERROR SINTAKS:
+     *
+     * sebelumnya:
+     *
+     * setText(... numberFormat(... );
+     *
+     * sekarang sudah benar.
+     */
+
+    setText(
+      'summaryIzin',
+      numberFormat(izinPending)
+    );
+
+
+    /*
+     * Tanggal dari backend jika tersedia.
+     */
+
+    if (data.tanggal) {
+
+      var parsedDate =
+        parseLocalDate(data.tanggal);
+
+      if (parsedDate) {
+
+        setText(
+          'todayDate',
+          formatLongDate(parsedDate)
+        );
+      }
+    }
+
+
+    /*
+     * Nama aplikasi.
+     */
+
+    if (data.nama_app) {
+
+      setText(
+        'sidebarAppName',
+        data.nama_app
+      );
+
+      document.title =
+        data.nama_app + ' - Admin';
+
+    } else {
+
+      setText(
+        'sidebarAppName',
+        getAppName()
+      );
+    }
+  }
+
+
+  /* =========================================================
+     NAVIGATION
+     ========================================================= */
+
+  function setupNavigation() {
+
+    var items =
+      document.querySelectorAll(
+        '.nav-item[data-page]'
+      );
+
+
+    items.forEach(function (item) {
+
+      item.addEventListener(
+        'click',
+        function () {
+
+          var page =
+            item.getAttribute('data-page');
+
+          navigate(page);
+        }
+      );
+
+    });
+  }
+
+
+  function setupQuickActions() {
+
+    var items =
+      document.querySelectorAll(
+        '.quick-card[data-go]'
+      );
+
+
+    items.forEach(function (item) {
+
+      item.addEventListener(
+        'click',
+        function () {
+
+          var page =
+            item.getAttribute('data-go');
+
+          navigate(page);
+        }
+      );
+
+    });
+  }
+
+
+  function navigate(page) {
+
+    if (!page) {
+      return;
+    }
+
+
+    var allowedPages = [
+      'dashboard',
+      'rekap',
+      'izin',
+      'users',
+      'pengaturan'
+    ];
+
+
+    if (
+      allowedPages.indexOf(page) === -1
+    ) {
+
+      page = 'dashboard';
+    }
+
+
+    currentPage = page;
+
+
+    document
+      .querySelectorAll('.app-page')
+      .forEach(function (section) {
+
+        section.classList.toggle(
+          'active',
+          section.id === 'page-' + page
+        );
+
+      });
+
+
+    document
+      .querySelectorAll(
+        '.nav-item[data-page]'
+      )
+      .forEach(function (item) {
+
+        item.classList.toggle(
+          'active',
+          item.getAttribute('data-page') === page
+        );
+
+      });
+
+
+    updatePageTitle(page);
+
+    closeMobileMenu();
+
+
+    /*
+     * Untuk sementara modul lain masih berupa UI.
+     *
+     * Setelah backend/UI masing-masing selesai,
+     * fungsi loadRekap(), loadIzin(), dst bisa
+     * dipanggil dari sini.
+     */
+
+    if (page === 'dashboard') {
+      loadDashboard();
+    }
+  }
+
+
+  function updatePageTitle(page) {
+
+    var titles = {
+
+      dashboard: [
+        'Dashboard',
+        'Ringkasan aktivitas hari ini'
+      ],
+
+      rekap: [
+        'Rekap Absensi',
+        'Rekap kehadiran seluruh pegawai'
+      ],
+
+      izin: [
+        'Pengajuan Izin',
+        'Kelola pengajuan pegawai'
+      ],
+
+      users: [
+        'Manajemen User',
+        'Kelola akun pengguna'
+      ],
+
+      pengaturan: [
+        'Pengaturan',
+        'Konfigurasi aplikasi'
+      ]
+
+    };
+
+
+    var value =
+      titles[page] ||
+      titles.dashboard;
+
+
+    setText(
+      'pageTitle',
+      value[0]
+    );
+
+
+    setText(
+      'pageSubtitle',
+      value[1]
+    );
+  }
+
+
+  /* =========================================================
+     MOBILE MENU
+     ========================================================= */
+
+  function setupMobileMenu() {
+
+    var button =
+      document.getElementById('menuButton');
+
+    var overlay =
+      document.getElementById('sidebarOverlay');
+
+
+    if (button) {
+
+      button.addEventListener(
+        'click',
+        function () {
+
+          var sidebar =
+            document.getElementById('sidebar');
+
+
+          if (!sidebar) {
+            return;
+          }
+
+
+          sidebar.classList.toggle('open');
+
+
+          if (overlay) {
+
+            overlay.classList.toggle(
+              'show'
+            );
+          }
+
+        }
+      );
+    }
+
+
+    if (overlay) {
+
+      overlay.addEventListener(
+        'click',
+        closeMobileMenu
+      );
+    }
+  }
+
+
+  function closeMobileMenu() {
+
+    var sidebar =
+      document.getElementById('sidebar');
+
+    var overlay =
+      document.getElementById('sidebarOverlay');
+
+
+    if (sidebar) {
+
+      sidebar.classList.remove('open');
+    }
+
+
+    if (overlay) {
+
+      overlay.classList.remove('show');
+    }
+  }
+
+
+  /* =========================================================
+     CLOCK
+     ========================================================= */
+
+  function startClock() {
+
+    updateClock();
+
+
+    if (clockTimer) {
+
+      clearInterval(clockTimer);
+    }
+
+
+    clockTimer =
+      setInterval(
+        updateClock,
+        1000
+      );
+  }
+
+
+  function updateClock() {
+
+    var now = new Date();
+
+
+    setText(
+      'todayClock',
+      formatClock(now)
+    );
+
+
+    setText(
+      'todayDate',
+      formatLongDate(now)
+    );
+  }
+
+
+  /* =========================================================
+     REFRESH
+     ========================================================= */
+
+  function setupRefresh() {
+
+    var button =
+      document.getElementById(
+        'refreshDashboard'
+      );
+
+
+    if (!button) {
+      return;
+    }
+
+
+    button.addEventListener(
+      'click',
+      function () {
+
+        if (dashboardLoading) {
+          return;
+        }
+
+
+        loadDashboard();
+
+      }
+    );
+  }
+
+
+  /* =========================================================
+     LOGOUT
+     ========================================================= */
+
+  function setupLogout() {
+
+    var button =
+      document.getElementById(
+        'sidebarLogout'
+      );
+
+    var cancel =
+      document.getElementById(
+        'cancelLogout'
+      );
+
+    var confirmButton =
+      document.getElementById(
+        'confirmLogout'
+      );
+
+
+    if (button) {
+
+      button.addEventListener(
+        'click',
+        showLogoutModal
+      );
+    }
+
+
+    if (cancel) {
+
+      cancel.addEventListener(
+        'click',
+        hideLogoutModal
+      );
+    }
+
+
+    if (confirmButton) {
+
+      confirmButton.addEventListener(
+        'click',
+        performLogout
+      );
+    }
+  }
+
+
+  function showLogoutModal() {
+
+    var modal =
+      document.getElementById(
+        'logoutModal'
+      );
+
+
+    if (modal) {
+
+      modal.classList.remove(
+        'hidden'
+      );
+    }
+  }
+
+
+  function hideLogoutModal() {
+
+    var modal =
+      document.getElementById(
+        'logoutModal'
+      );
+
+
+    if (modal) {
+
+      modal.classList.add(
+        'hidden'
+      );
+    }
+  }
+
+
+  function performLogout() {
+
+    var token = getToken();
+
+
+    hideLogoutModal();
+
+    showLoading('Keluar...');
+
+
+    if (!token) {
+
+      clearSession();
+      redirectLogin();
+
+      return;
+    }
+
+
+    google.script.run
+
+      .withSuccessHandler(function () {
+
+        clearSession();
+        redirectLogin();
+
+      })
+
+      .withFailureHandler(function () {
+
+        /*
+         * Logout lokal tetap dilakukan
+         * walaupun server gagal.
+         */
+
+        clearSession();
+        redirectLogin();
+
+      })
+
+      .logout(token);
+  }
+
+
+  /* =========================================================
+     REDIRECT
+     ========================================================= */
+
+  function redirectLogin() {
+
+    clearSession();
+
+
+    var base =
+      window.location.href
+        .split('?')[0];
+
+
+    /*
+     * Ini hanya navigasi ke halaman Login.
+     *
+     * Keamanan TIDAK bergantung pada parameter page.
+     * DashboardAdmin tetap memvalidasi token + role
+     * di backend.
+     */
+
+    window.top.location.href =
+      base + '?page=Login';
+  }
+
+
+  /* =========================================================
+     LOADING
+     ========================================================= */
+
+  function showLoading(text) {
+
+    var el =
+      document.getElementById(
+        'globalLoading'
+      );
+
+    var textEl =
+      document.getElementById(
+        'loadingText'
+      );
+
+
+    if (textEl) {
+
+      textEl.textContent =
+        text || 'Memuat...';
+    }
+
+
+    if (el) {
+
+      el.classList.remove(
+        'hidden'
+      );
+    }
+  }
+
+
+  function hideLoading() {
+
+    var el =
+      document.getElementById(
+        'globalLoading'
+      );
+
+
+    if (el) {
+
+      el.classList.add(
+        'hidden'
+      );
+    }
+  }
+
+
+  /* =========================================================
+     TOAST
+     ========================================================= */
+
+  function showToast(message, type) {
+
+    var toast =
+      document.getElementById(
+        'toast'
+      );
+
+
+    if (!toast) {
+      return;
+    }
+
+
+    clearTimeout(toastTimer);
+
+
+    toast.textContent =
+      message || '';
+
+
+    toast.className =
+      'toast show ' +
+      (type || '');
+
+
+    toastTimer =
+      setTimeout(
+        function () {
+
+          toast.classList.remove(
+            'show'
+          );
+
+        },
+        3000
+      );
+  }
+
+
+  /* =========================================================
+     HELPERS
+     ========================================================= */
+
+  function setText(id, value) {
+
+    var el =
+      document.getElementById(id);
+
+
+    if (el) {
+
+      el.textContent =
+        value == null
+          ? ''
+          : String(value);
+    }
+  }
+
+
+  function toNumber(value) {
+
+    var number =
+      Number(value);
+
+
+    if (isNaN(number)) {
+      return 0;
+    }
+
+
+    return number;
+  }
+
+
+  function numberFormat(value) {
+
+    var number =
+      toNumber(value);
+
+
+    try {
+
+      return number.toLocaleString(
+        'id-ID'
+      );
+
+    } catch (e) {
+
+      return String(number);
+    }
+  }
+
+
+  function formatClock(date) {
+
+    return [
+      pad(date.getHours()),
+      pad(date.getMinutes()),
+      pad(date.getSeconds())
+    ].join(':');
+  }
+
+
+  function formatLongDate(date) {
+
+    var days = [
+      'Minggu',
+      'Senin',
+      'Selasa',
+      'Rabu',
+      'Kamis',
+      'Jumat',
+      'Sabtu'
+    ];
+
+
+    var months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
+    ];
+
+
+    return (
+      days[date.getDay()] +
+      ', ' +
+      date.getDate() +
+      ' ' +
+      months[date.getMonth()] +
+      ' ' +
+      date.getFullYear()
+    );
+  }
+
+
+  function parseLocalDate(value) {
+
+    var parts =
+      String(value).split('-');
+
+
+    if (parts.length !== 3) {
+      return null;
+    }
+
+
+    var date =
+      new Date(
+        Number(parts[0]),
+        Number(parts[1]) - 1,
+        Number(parts[2])
+      );
+
+
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+
+
+    return date;
+  }
+
+
+  function pad(value) {
+
+    return String(value)
+      .padStart(2, '0');
+  }
+
+
+  function getInitial(name) {
+
+    var value =
+      String(name || 'A').trim();
+
+
+    if (!value) {
+      return 'A';
+    }
+
+
+    return value
+      .charAt(0)
+      .toUpperCase();
+  }
+
+
+  function normalizeError(error) {
+
+    if (!error) {
+
+      return 'Terjadi kesalahan pada server.';
+    }
+
+
+    if (
+      typeof error === 'string'
+    ) {
+
+      return error;
+    }
+
+
+    if (error.message) {
+
+      return error.message;
+    }
+
+
+    return 'Terjadi kesalahan pada server.';
+  }
+
+
+  function getAppName() {
+
+    return 'Absensi';
+  }
+
+
+  /* =========================================================
+     PUBLIC API
+     ========================================================= */
+
+  window.AdminApp = {
+
+    getToken: getToken,
+
+    getUser: getStoredUser,
+
+    refreshDashboard: loadDashboard,
+
+    navigate: navigate,
+
+    logout: performLogout,
+
+    clearSession: clearSession
+
+  };
+
+
+})();
+</script>

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <base target="_top">
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#2563eb"
+  >
+
+  <title>Aplikasi Absensi</title>
+
+  <?!= include('CSS'); ?>
+</head>
+
+<body>
+
+  <!-- ============================================================
+       LOGIN PAGE
+       ============================================================ -->
+
+  <main
+    class="login-page"
+    id="loginPage"
+  >
+
+    <section class="login-card">
+
+      <!-- BRAND -->
+      <div class="brand">
+
+        <div
+          class="brand-logo"
+          id="brandLogo"
+          aria-hidden="true"
+        >
+          <span>✓</span>
+        </div>
+
+        <h1 id="appName">
+          Aplikasi Absensi
+        </h1>
+
+        <p>
+          Silakan masuk untuk melanjutkan
+        </p>
+
+      </div>
+
+
+      <!-- LOGIN FORM -->
+      <form
+        id="loginForm"
+        autocomplete="on"
+        novalidate
+      >
+
+        <!-- USERNAME -->
+        <div class="form-group">
+
+          <label for="username">
+            Username
+          </label>
+
+          <div class="input-wrap">
+
+            <span
+              class="input-icon"
+              aria-hidden="true"
+            >
+              👤
+            </span>
+
+            <input
+              type="text"
+              id="username"
+              name="username"
+              autocomplete="username"
+              placeholder="Masukkan username"
+              maxlength="30"
+              required
+              autocapitalize="none"
+              spellcheck="false"
+            >
+
+          </div>
+
+        </div>
+
+
+        <!-- PASSWORD -->
+        <div class="form-group">
+
+          <label for="password">
+            Password
+          </label>
+
+          <div class="input-wrap">
+
+            <span
+              class="input-icon"
+              aria-hidden="true"
+            >
+              🔒
+            </span>
+
+            <input
+              type="password"
+              id="password"
+              name="password"
+              autocomplete="current-password"
+              placeholder="Masukkan password"
+              maxlength="128"
+              required
+            >
+
+            <button
+              type="button"
+              class="password-toggle"
+              id="togglePassword"
+              aria-label="Tampilkan password"
+              aria-pressed="false"
+            >
+              👁
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- MESSAGE -->
+        <div
+          id="loginMessage"
+          class="message hidden"
+          role="alert"
+          aria-live="polite"
+        ></div>
+
+
+        <!-- LOGIN BUTTON -->
+        <button
+          type="submit"
+          id="loginButton"
+          class="btn btn-primary btn-login"
+        >
+
+          <span id="loginButtonText">
+            Masuk
+          </span>
+
+          <span
+            id="loginSpinner"
+            class="spinner hidden"
+            aria-hidden="true"
+          ></span>
+
+        </button>
+
+      </form>
+
+
+      <!-- FOOTER -->
+      <div class="login-footer">
+
+        <span>
+          Sistem Absensi Karyawan
+        </span>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ============================================================
+       APPLICATION CONTAINER
+       
+       Dashboard TIDAK dibuka melalui ?page=DashboardAdmin.
+       Dashboard ditampilkan oleh JavaScript setelah login berhasil.
+       ============================================================ -->
+
+  <div
+    id="app"
+    style="display:none;"
+  ></div>
+
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+
+  <?!= include('JS'); ?>
+
+
+  <!-- ============================================================
+       LOGIN SAFETY / BOOTSTRAP
+       ============================================================ -->
+
+  <script>
+
+    /*
+     * ============================================================
+     * PENTING
+     * ============================================================
+     *
+     * Login tidak pernah melakukan:
+     *
+     * window.location = '?page=DashboardAdmin'
+     * window.location.href = '?page=DashboardAdmin'
+     * window.top.location.href = '?page=DashboardAdmin'
+     *
+     * Setelah login berhasil, JS harus menampilkan dashboard
+     * berdasarkan result.user.role.
+     *
+     * ============================================================
+     */
+
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      function () {
+
+        const toggle =
+          document.getElementById(
+            'togglePassword'
+          );
+
+        const password =
+          document.getElementById(
+            'password'
+          );
+
+
+        if (
+          toggle &&
+          password
+        ) {
+
+          toggle.addEventListener(
+            'click',
+            function () {
+
+              const isPassword =
+                password.type === 'password';
+
+              password.type =
+                isPassword
+                  ? 'text'
+                  : 'password';
+
+              toggle.setAttribute(
+                'aria-pressed',
+                isPassword
+                  ? 'true'
+                  : 'false'
+              );
+
+              toggle.setAttribute(
+                'aria-label',
+                isPassword
+                  ? 'Sembunyikan password'
+                  : 'Tampilkan password'
+              );
+
+              toggle.textContent =
+                isPassword
+                  ? '🙈'
+                  : '👁';
+
+            }
+          );
+
+        }
+
+
+        /*
+         * Enter pada username/password tetap bekerja
+         * melalui submit handler yang ada di JS.html.
+         */
+
+      }
+    );
+
+
+    /*
+     * ============================================================
+     * FUNGSI GLOBAL UNTUK RESET LOGIN
+     * ============================================================
+     *
+     * Dipakai ketika session expired / logout.
+     * ============================================================
+     */
+
+    window.showLoginPage =
+      function () {
+
+        const loginPage =
+          document.getElementById(
+            'loginPage'
+          );
+
+        const app =
+          document.getElementById(
+            'app'
+          );
+
+
+        if (loginPage) {
+
+          loginPage.style.display =
+            '';
+
+        }
+
+
+        if (app) {
+
+          app.style.display =
+            'none';
+
+          app.innerHTML =
+            '';
+
+        }
+
+
+        const username =
+          document.getElementById(
+            'username'
+          );
+
+        const password =
+          document.getElementById(
+            'password'
+          );
+
+
+        if (username) {
+
+          username.value =
+            '';
+
+        }
+
+
+        if (password) {
+
+          password.value =
+            '';
+
+        }
+
+
+        const message =
+          document.getElementById(
+            'loginMessage'
+          );
+
+
+        if (message) {
+
+          message.textContent =
+            '';
+
+          message.classList.add(
+            'hidden'
+          );
+
+        }
+
+
+        const button =
+          document.getElementById(
+            'loginButton'
+          );
+
+
+        if (button) {
+
+          button.disabled =
+            false;
+
+        }
+
+
+        const buttonText =
+          document.getElementById(
+            'loginButtonText'
+          );
+
+
+        if (buttonText) {
+
+          buttonText.textContent =
+            'Masuk';
+
+        }
+
+
+        const spinner =
+          document.getElementById(
+            'loginSpinner'
+          );
+
+
+        if (spinner) {
+
+          spinner.classList.add(
+            'hidden'
+          );
+
+        }
+
+      };
+
+
+    /*
+     * ============================================================
+     * FUNGSI GLOBAL MENAMPILKAN ERROR LOGIN
+     * ============================================================
+     */
+
+    window.showLoginError =
+      function (message) {
+
+        const element =
+          document.getElementById(
+            'loginMessage'
+          );
+
+
+        if (!element) {
+          return;
+        }
+
+
+        element.textContent =
+          message ||
+          'Username atau password salah.';
+
+
+        element.classList.remove(
+          'hidden'
+        );
+
+
+        element.classList.add(
+          'error'
+        );
+
+      };
+
+
+    /*
+     * ============================================================
+     * LOAD NAMA APLIKASI
+     * ============================================================
+     *
+     * Ini hanya mengambil pengaturan.
+     * Tidak menentukan role.
+     * Tidak melakukan redirect.
+     * ============================================================
+     */
+
+    function loadLoginSettings() {
+
+      if (
+        typeof google ===
+        'undefined' ||
+        !google.script ||
+        !google.script.run
+      ) {
+
+        return;
+
+      }
+
+
+      google.script.run
+
+        .withSuccessHandler(
+          function (result) {
+
+            if (!result) {
+              return;
+            }
+
+
+            /*
+             * Mendukung response:
+             *
+             * {
+             *   success: true,
+             *   data: {...}
+             * }
+             *
+             * maupun:
+             *
+             * {
+             *   nama_app: ...
+             * }
+             */
+
+            const data =
+              result.data ||
+              result;
+
+
+            if (
+              data.nama_app
+            ) {
+
+              const appName =
+                document.getElementById(
+                  'appName'
+                );
+
+              if (appName) {
+
+                appName.textContent =
+                  data.nama_app;
+
+              }
+
+            }
+
+
+            if (
+              data.logo_url
+            ) {
+
+              const logo =
+                document.getElementById(
+                  'brandLogo'
+                );
+
+              if (logo) {
+
+                logo.innerHTML =
+                  '<img src="' +
+                  escapeHtmlAttribute(
+                    data.logo_url
+                  ) +
+                  '" alt="Logo">';
+
+              }
+
+            }
+
+          }
+        )
+
+        .withFailureHandler(
+          function () {
+
+            /*
+             * Jangan membuat login gagal
+             * hanya karena pengaturan gagal dimuat.
+             */
+
+          }
+        )
+
+        /*
+         * Hanya jalankan jika fungsi backend tersedia.
+         */
+        .getPengaturanPublic();
+
+    }
+
+
+    /*
+     * ============================================================
+     * HTML ATTRIBUTE ESCAPE
+     * ============================================================
+     */
+
+    function escapeHtmlAttribute(
+      value
+    ) {
+
+      return String(value || '')
+        .replace(
+          /&/g,
+          '&amp;'
+        )
+        .replace(
+          /"/g,
+          '&quot;'
+        )
+        .replace(
+          /'/g,
+          '&#39;'
+        )
+        .replace(
+          /</g,
+          '&lt;'
+        )
+        .replace(
+          />/g,
+          '&gt;'
+        );
+
+    }
+
+
+    /*
+     * ============================================================
+     * LOAD SETTINGS
+     * ============================================================
+     */
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      function () {
+
+        /*
+         * Jika backend Anda BELUM memiliki
+         * getPengaturanPublic(), fungsi ini jangan
+         * sampai membuat halaman error.
+         *
+         * Karena itu kita cek terlebih dahulu.
+         */
+
+        try {
+
+          if (
+            typeof loadLoginSettings ===
+            'function'
+          ) {
+
+            /*
+             * Tidak dipanggil secara agresif.
+             *
+             * Login tetap bisa digunakan walaupun
+             * fungsi pengaturan belum tersedia.
+             */
+
+          }
+
+        } catch (err) {
+
+          console.warn(
+            'Pengaturan login tidak dapat dimuat:',
+            err
+          );
+
+        }
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>

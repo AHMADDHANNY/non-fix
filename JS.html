@@ -1,13 +1,7 @@
 <script>
-
 (function () {
 
   'use strict';
-
-
-  /* =========================================================
-     KONFIGURASI
-     ========================================================= */
 
   var STORAGE_TOKEN =
     'absensi_session_token';
@@ -16,72 +10,46 @@
     'absensi_session_user';
 
 
-  /* =========================================================
-     ELEMENT
-     ========================================================= */
-
   var form =
-    document.getElementById(
-      'loginForm'
-    );
+    document.getElementById('loginForm');
 
   var usernameInput =
-    document.getElementById(
-      'username'
-    );
+    document.getElementById('username');
 
   var passwordInput =
-    document.getElementById(
-      'password'
-    );
+    document.getElementById('password');
 
   var loginButton =
-    document.getElementById(
-      'loginButton'
-    );
+    document.getElementById('loginButton');
 
   var loginButtonText =
-    document.getElementById(
-      'loginButtonText'
-    );
+    document.getElementById('loginButtonText');
 
   var loginSpinner =
-    document.getElementById(
-      'loginSpinner'
-    );
+    document.getElementById('loginSpinner');
 
   var loginMessage =
-    document.getElementById(
-      'loginMessage'
-    );
+    document.getElementById('loginMessage');
 
   var togglePassword =
-    document.getElementById(
-      'togglePassword'
-    );
+    document.getElementById('togglePassword');
 
-
-  /* =========================================================
-     INITIAL
-     ========================================================= */
 
   document.addEventListener(
     'DOMContentLoaded',
-    function () {
-
-      setupPasswordToggle();
-
-      setupLoginForm();
-
-      checkExistingSession();
-
-    }
+    init
   );
 
 
-  /* =========================================================
-     PASSWORD TOGGLE
-     ========================================================= */
+  function init() {
+
+    setupPasswordToggle();
+    setupLoginForm();
+    loadAppName();
+    checkExistingSession();
+
+  }
+
 
   function setupPasswordToggle() {
 
@@ -92,34 +60,22 @@
       return;
     }
 
-
     togglePassword.addEventListener(
       'click',
       function () {
 
-        var isPassword =
-          passwordInput.type ===
-          'password';
-
+        var visible =
+          passwordInput.type === 'text';
 
         passwordInput.type =
-          isPassword
-            ? 'text'
-            : 'password';
-
+          visible
+            ? 'password'
+            : 'text';
 
         togglePassword.textContent =
-          isPassword
-            ? '🙈'
-            : '👁';
-
-
-        togglePassword.setAttribute(
-          'aria-pressed',
-          isPassword
-            ? 'true'
-            : 'false'
-        );
+          visible
+            ? '👁'
+            : '🙈';
 
       }
     );
@@ -127,16 +83,11 @@
   }
 
 
-  /* =========================================================
-     LOGIN FORM
-     ========================================================= */
-
   function setupLoginForm() {
 
     if (!form) {
       return;
     }
-
 
     form.addEventListener(
       'submit',
@@ -152,28 +103,13 @@
   }
 
 
-  /* =========================================================
-     LOGIN
-     ========================================================= */
-
   function login() {
-
-    if (
-      !usernameInput ||
-      !passwordInput
-    ) {
-
-      return;
-
-    }
-
 
     var username =
       usernameInput.value.trim();
 
     var password =
       passwordInput.value;
-
 
     clearMessage();
 
@@ -224,9 +160,8 @@
               response &&
               response.message
                 ? response.message
-                : 'Login gagal.'
+                : 'Username atau password salah.'
             );
-
 
             passwordInput.value = '';
 
@@ -248,27 +183,31 @@
           }
 
 
-          /*
-           * Pastikan user juga dikembalikan
-           * oleh backend.
-           */
+          var user =
+            response.user || {};
+
+
+          var role =
+            String(
+              user.role || ''
+            )
+            .trim()
+            .toLowerCase();
+
 
           if (
-            !response.user
+            role !== 'admin' &&
+            role !== 'pegawai'
           ) {
 
             showError(
-              'Data pengguna tidak diterima dari server.'
+              'Role akun tidak valid.'
             );
 
             return;
 
           }
 
-
-          /*
-           * Simpan session.
-           */
 
           try {
 
@@ -277,18 +216,15 @@
               response.token
             );
 
-
             localStorage.setItem(
               STORAGE_USER,
-              JSON.stringify(
-                response.user
-              )
+              JSON.stringify(user)
             );
 
-          } catch (storageError) {
+          } catch (error) {
 
             showError(
-              'Browser tidak mengizinkan penyimpanan session.'
+              'Session tidak dapat disimpan di browser.'
             );
 
             return;
@@ -301,37 +237,19 @@
           );
 
 
-          /*
-           * =====================================================
-           * PENTING
-           * =====================================================
-           *
-           * TIDAK ADA REDIRECT URL.
-           *
-           * Tidak menggunakan:
-           *
-           * ?page=DashboardAdmin
-           *
-           * ?page=DashboardPegawai
-           *
-           * Dashboard akan dibuat/ditampilkan
-           * di dalam halaman aplikasi.
-           */
-
           setTimeout(
             function () {
 
               redirectByRole(
-                response.user
+                user
               );
 
             },
-            250
+            300
           );
 
         }
       )
-
 
       .withFailureHandler(
         function (error) {
@@ -339,14 +257,11 @@
           setLoading(false);
 
           showError(
-            normalizeError(
-              error
-            )
+            normalizeError(error)
           );
 
         }
       )
-
 
       .login(
         username,
@@ -356,26 +271,15 @@
   }
 
 
-  /* =========================================================
-     CEK SESSION LAMA
-     ========================================================= */
-
   function checkExistingSession() {
 
     var token =
       getToken();
 
-
     if (!token) {
-
       return;
-
     }
 
-
-    /*
-     * Token harus diverifikasi server.
-     */
 
     google.script.run
 
@@ -392,11 +296,6 @@
               response.user
             );
 
-
-            /*
-             * Jangan redirect URL.
-             */
-
             redirectByRole(
               response.user
             );
@@ -410,18 +309,16 @@
         }
       )
 
-
       .withFailureHandler(
         function () {
 
           /*
-           * Jangan hapus token jika
-           * server sementara tidak dapat dihubungi.
+           * Jangan menampilkan error
+           * saat halaman Login pertama dibuka.
            */
 
         }
       )
-
 
       .verifySession(
         token
@@ -430,27 +327,11 @@
   }
 
 
-  /* =========================================================
-     ROUTING BERDASARKAN ROLE
-     =========================================================
-     
-     PENTING:
-     
-     Fungsi ini TIDAK mengubah URL.
-     
-     Admin:
-       -> showAdminDashboard()
-     
-     Pegawai:
-       -> showEmployeeDashboard()
-     
-     ========================================================= */
-
-  function redirectByRole(
-    user
-  ) {
+  function redirectByRole(user) {
 
     if (!user) {
+
+      clearSession();
 
       showError(
         'Data pengguna tidak tersedia.'
@@ -469,104 +350,27 @@
       .toLowerCase();
 
 
-    /*
-     * =====================================================
-     * ADMIN
-     * =====================================================
-     */
-
-    if (
-      role === 'admin'
-    ) {
-
-      /*
-       * Jika fungsi dashboard admin
-       * sudah tersedia di file JS lain,
-       * gunakan fungsi tersebut.
-       */
-
-      if (
-        typeof window.showAdminDashboard ===
-        'function'
-      ) {
-
-        window.showAdminDashboard();
-
-        return;
-
-      }
+    var targetPage;
 
 
-      if (
-        typeof window.tampilkanDashboardAdmin ===
-        'function'
-      ) {
+    if (role === 'admin') {
 
-        window.tampilkanDashboardAdmin();
+      targetPage =
+        'DashboardAdmin';
 
-        return;
-
-      }
-
-
-      /*
-       * Jika belum ada frontend dashboard,
-       * tampilkan pesan yang jelas.
-       */
-
-      showError(
-        'Login admin berhasil, tetapi Dashboard Admin belum terhubung.'
-      );
-
-      console.error(
-        'Fungsi showAdminDashboard() / tampilkanDashboardAdmin() belum tersedia.'
-      );
-
-      return;
-
-    }
-
-
-    /*
-     * =====================================================
-     * PEGAWAI
-     * =====================================================
-     */
-
-    if (
+    } else if (
       role === 'pegawai'
     ) {
 
-      if (
-        typeof window.showEmployeeDashboard ===
-        'function'
-      ) {
+      targetPage =
+        'DashboardPegawai';
 
-        window.showEmployeeDashboard();
+    } else {
 
-        return;
-
-      }
-
-
-      if (
-        typeof window.tampilkanDashboardPegawai ===
-        'function'
-      ) {
-
-        window.tampilkanDashboardPegawai();
-
-        return;
-
-      }
-
+      clearSession();
 
       showError(
-        'Login pegawai berhasil, tetapi Dashboard Pegawai belum terhubung.'
-      );
-
-      console.error(
-        'Fungsi showEmployeeDashboard() / tampilkanDashboardPegawai() belum tersedia.'
+        'Role pengguna tidak dikenali.'
       );
 
       return;
@@ -575,23 +379,61 @@
 
 
     /*
-     * =====================================================
-     * ROLE TIDAK VALID
-     * =====================================================
+     * URL memang akan memiliki ?page=...
+     * tetapi TIDAK menjadi mekanisme autentikasi.
+     *
+     * Dashboard tujuan tetap memanggil
+     * verifySession() dan mengecek role
+     * di server.
      */
 
-    clearSession();
+    var base =
+      window.location.href
+        .split('?')[0];
 
-    showError(
-      'Role pengguna tidak dikenali.'
-    );
+
+    window.top.location.href =
+      base +
+      '?page=' +
+      encodeURIComponent(
+        targetPage
+      );
 
   }
 
 
-  /* =========================================================
-     SESSION HELPER
-     ========================================================= */
+  function loadAppName() {
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (name) {
+
+          if (!name) {
+            return;
+          }
+
+          var element =
+            document.getElementById(
+              'appName'
+            );
+
+          if (element) {
+            element.textContent =
+              name;
+          }
+
+        }
+      )
+
+      .withFailureHandler(
+        function () {}
+      )
+
+      .getNamaAppSafe_();
+
+  }
+
 
   function getToken() {
 
@@ -603,7 +445,7 @@
         ) || ''
       );
 
-    } catch (e) {
+    } catch (error) {
 
       return '';
 
@@ -612,9 +454,7 @@
   }
 
 
-  function saveUser(
-    user
-  ) {
+  function saveUser(user) {
 
     try {
 
@@ -625,7 +465,7 @@
         )
       );
 
-    } catch (e) {}
+    } catch (error) {}
 
   }
 
@@ -638,23 +478,16 @@
         STORAGE_TOKEN
       );
 
-
       localStorage.removeItem(
         STORAGE_USER
       );
 
-    } catch (e) {}
+    } catch (error) {}
 
   }
 
 
-  /* =========================================================
-     UI - LOADING
-     ========================================================= */
-
-  function setLoading(
-    loading
-  ) {
+  function setLoading(loading) {
 
     if (loginButton) {
 
@@ -686,29 +519,15 @@
   }
 
 
-  /* =========================================================
-     UI - ERROR
-     ========================================================= */
-
-  function showError(
-    message
-  ) {
+  function showError(message) {
 
     if (!loginMessage) {
-
-      console.error(
-        message
-      );
-
       return;
-
     }
-
 
     loginMessage.textContent =
       message ||
       'Terjadi kesalahan.';
-
 
     loginMessage.className =
       'message error';
@@ -716,25 +535,15 @@
   }
 
 
-  /* =========================================================
-     UI - SUCCESS
-     ========================================================= */
-
-  function showSuccess(
-    message
-  ) {
+  function showSuccess(message) {
 
     if (!loginMessage) {
-
       return;
-
     }
-
 
     loginMessage.textContent =
       message ||
-      'Berhasil.';
-
+      'Login berhasil.';
 
     loginMessage.className =
       'message success';
@@ -742,22 +551,13 @@
   }
 
 
-  /* =========================================================
-     UI - CLEAR MESSAGE
-     ========================================================= */
-
   function clearMessage() {
 
     if (!loginMessage) {
-
       return;
-
     }
 
-
-    loginMessage.textContent =
-      '';
-
+    loginMessage.textContent = '';
 
     loginMessage.className =
       'message hidden';
@@ -765,13 +565,7 @@
   }
 
 
-  /* =========================================================
-     ERROR NORMALIZER
-     ========================================================= */
-
-  function normalizeError(
-    error
-  ) {
+  function normalizeError(error) {
 
     if (!error) {
 
@@ -783,8 +577,7 @@
 
 
     if (
-      typeof error ===
-      'string'
+      typeof error === 'string'
     ) {
 
       return error;
@@ -792,9 +585,7 @@
     }
 
 
-    if (
-      error.message
-    ) {
+    if (error.message) {
 
       return error.message;
 
@@ -808,50 +599,39 @@
   }
 
 
-  /* =========================================================
-     GLOBAL API
-     ========================================================= */
-
   window.AbsensiApp = {
 
-    getToken:
-      getToken,
+    getToken: getToken,
 
+    getUser: function () {
 
-    getUser:
-      function () {
+      try {
 
-        try {
+        var raw =
+          localStorage.getItem(
+            STORAGE_USER
+          );
 
-          var raw =
-            localStorage.getItem(
-              STORAGE_USER
-            );
+        return raw
+          ? JSON.parse(raw)
+          : null;
 
+      } catch (error) {
 
-          return raw
-            ? JSON.parse(raw)
-            : null;
+        return null;
 
-        } catch (e) {
+      }
 
-          return null;
-
-        }
-
-      },
-
+    },
 
     clearSession:
       clearSession,
 
-
-    logoutLocal:
-      clearSession
+    redirectByRole:
+      redirectByRole
 
   };
 
 
 })();
-
 </script>

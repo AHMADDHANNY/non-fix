@@ -1,7 +1,13 @@
 <script>
+
 (function () {
 
   'use strict';
+
+
+  /* =========================================================
+     STORAGE
+     ========================================================= */
 
   var STORAGE_TOKEN =
     'absensi_session_token';
@@ -9,6 +15,10 @@
   var STORAGE_USER =
     'absensi_session_user';
 
+
+  /* =========================================================
+     ELEMENT
+     ========================================================= */
 
   var form =
     document.getElementById('loginForm');
@@ -35,21 +45,27 @@
     document.getElementById('togglePassword');
 
 
+  /* =========================================================
+     INIT
+     ========================================================= */
+
   document.addEventListener(
     'DOMContentLoaded',
-    init
+    function () {
+
+      setupPasswordToggle();
+
+      setupLoginForm();
+
+      checkExistingSession();
+
+    }
   );
 
 
-  function init() {
-
-    setupPasswordToggle();
-    setupLoginForm();
-    loadAppName();
-    checkExistingSession();
-
-  }
-
+  /* =========================================================
+     PASSWORD TOGGLE
+     ========================================================= */
 
   function setupPasswordToggle() {
 
@@ -64,24 +80,35 @@
       'click',
       function () {
 
-        var visible =
-          passwordInput.type === 'text';
+        var isPassword =
+          passwordInput.type === 'password';
 
         passwordInput.type =
-          visible
-            ? 'password'
-            : 'text';
+          isPassword
+            ? 'text'
+            : 'password';
 
         togglePassword.textContent =
-          visible
-            ? '👁'
-            : '🙈';
+          isPassword
+            ? '🙈'
+            : '👁';
+
+        togglePassword.setAttribute(
+          'aria-pressed',
+          isPassword
+            ? 'true'
+            : 'false'
+        );
 
       }
     );
 
   }
 
+
+  /* =========================================================
+     LOGIN FORM
+     ========================================================= */
 
   function setupLoginForm() {
 
@@ -103,13 +130,25 @@
   }
 
 
+  /* =========================================================
+     LOGIN
+     ========================================================= */
+
   function login() {
+
+    if (
+      !usernameInput ||
+      !passwordInput
+    ) {
+      return;
+    }
 
     var username =
       usernameInput.value.trim();
 
     var password =
       passwordInput.value;
+
 
     clearMessage();
 
@@ -160,7 +199,7 @@
               response &&
               response.message
                 ? response.message
-                : 'Username atau password salah.'
+                : 'Login gagal.'
             );
 
             passwordInput.value = '';
@@ -183,8 +222,19 @@
           }
 
 
+          if (!response.user) {
+
+            showError(
+              'Data pengguna tidak diterima dari server.'
+            );
+
+            return;
+
+          }
+
+
           var user =
-            response.user || {};
+            response.user;
 
 
           var role =
@@ -201,7 +251,7 @@
           ) {
 
             showError(
-              'Role akun tidak valid.'
+              'Role pengguna tidak dikenali.'
             );
 
             return;
@@ -209,11 +259,15 @@
           }
 
 
+          /* =================================================
+             SIMPAN SESSION
+             ================================================= */
+
           try {
 
             localStorage.setItem(
               STORAGE_TOKEN,
-              response.token
+              String(response.token)
             );
 
             localStorage.setItem(
@@ -221,10 +275,10 @@
               JSON.stringify(user)
             );
 
-          } catch (error) {
+          } catch (storageError) {
 
             showError(
-              'Session tidak dapat disimpan di browser.'
+              'Browser tidak mengizinkan penyimpanan session.'
             );
 
             return;
@@ -237,12 +291,14 @@
           );
 
 
+          /*
+           * Beri sedikit waktu agar pesan berhasil
+           * sempat terlihat.
+           */
           setTimeout(
             function () {
 
-              redirectByRole(
-                user
-              );
+              redirectByRole(user);
 
             },
             300
@@ -250,6 +306,7 @@
 
         }
       )
+
 
       .withFailureHandler(
         function (error) {
@@ -263,6 +320,7 @@
         }
       )
 
+
       .login(
         username,
         password
@@ -271,10 +329,15 @@
   }
 
 
+  /* =========================================================
+     SESSION LAMA
+     ========================================================= */
+
   function checkExistingSession() {
 
     var token =
       getToken();
+
 
     if (!token) {
       return;
@@ -292,33 +355,35 @@
             response.user
           ) {
 
-            saveUser(
-              response.user
-            );
+            var user =
+              response.user;
 
-            redirectByRole(
-              response.user
-            );
+            saveUser(user);
 
-          } else {
+            redirectByRole(user);
 
-            clearSession();
+            return;
 
           }
 
+
+          clearSession();
+
         }
       )
+
 
       .withFailureHandler(
         function () {
 
           /*
-           * Jangan menampilkan error
-           * saat halaman Login pertama dibuka.
+           * Jangan langsung menghapus session
+           * jika server sementara gagal.
            */
 
         }
       )
+
 
       .verifySession(
         token
@@ -327,74 +392,53 @@
   }
 
 
- function redirectByRole(user) {
+  /* =========================================================
+     REDIRECT BERDASARKAN ROLE
+     ========================================================= */
 
-  if (!user) {
-    showError('Data pengguna tidak tersedia.');
-    return;
-  }
+  function redirectByRole(user) {
 
-  var role = String(
-    user.role || ''
-  ).trim().toLowerCase();
+    if (!user) {
 
-  var targetPage = '';
+      clearSession();
 
-  if (role === 'admin') {
+      showError(
+        'Data pengguna tidak tersedia.'
+      );
 
-    targetPage = 'DashboardAdmin';
+      return;
 
-  } else if (role === 'pegawai') {
-
-    targetPage = 'DashboardPegawai';
-
-  } else {
-
-    clearSession();
-
-    showError(
-      'Role pengguna tidak dikenali.'
-    );
-
-    return;
-  }
-
-  var baseUrl =
-    window.location.href.split('?')[0];
-
-  window.top.location.href =
-    baseUrl +
-    '?page=' +
-    encodeURIComponent(targetPage);
-}
+    }
 
 
-    /*
-     * Ambil URL aplikasi saat ini.
-     *
-     * Contoh:
-     *
-     * https://script.googleusercontent.com/.../userCodeAppPanel
-     *
-     * Kita hanya menambahkan ?page=...
-     *
-     * Token TIDAK dimasukkan ke URL.
-     */
-
-    var baseUrl =
-      window.location.href
-        .split('?')[0];
+    var role =
+      String(
+        user.role || ''
+      )
+      .trim()
+      .toLowerCase();
 
 
-    /*
-     * ADMIN
-     */
+    var targetPage = '';
+
 
     if (role === 'admin') {
 
-      window.top.location.href =
-        baseUrl +
-        '?page=DashboardAdmin';
+      targetPage =
+        'DashboardAdmin';
+
+    } else if (role === 'pegawai') {
+
+      targetPage =
+        'DashboardPegawai';
+
+    } else {
+
+      clearSession();
+
+      showError(
+        'Role pengguna tidak dikenali.'
+      );
 
       return;
 
@@ -402,100 +446,47 @@
 
 
     /*
-     * PEGAWAI
-     */
-
-    if (role === 'pegawai') {
-
-      window.top.location.href =
-        baseUrl +
-        '?page=DashboardPegawai';
-
-      return;
-
-    }
-
-
-    /*
-     * ROLE TIDAK DIKENALI
-     */
-
-    clearSession();
-
-    showError(
-      'Role pengguna tidak dikenali.'
-    );
-
-  }
-
-
-  /*
-   * Pastikan fungsi bisa dipanggil
-   * oleh kode login.
-   */
-
-  window.redirectByRole =
-    redirectByRole;
-
-})();
-
-
-    /*
-     * URL memang akan memiliki ?page=...
-     * tetapi TIDAK menjadi mekanisme autentikasi.
+     * =====================================================
+     * ROUTING
+     * =====================================================
      *
-     * Dashboard tujuan tetap memanggil
-     * verifySession() dan mengecek role
-     * di server.
+     * Login -> Dashboard berdasarkan role.
+     *
+     * URL ?page=... hanya menentukan file HTML.
+     *
+     * Keamanan TETAP dilakukan oleh:
+     *
+     * DashboardAdmin -> verifySession + role admin
+     * DashboardPegawai -> verifySession + role pegawai
+     *
+     * Jadi mengetik URL dashboard secara manual
+     * tidak otomatis memberikan akses.
      */
 
-    var base =
-      window.location.href
-        .split('?')[0];
+    var currentUrl =
+      window.location.href;
+
+    var baseUrl =
+      currentUrl.split('?')[0];
 
 
-    window.top.location.href =
-      base +
+    var targetUrl =
+      baseUrl +
       '?page=' +
       encodeURIComponent(
         targetPage
       );
 
-  }
 
-
-  function loadAppName() {
-
-    google.script.run
-
-      .withSuccessHandler(
-        function (name) {
-
-          if (!name) {
-            return;
-          }
-
-          var element =
-            document.getElementById(
-              'appName'
-            );
-
-          if (element) {
-            element.textContent =
-              name;
-          }
-
-        }
-      )
-
-      .withFailureHandler(
-        function () {}
-      )
-
-      .getNamaAppSafe_();
+    window.top.location.href =
+      targetUrl;
 
   }
 
+
+  /* =========================================================
+     STORAGE
+     ========================================================= */
 
   function getToken() {
 
@@ -507,9 +498,33 @@
         ) || ''
       );
 
-    } catch (error) {
+    } catch (e) {
 
       return '';
+
+    }
+
+  }
+
+
+  function getUser() {
+
+    try {
+
+      var raw =
+        localStorage.getItem(
+          STORAGE_USER
+        );
+
+      if (!raw) {
+        return null;
+      }
+
+      return JSON.parse(raw);
+
+    } catch (e) {
+
+      return null;
 
     }
 
@@ -527,7 +542,7 @@
         )
       );
 
-    } catch (error) {}
+    } catch (e) {}
 
   }
 
@@ -544,10 +559,14 @@
         STORAGE_USER
       );
 
-    } catch (error) {}
+    } catch (e) {}
 
   }
 
+
+  /* =========================================================
+     UI LOADING
+     ========================================================= */
 
   function setLoading(loading) {
 
@@ -581,15 +600,27 @@
   }
 
 
+  /* =========================================================
+     UI MESSAGE
+     ========================================================= */
+
   function showError(message) {
 
     if (!loginMessage) {
+
+      console.error(
+        message
+      );
+
       return;
+
     }
+
 
     loginMessage.textContent =
       message ||
       'Terjadi kesalahan.';
+
 
     loginMessage.className =
       'message error';
@@ -603,9 +634,11 @@
       return;
     }
 
+
     loginMessage.textContent =
       message ||
-      'Login berhasil.';
+      'Berhasil.';
+
 
     loginMessage.className =
       'message success';
@@ -619,13 +652,20 @@
       return;
     }
 
-    loginMessage.textContent = '';
+
+    loginMessage.textContent =
+      '';
+
 
     loginMessage.className =
       'message hidden';
 
   }
 
+
+  /* =========================================================
+     ERROR
+     ========================================================= */
 
   function normalizeError(error) {
 
@@ -647,7 +687,9 @@
     }
 
 
-    if (error.message) {
+    if (
+      error.message
+    ) {
 
       return error.message;
 
@@ -661,32 +703,22 @@
   }
 
 
+  /* =========================================================
+     GLOBAL API
+     ========================================================= */
+
   window.AbsensiApp = {
 
-    getToken: getToken,
+    getToken:
+      getToken,
 
-    getUser: function () {
-
-      try {
-
-        var raw =
-          localStorage.getItem(
-            STORAGE_USER
-          );
-
-        return raw
-          ? JSON.parse(raw)
-          : null;
-
-      } catch (error) {
-
-        return null;
-
-      }
-
-    },
+    getUser:
+      getUser,
 
     clearSession:
+      clearSession,
+
+    logoutLocal:
       clearSession,
 
     redirectByRole:
@@ -696,4 +728,5 @@
 
 
 })();
+
 </script>

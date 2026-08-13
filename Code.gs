@@ -1,7 +1,7 @@
 /**
  * ============================================================
- * CODE.GS
- * ROUTING UTAMA + HELPER DATABASE
+ * CODE.GS - FINAL
+ * ROUTING + DATABASE HELPER + APP HELPER
  * ============================================================
  */
 
@@ -13,12 +13,15 @@ var SHEET_SESSIONS = 'Sessions';
 
 var SESSION_DURASI_JAM = 12;
 
+var FOLDER_REKAP_NAME = 'Absensi_Rekap';
+var FOLDER_IZIN_NAME = 'Absensi_Lampiran_Izin';
+var FOLDER_ABSENSI_NAME = 'Absensi_Foto';
 
-/**
- * ============================================================
+
+/* ============================================================
  * WEB APP
- * ============================================================
- */
+ * ============================================================ */
+
 function doGet(e) {
 
   var page = 'Login';
@@ -32,19 +35,14 @@ function doGet(e) {
       e.parameter &&
       e.parameter.page
     ) {
-
       requestedPage =
-        String(
-          e.parameter.page
-        )
-        .trim()
-        .replace(
-          /[^a-zA-Z0-9_-]/g,
-          ''
-        );
-
+        String(e.parameter.page)
+          .trim()
+          .replace(
+            /[^a-zA-Z0-9_-]/g,
+            ''
+          );
     }
-
 
     var allowedPages = [
       'Login',
@@ -52,18 +50,13 @@ function doGet(e) {
       'DashboardPegawai'
     ];
 
-
     if (
       allowedPages.indexOf(
         requestedPage
       ) !== -1
     ) {
-
-      page =
-        requestedPage;
-
+      page = requestedPage;
     }
-
 
     return renderPage_(page);
 
@@ -79,44 +72,17 @@ function doGet(e) {
 }
 
 
-/**
- * ============================================================
- * RENDER PAGE
- * ============================================================
- */
+/* ============================================================
+ * RENDER
+ * ============================================================ */
+
 function renderPage_(page) {
 
-  /*
-   * DashboardAdmin adalah FRAGMENT.
-   *
-   * Jadi jangan memakai:
-   *
-   * createTemplateFromFile('DashboardAdmin')
-   *
-   * secara langsung.
-   *
-   * Kita bungkus dengan HTML lengkap,
-   * CSS, AdminCSS dan AdminJS.
-   */
-  if (
-    page === 'DashboardAdmin'
-  ) {
-
-    return renderDashboardAdmin_();
-
-  }
-
-
-  /*
-   * Login dan DashboardPegawai
-   * adalah halaman HTML lengkap.
-   */
   var template =
     HtmlService
       .createTemplateFromFile(
         page
       );
-
 
   return template
     .evaluate()
@@ -134,138 +100,34 @@ function renderPage_(page) {
 }
 
 
-/**
- * ============================================================
- * RENDER DASHBOARD ADMIN
- * ============================================================
- */
-function renderDashboardAdmin_() {
+/* ============================================================
+ * INCLUDE
+ * ============================================================ */
 
-  var html =
-    '<!DOCTYPE html>' +
-
-    '<html lang="id">' +
-
-    '<head>' +
-
-    '<base target="_top">' +
-
-    '<meta charset="UTF-8">' +
-
-    '<meta name="viewport" ' +
-    'content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">' +
-
-    '<title>' +
-    escapeHtml_(
-      getNamaAppSafe_()
-    ) +
-    '</title>' +
-
-    include('CSS') +
-
-    include('AdminCSS') +
-
-    '</head>' +
-
-    '<body>' +
-
-    include(
-      'DashboardAdmin'
-    ) +
-
-    include(
-      'AdminJS'
-    ) +
-
-    /*
-     * AdminJS mendefinisikan:
-     *
-     * window.AdminApp
-     *
-     * tetapi tidak otomatis menjalankan init().
-     */
-    '<script>' +
-
-    'document.addEventListener("DOMContentLoaded", function () {' +
-
-    '  if (' +
-    '    window.AdminApp && ' +
-    '    typeof window.AdminApp.init === "function"' +
-    '  ) {' +
-
-    '    window.AdminApp.init();' +
-
-    '  }' +
-
-    '});' +
-
-    '</script>' +
-
-    '</body>' +
-
-    '</html>';
-
-
-  return HtmlService
-    .createHtmlOutput(
-      html
-    )
-    .setTitle(
-      getNamaAppSafe_()
-    )
-    .addMetaTag(
-      'viewport',
-      'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover'
-    )
-    .setXFrameOptionsMode(
-      HtmlService.XFrameOptionsMode.ALLOWALL
-    );
-
-}
-
-
-/**
- * ============================================================
- * INCLUDE HTML
- * ============================================================
- */
-function include(
-  filename
-) {
+function include(filename) {
 
   if (!filename) {
-
     throw new Error(
       'include(): nama file kosong.'
     );
-
   }
 
-
   var name =
-    String(
-      filename
-    )
-    .trim()
-    .replace(
-      /\.html$/i,
-      ''
-    );
-
+    String(filename)
+      .trim()
+      .replace(
+        /\.html$/i,
+        ''
+      );
 
   if (
-    !/^[a-zA-Z0-9_-]+$/.test(
-      name
-    )
+    !/^[a-zA-Z0-9_-]+$/.test(name)
   ) {
-
     throw new Error(
       'Nama file include tidak valid: ' +
       name
     );
-
   }
-
 
   try {
 
@@ -281,7 +143,6 @@ function include(
       'File HTML "' +
       name +
       '.html" tidak ditemukan. ' +
-      'Pastikan file tersebut ada di project Apps Script. ' +
       'Error asli: ' +
       error.message
     );
@@ -291,17 +152,93 @@ function include(
 }
 
 
-/**
- * ============================================================
- * DATABASE
- * ============================================================
+/* ============================================================
+ * NAMA APLIKASI
+ *
+ * PRIVATE:
+ * getNamaAppSafe_()
+ *
+ * PUBLIC:
+ * getNamaApp()
+ *
+ * Browser WAJIB menggunakan getNamaApp().
+ * ============================================================ */
+
+function getNamaAppSafe_() {
+
+  var defaultName =
+    'Aplikasi Absensi';
+
+  try {
+
+    var ss =
+      SpreadsheetApp
+        .getActiveSpreadsheet();
+
+    if (!ss) {
+      return defaultName;
+    }
+
+    var sheet =
+      ss.getSheetByName(
+        SHEET_PENGATURAN
+      );
+
+    if (!sheet) {
+      return defaultName;
+    }
+
+    if (
+      sheet.getLastRow() < 2
+    ) {
+      return defaultName;
+    }
+
+    var value =
+      sheet
+        .getRange(
+          2,
+          1
+        )
+        .getDisplayValue()
+        .trim();
+
+    return value ||
+      defaultName;
+
+  } catch (error) {
+
+    return defaultName;
+
+  }
+
+}
+
+
+/*
+ * PUBLIC API.
+ *
+ * Bisa dipanggil:
+ *
+ * google.script.run.getNamaApp()
+ *
  */
+function getNamaApp() {
+
+  return getNamaAppSafe_();
+
+}
+
+
+/* ============================================================
+ * DATABASE
+ * ============================================================ */
+
 function getDatabase_() {
 
   var ss =
     SpreadsheetApp
       .getActiveSpreadsheet();
-
 
   if (!ss) {
 
@@ -311,27 +248,21 @@ function getDatabase_() {
 
   }
 
-
   return ss;
 
 }
 
 
-/**
- * ============================================================
+/* ============================================================
  * GET SHEET
- * ============================================================
- */
-function getSheet(
-  sheetName
-) {
+ * ============================================================ */
+
+function getSheet(sheetName) {
 
   var name =
     String(
       sheetName || ''
-    )
-    .trim();
-
+    ).trim();
 
   if (!name) {
 
@@ -341,16 +272,13 @@ function getSheet(
 
   }
 
-
   var ss =
     getDatabase_();
-
 
   var sheet =
     ss.getSheetByName(
       name
     );
-
 
   if (!sheet) {
 
@@ -362,46 +290,33 @@ function getSheet(
 
   }
 
-
   return sheet;
 
 }
 
 
-/**
- * ============================================================
- * GET SHEET SAFE
- * ============================================================
- */
-function getSheetSafe_(
-  sheetName
-) {
+/* ============================================================
+ * SAFE SHEET
+ * ============================================================ */
+
+function getSheetSafe_(sheetName) {
 
   var name =
     String(
       sheetName || ''
-    )
-    .trim();
-
+    ).trim();
 
   if (!name) {
-
     return null;
-
   }
-
 
   var ss =
     SpreadsheetApp
       .getActiveSpreadsheet();
 
-
   if (!ss) {
-
     return null;
-
   }
-
 
   return ss.getSheetByName(
     name
@@ -410,209 +325,505 @@ function getSheetSafe_(
 }
 
 
-/**
- * ============================================================
- * NAMA APLIKASI - PRIVATE
- * ============================================================
- */
-function getNamaAppSafe_() {
+/* ============================================================
+ * JSON RESPONSE
+ *
+ * Ditaruh di Code.gs supaya SEMUA modul backend
+ * mendapat helper yang sama.
+ * ============================================================ */
 
-  var defaultName =
-    'Aplikasi Absensi';
+function jsonResponse(
+  success,
+  message,
+  data
+) {
+
+  if (
+    arguments.length === 1 &&
+    success &&
+    typeof success === 'object' &&
+    !Array.isArray(success)
+  ) {
+
+    return success;
+
+  }
+
+  var result = {
+    success: Boolean(success)
+  };
+
+  if (
+    message !== undefined &&
+    message !== null
+  ) {
+
+    result.message =
+      String(message);
+
+  }
+
+  if (
+    data !== undefined &&
+    data !== null
+  ) {
+
+    result.data =
+      data;
+
+  }
+
+  return result;
+
+}
 
 
-  try {
+/* ============================================================
+ * HASH PASSWORD
+ * ============================================================ */
 
-    var ss =
-      SpreadsheetApp
-        .getActiveSpreadsheet();
+function hashPassword(
+  password,
+  salt
+) {
+
+  password =
+    String(
+      password || ''
+    );
+
+  salt =
+    String(
+      salt || ''
+    );
+
+  var digest =
+    Utilities.computeDigest(
+      Utilities.DigestAlgorithm.SHA_256,
+      password + salt,
+      Utilities.Charset.UTF_8
+    );
+
+  return digest
+    .map(
+      function(byte) {
+
+        var value =
+          byte < 0
+            ? byte + 256
+            : byte;
+
+        return (
+          '0' +
+          value.toString(16)
+        ).slice(-2);
+
+      }
+    )
+    .join('');
+
+}
 
 
-    if (!ss) {
+/* ============================================================
+ * VERIFY PASSWORD
+ * ============================================================ */
 
-      return defaultName;
+function verifyPassword_(
+  password,
+  passwordHash,
+  salt
+) {
 
-    }
+  password =
+    String(
+      password || ''
+    );
+
+  passwordHash =
+    String(
+      passwordHash || ''
+    );
+
+  salt =
+    String(
+      salt || ''
+    );
+
+  if (
+    !passwordHash ||
+    !salt
+  ) {
+    return false;
+  }
+
+  return (
+    hashPassword(
+      password,
+      salt
+    ) === passwordHash
+  );
+
+}
 
 
-    var sheet =
-      ss.getSheetByName(
-        SHEET_PENGATURAN
-      );
+/* ============================================================
+ * SEQUENTIAL ID
+ *
+ * Contoh:
+ * USR-000001
+ * ABS-000001
+ * IZN-000001
+ * ============================================================ */
 
+function generateSequentialId(
+  prefix,
+  sheetName,
+  idColumnIndex
+) {
 
-    if (!sheet) {
+  prefix =
+    String(
+      prefix || 'ID'
+    )
+    .trim()
+    .toUpperCase();
 
-      return defaultName;
+  var sheet =
+    getSheet(
+      sheetName
+    );
 
-    }
+  var lastRow =
+    sheet.getLastRow();
 
+  var maxNumber = 0;
 
-    if (
-      sheet.getLastRow() <
-      2
-    ) {
+  if (
+    lastRow >= 2
+  ) {
 
-      return defaultName;
-
-    }
-
-
-    var value =
+    var values =
       sheet
         .getRange(
           2,
+          idColumnIndex + 1,
+          lastRow - 1,
           1
         )
-        .getDisplayValue()
-        .trim();
+        .getDisplayValues();
 
-
-    return (
-      value ||
-      defaultName
-    );
-
-  } catch (error) {
-
-    return defaultName;
-
-  }
-
-}
-
-
-/**
- * ============================================================
- * NAMA APLIKASI - PUBLIC
- *
- * JS.html tidak memanggil fungsi yang berakhiran "_".
- * ============================================================
- */
-function getNamaApp() {
-
-  return getNamaAppSafe_();
-
-}
-
-
-/**
- * ============================================================
- * DASHBOARD PEGAWAI
- * ============================================================
- *
- * Endpoint ini dipakai oleh:
- *
- * DashboardPegawai.html
- *
- * Endpoint sebelumnya belum tersedia.
- */
-function getDashboardPegawai(
-  token
-) {
-
-  try {
-
-    var session =
-      verifySession(
-        token
-      );
-
-
-    if (
-      !session ||
-      session.valid !== true
+    for (
+      var i = 0;
+      i < values.length;
+      i++
     ) {
 
-      throw new Error(
-        session &&
-        session.message
-          ? session.message
-          : 'Sesi tidak valid.'
-      );
+      var id =
+        String(
+          values[i][0] || ''
+        ).trim();
 
-    }
-
-
-    var user =
-      session.user ||
-      {};
-
-
-    var role =
-      String(
-        user.role || ''
-      )
-      .trim()
-      .toLowerCase();
-
-
-    if (
-      role !== 'pegawai'
-    ) {
-
-      throw new Error(
-        'Akses hanya untuk pegawai.'
-      );
-
-    }
-
-
-    /*
-     * Gunakan endpoint absensi
-     * yang sudah tersedia.
-     */
-    var status =
-      getStatusAbsensiHariIni(
-        token
-      );
-
-
-    if (
-      status &&
-      status.success === true
-    ) {
-
-      return status;
-
-    }
-
-
-    return {
-      success: true,
-
-      data: {
-        tanggal: '',
-        status: '',
-        jam_masuk: '',
-        jam_pulang: ''
+      if (!id) {
+        continue;
       }
 
-    };
+      var match =
+        id.match(
+          /(\d+)$/
+        );
 
-  } catch (error) {
+      if (match) {
 
-    return {
-      success: false,
+        var number =
+          parseInt(
+            match[1],
+            10
+          );
 
-      message:
-        error &&
-        error.message
-          ? error.message
-          : String(error)
+        if (
+          number > maxNumber
+        ) {
+          maxNumber = number;
+        }
 
-    };
+      }
+
+    }
 
   }
+
+  return (
+    prefix +
+    '-' +
+    String(
+      maxNumber + 1
+    ).padStart(
+      6,
+      '0'
+    )
+  );
 
 }
 
 
-/**
- * ============================================================
+/* ============================================================
+ * PENGATURAN CACHE
+ * ============================================================ */
+
+function getPengaturanCache() {
+
+  var cache =
+    CacheService
+      .getScriptCache();
+
+  var cached =
+    cache.get(
+      'ABSENSI_PENGATURAN'
+    );
+
+  if (cached) {
+
+    try {
+
+      return JSON.parse(
+        cached
+      );
+
+    } catch (ignore) {}
+
+  }
+
+  var sheet =
+    getSheetSafe_(
+      SHEET_PENGATURAN
+    );
+
+  var result = {
+
+    nama_app:
+      'Aplikasi Absensi',
+
+    logo_url:
+      '',
+
+    lat_kantor:
+      0,
+
+    long_kantor:
+      0,
+
+    radius_meter:
+      100,
+
+    jam_masuk:
+      '08:00',
+
+    jam_pulang:
+      '17:00',
+
+    toleransi_menit:
+      15
+
+  };
+
+  if (
+    !sheet ||
+    sheet.getLastRow() < 2
+  ) {
+
+    cache.put(
+      'ABSENSI_PENGATURAN',
+      JSON.stringify(result),
+      300
+    );
+
+    return result;
+
+  }
+
+  var row =
+    sheet
+      .getRange(
+        2,
+        1,
+        1,
+        Math.max(
+          8,
+          sheet.getLastColumn()
+        )
+      )
+      .getValues()[0];
+
+  result.nama_app =
+    String(
+      row[0] || result.nama_app
+    );
+
+  result.logo_url =
+    String(
+      row[1] || ''
+    );
+
+  result.lat_kantor =
+    Number(
+      row[2] || 0
+    );
+
+  result.long_kantor =
+    Number(
+      row[3] || 0
+    );
+
+  result.radius_meter =
+    Number(
+      row[4] || 100
+    );
+
+  result.jam_masuk =
+    String(
+      row[5] || '08:00'
+    );
+
+  result.jam_pulang =
+    String(
+      row[6] || '17:00'
+    );
+
+  result.toleransi_menit =
+    Number(
+      row[7] || 15
+    );
+
+  cache.put(
+    'ABSENSI_PENGATURAN',
+    JSON.stringify(result),
+    300
+  );
+
+  return result;
+
+}
+
+
+/* ============================================================
+ * BERSIHKAN CACHE PENGATURAN
+ * ============================================================ */
+
+function bersihkanCachePengaturan() {
+
+  CacheService
+    .getScriptCache()
+    .remove(
+      'ABSENSI_PENGATURAN'
+    );
+
+  return true;
+
+}
+
+
+/* ============================================================
+ * GOOGLE DRIVE FOLDER
+ * ============================================================ */
+
+function getOrCreateFolder_(
+  folderName
+) {
+
+  folderName =
+    String(
+      folderName || ''
+    ).trim();
+
+  if (!folderName) {
+
+    throw new Error(
+      'Nama folder tidak boleh kosong.'
+    );
+
+  }
+
+  var folders =
+    DriveApp.getFoldersByName(
+      folderName
+    );
+
+  if (
+    folders.hasNext()
+  ) {
+
+    return folders.next();
+
+  }
+
+  return DriveApp.createFolder(
+    folderName
+  );
+
+}
+
+
+/* ============================================================
+ * ERROR PAGE
+ * ============================================================ */
+
+function renderErrorPage_(
+  page,
+  error
+) {
+
+  var message =
+    error &&
+    error.message
+      ? error.message
+      : String(error);
+
+  return HtmlService
+    .createHtmlOutput(
+      '<!DOCTYPE html>' +
+      '<html lang="id">' +
+      '<head>' +
+      '<meta charset="UTF-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<title>Gagal Memuat Aplikasi</title>' +
+      '<style>' +
+      'body{margin:0;padding:30px;font-family:Arial;background:#f5f7fb}' +
+      '.box{max-width:720px;margin:40px auto;background:#fff;padding:30px;border-radius:16px}' +
+      'h2{color:#d32f2f}' +
+      'pre{background:#f1f1f1;padding:15px;white-space:pre-wrap;word-break:break-word}' +
+      '</style>' +
+      '</head>' +
+      '<body>' +
+      '<div class="box">' +
+      '<h2>Gagal Memuat Aplikasi</h2>' +
+      '<p>Halaman:</p>' +
+      '<pre>' +
+      escapeHtml_(
+        page
+      ) +
+      '</pre>' +
+      '<p>Error:</p>' +
+      '<pre>' +
+      escapeHtml_(
+        message
+      ) +
+      '</pre>' +
+      '</div>' +
+      '</body>' +
+      '</html>'
+    )
+    .setTitle(
+      'Gagal Memuat Aplikasi'
+    );
+
+}
+
+
+/* ============================================================
  * ESCAPE HTML
- * ============================================================
- */
+ * ============================================================ */
+
 function escapeHtml_(
   value
 ) {
@@ -644,473 +855,133 @@ function escapeHtml_(
 }
 
 
-/**
- * ============================================================
- * TEST FILE LOGIN
- * ============================================================
- */
-function testFileLogin() {
+/* ============================================================
+ * CREATE SESSION COMPATIBILITY
+ * ============================================================ */
 
-  try {
+function createSession_(
+  idUser
+) {
 
-    HtmlService
-      .createTemplateFromFile(
-        'Login'
-      );
+  if (
+    typeof buatSessionToken_ ===
+    'function'
+  ) {
 
-
-    return {
-      success: true,
-      message:
-        'Login.html berhasil ditemukan.'
-    };
-
-
-  } catch (error) {
-
-    return {
-      success: false,
-      message:
-        error.message
-    };
-
-  }
-
-}
-
-
-/**
- * ============================================================
- * TEST FILE DASHBOARD ADMIN
- * ============================================================
- */
-function testFileDashboardAdmin() {
-
-  try {
-
-    HtmlService
-      .createHtmlOutputFromFile(
-        'DashboardAdmin'
-      );
-
-
-    return {
-      success: true,
-      message:
-        'DashboardAdmin.html berhasil ditemukan.'
-    };
-
-
-  } catch (error) {
-
-    return {
-      success: false,
-      message:
-        error.message
-    };
-
-  }
-
-}
-
-
-/**
- * ============================================================
- * TEST FILE DASHBOARD PEGAWAI
- * ============================================================
- */
-function testFileDashboardPegawai() {
-
-  try {
-
-    HtmlService
-      .createTemplateFromFile(
-        'DashboardPegawai'
-      );
-
-
-    return {
-      success: true,
-      message:
-        'DashboardPegawai.html berhasil ditemukan.'
-    };
-
-
-  } catch (error) {
-
-    return {
-      success: false,
-      message:
-        error.message
-    };
-
-  }
-
-}
-
-/**
- * ============================================================
- * COMPATIBILITY FUNCTIONS
- * ============================================================
- */
-
-/**
- * Mengembalikan URL Web App aktif.
- *
- * Dipakai oleh Login.html / JS.html
- * untuk redirect setelah login.
- */
-function getWebAppUrl() {
-
-  try {
-
-    var url =
-      ScriptApp
-        .getService()
-        .getUrl();
-
-    if (url) {
-      return url;
-    }
-
-  } catch (error) {
-    // lanjut ke fallback
-  }
-
-  /*
-   * Fallback jika ScriptApp.getService().getUrl()
-   * tidak tersedia saat fungsi dipanggil.
-   */
-  return '';
-}
-
-
-/**
- * Nama aplikasi untuk frontend.
- *
- * JS.html memanggil getNamaApp().
- */
-function getNamaApp() {
-
-  return getNamaAppSafe_();
-
-}
-
-/**
- * ============================================================
- * PUBLIC APP NAME
- * ============================================================
- *
- * getNamaAppSafe_() tidak boleh dipanggil langsung
- * dari google.script.run karena nama berakhiran "_"
- * dianggap private oleh Apps Script.
- */
-function getNamaApp() {
-  return getNamaAppSafe_();
-}
-
-
-/**
- * ============================================================
- * PENGATURAN CACHE
- * ============================================================
- */
-
-var CACHE_PENGATURAN_KEY =
-  'ABSENSI_PENGATURAN_CACHE_V1';
-
-
-function getPengaturanCache() {
-
-  var cache =
-    CacheService.getScriptCache();
-
-  var cached =
-    cache.get(
-      CACHE_PENGATURAN_KEY
+    return buatSessionToken_(
+      idUser
     );
 
-  if (cached) {
-
-    try {
-
-      return JSON.parse(
-        cached
-      );
-
-    } catch (e) {}
-
   }
 
+  throw new Error(
+    'Fungsi session belum tersedia.'
+  );
 
-  var hasil = {
-    nama_app: 'Aplikasi Absensi',
-    logo_url: '',
-    lat_kantor: '',
-    long_kantor: '',
-    radius_meter: 100,
-    jam_masuk: '08:00',
-    jam_pulang: '17:00',
-    toleransi_menit: 15
+}
+
+
+/* ============================================================
+ * TEST SYSTEM
+ * ============================================================ */
+
+function testSystem() {
+
+  var result = {
+    success: true,
+    checks: {}
   };
-
 
   try {
 
-    var sheet =
-      getSheetSafe_(
-        SHEET_PENGATURAN
-      );
+    getSheet(
+      SHEET_USERS
+    );
 
-
-    if (
-      sheet &&
-      sheet.getLastRow() >= 2
-    ) {
-
-      var row =
-        sheet
-          .getRange(
-            2,
-            1,
-            1,
-            8
-          )
-          .getValues()[0];
-
-
-      hasil = {
-
-        nama_app:
-          String(
-            row[0] ||
-            'Aplikasi Absensi'
-          ),
-
-        logo_url:
-          String(
-            row[1] ||
-            ''
-          ),
-
-        lat_kantor:
-          row[2] === '' ||
-          row[2] == null
-            ? ''
-            : Number(row[2]),
-
-        long_kantor:
-          row[3] === '' ||
-          row[3] == null
-            ? ''
-            : Number(row[3]),
-
-        radius_meter:
-          row[4] === '' ||
-          row[4] == null
-            ? 100
-            : Number(row[4]),
-
-        jam_masuk:
-          String(
-            row[5] ||
-            '08:00'
-          ),
-
-        jam_pulang:
-          String(
-            row[6] ||
-            '17:00'
-          ),
-
-        toleransi_menit:
-          row[7] === '' ||
-          row[7] == null
-            ? 15
-            : Number(row[7])
-
-      };
-
-    }
+    result.checks.Users =
+      true;
 
   } catch (e) {
 
-    /*
-     * Biarkan validasi absensi yang menangani
-     * konfigurasi yang belum lengkap.
-     */
+    result.success = false;
+
+    result.checks.Users =
+      e.message;
 
   }
 
+  try {
 
-  cache.put(
-    CACHE_PENGATURAN_KEY,
-    JSON.stringify(hasil),
-    21600
-  );
-
-
-  return hasil;
-
-}
-
-
-/**
- * ============================================================
- * BERSIHKAN CACHE PENGATURAN
- * ============================================================
- */
-
-function bersihkanCachePengaturan() {
-
-  CacheService
-    .getScriptCache()
-    .remove(
-      CACHE_PENGATURAN_KEY
-    );
-
-}
-
-
-/**
- * ============================================================
- * GENERATE SEQUENTIAL ID
- * ============================================================
- *
- * Contoh:
- *
- * USR-000001
- * USR-000002
- *
- * ABS-000001
- * IZN-000001
- */
-
-function generateSequentialId(
-  prefix,
-  sheetName,
-  idColumnIndex
-) {
-
-  prefix =
-    String(
-      prefix || ''
-    )
-    .trim()
-    .toUpperCase();
-
-
-  if (!prefix) {
-
-    throw new Error(
-      'Prefix ID tidak boleh kosong.'
-    );
-
-  }
-
-
-  var sheet =
     getSheet(
-      sheetName
+      SHEET_ABSENSI
     );
 
+    result.checks.Absensi =
+      true;
 
-  var lastRow =
-    sheet.getLastRow();
+  } catch (e) {
 
+    result.success = false;
 
-  var nextNumber =
-    1;
-
-
-  if (lastRow >= 2) {
-
-    var values =
-      sheet
-        .getRange(
-          2,
-          Number(idColumnIndex) + 1,
-          lastRow - 1,
-          1
-        )
-        .getDisplayValues();
-
-
-    var regex =
-      new RegExp(
-        '^' +
-        prefix.replace(
-          /[.*+?^${}()|[\]\\]/g,
-          '\\$&'
-        ) +
-        '-(\\d+)$',
-        'i'
-      );
-
-
-    var maxNumber =
-      0;
-
-
-    for (
-      var i = 0;
-      i < values.length;
-      i++
-    ) {
-
-      var value =
-        String(
-          values[i][0] ||
-          ''
-        )
-        .trim();
-
-
-      var match =
-        value.match(
-          regex
-        );
-
-
-      if (match) {
-
-        var number =
-          parseInt(
-            match[1],
-            10
-          );
-
-
-        if (
-          !isNaN(number) &&
-          number > maxNumber
-        ) {
-
-          maxNumber =
-            number;
-
-        }
-
-      }
-
-    }
-
-
-    nextNumber =
-      maxNumber + 1;
+    result.checks.Absensi =
+      e.message;
 
   }
 
+  try {
 
-  return (
-    prefix +
-    '-' +
-    String(
-      nextNumber
-    ).padStart(
-      6,
-      '0'
-    )
-  );
+    getSheet(
+      SHEET_IZIN
+    );
+
+    result.checks.Izin =
+      true;
+
+  } catch (e) {
+
+    result.success = false;
+
+    result.checks.Izin =
+      e.message;
+
+  }
+
+  try {
+
+    getSheet(
+      SHEET_PENGATURAN
+    );
+
+    result.checks.Pengaturan =
+      true;
+
+  } catch (e) {
+
+    result.success = false;
+
+    result.checks.Pengaturan =
+      e.message;
+
+  }
+
+  try {
+
+    getSheet(
+      SHEET_SESSIONS
+    );
+
+    result.checks.Sessions =
+      true;
+
+  } catch (e) {
+
+    result.success = false;
+
+    result.checks.Sessions =
+      e.message;
+
+  }
+
+  return result;
 
 }

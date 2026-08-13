@@ -2322,56 +2322,51 @@
 
   function performLogout() {
 
-    var token =
-      getToken();
+  var token =
+    getToken();
 
-    clearSession();
 
-    var modal =
-      document.getElementById(
-        'logoutModal'
-      );
+  clearSession();
 
-    if (modal) {
-      modal.classList.add(
-        'hidden'
-      );
-    }
 
-    showLoading(
-      'Keluar...'
+  var modal =
+    document.getElementById(
+      'logoutModal'
     );
 
-    if (!token) {
 
-      redirectLogin();
+  if (modal) {
 
-      return;
+    modal.classList.add(
+      'hidden'
+    );
 
-    }
+  }
+
+
+  /*
+   * Simpan URL Login sebelum request server.
+   */
+  var base =
+    String(
+      window.ABSENSI_WEB_APP_URL ||
+      ''
+    ).trim();
+
+
+  /*
+   * Logout server tetap dipanggil.
+   */
+  if (token) {
 
     google.script.run
 
       .withSuccessHandler(
-        function () {
-
-          redirectLogin();
-
-        }
+        function () {}
       )
 
       .withFailureHandler(
-        function () {
-
-          /*
-           * Session browser sudah dibersihkan.
-           * Tetap kembali ke Login walaupun server
-           * gagal menghapus token.
-           */
-
-          redirectLogin();
-
-        }
+        function () {}
       )
 
       .logout(
@@ -2381,20 +2376,155 @@
   }
 
 
-  function redirectLogin() {
+  /*
+   * Navigasi dilakukan sekarang,
+   * masih berada dalam aksi klik user.
+   */
+  if (base) {
 
-    clearSession();
+    navigateTopLogin(
+      base
+    );
 
-    var base =
-      window.location.href
-        .split('?')[0];
+  } else {
 
-    window.top.location.href =
-      base +
-      '?page=Login';
+    google.script.run
+
+      .withSuccessHandler(
+        function (url) {
+
+          if (url) {
+
+            navigateTopLogin(
+              url
+            );
+
+          }
+
+        }
+      )
+
+      .getWebAppUrl();
 
   }
 
+}
+
+function redirectLogin() {
+
+  clearSession();
+
+
+  var base =
+    String(
+      window.ABSENSI_WEB_APP_URL ||
+      ''
+    ).trim();
+
+
+  if (!base) {
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (url) {
+
+          if (!url) {
+
+            showToast(
+              'URL Web App tidak tersedia.',
+              'error'
+            );
+
+            return;
+
+          }
+
+
+          navigateTopLogin(
+            url
+          );
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          showToast(
+            normalizeError(
+              error
+            ),
+            'error'
+          );
+
+        }
+      )
+
+      .getWebAppUrl();
+
+    return;
+
+  }
+
+
+  navigateTopLogin(
+    base
+  );
+
+}
+
+
+function navigateTopLogin(
+  base
+) {
+
+  var separator =
+    base.indexOf('?') >= 0
+      ? '&'
+      : '?';
+
+
+  var url =
+    base +
+    separator +
+    'page=Login';
+
+
+  /*
+   * Anchor target="_top".
+   *
+   * Dipanggil dari aksi user saat logout,
+   * sehingga navigasi top-level diizinkan
+   * oleh sandbox Apps Script.
+   */
+  var link =
+    document.createElement(
+      'a'
+    );
+
+
+  link.href =
+    url;
+
+  link.target =
+    '_top';
+
+  link.rel =
+    'noopener';
+
+  link.style.display =
+    'none';
+
+
+  document.body.appendChild(
+    link
+  );
+
+
+  link.click();
+
+}
 
   /* =========================================================
      MOBILE

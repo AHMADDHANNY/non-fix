@@ -62,7 +62,7 @@
 
 
   /* =========================================================
-     INITIAL
+     INIT
      ========================================================= */
 
   document.addEventListener(
@@ -85,7 +85,7 @@
 
 
   /* =========================================================
-     PASSWORD TOGGLE
+     PASSWORD
      ========================================================= */
 
   function setupPasswordToggle() {
@@ -104,19 +104,19 @@
       'click',
       function () {
 
-        var isVisible =
+        var visible =
           passwordInput.type ===
           'text';
 
 
         passwordInput.type =
-          isVisible
+          visible
             ? 'password'
             : 'text';
 
 
         togglePassword.textContent =
-          isVisible
+          visible
             ? '👁'
             : '🙈';
 
@@ -127,13 +127,15 @@
 
 
   /* =========================================================
-     LOGIN FORM
+     FORM
      ========================================================= */
 
   function setupLoginForm() {
 
     if (!form) {
+
       return;
+
     }
 
 
@@ -157,25 +159,15 @@
 
   function login() {
 
-    if (
-      !usernameInput ||
-      !passwordInput
-    ) {
-
-      showError(
-        'Form login tidak ditemukan.'
-      );
-
-      return;
-
-    }
-
-
     var username =
-      usernameInput.value.trim();
+      usernameInput
+        ? usernameInput.value.trim()
+        : '';
 
     var password =
-      passwordInput.value;
+      passwordInput
+        ? passwordInput.value
+        : '';
 
 
     clearMessage();
@@ -187,7 +179,9 @@
         'Username wajib diisi.'
       );
 
-      usernameInput.focus();
+      if (usernameInput) {
+        usernameInput.focus();
+      }
 
       return;
 
@@ -200,7 +194,9 @@
         'Password wajib diisi.'
       );
 
-      passwordInput.focus();
+      if (passwordInput) {
+        passwordInput.focus();
+      }
 
       return;
 
@@ -231,18 +227,19 @@
             );
 
 
-            passwordInput.value = '';
+            if (passwordInput) {
 
-            passwordInput.focus();
+              passwordInput.value = '';
+
+              passwordInput.focus();
+
+            }
 
             return;
 
           }
 
 
-          /*
-           * Token WAJIB dikembalikan server.
-           */
           if (!response.token) {
 
             showError(
@@ -258,9 +255,6 @@
             response.user || {};
 
 
-          /*
-           * Role WAJIB valid.
-           */
           var role =
             String(
               user.role || ''
@@ -274,8 +268,6 @@
             role !== 'pegawai'
           ) {
 
-            clearSession();
-
             showError(
               'Role akun tidak valid.'
             );
@@ -285,16 +277,11 @@
           }
 
 
-          /*
-           * Simpan token dan user.
-           */
           try {
 
             localStorage.setItem(
               STORAGE_TOKEN,
-              String(
-                response.token
-              )
+              response.token
             );
 
 
@@ -305,7 +292,7 @@
               )
             );
 
-          } catch (storageError) {
+          } catch (error) {
 
             showError(
               'Session tidak dapat disimpan di browser.'
@@ -321,9 +308,6 @@
           );
 
 
-          /*
-           * Redirect berdasarkan role.
-           */
           setTimeout(
             function () {
 
@@ -361,7 +345,7 @@
 
 
   /* =========================================================
-     CEK SESSION LAMA
+     EXISTING SESSION
      ========================================================= */
 
   function checkExistingSession() {
@@ -410,10 +394,8 @@
         function () {
 
           /*
-           * Jangan tampilkan error saat
-           * pengecekan session gagal.
-           *
-           * User tetap berada di halaman login.
+           * Jangan ganggu halaman login
+           * jika validasi session gagal.
            */
 
         }
@@ -427,7 +409,7 @@
 
 
   /* =========================================================
-     REDIRECT BERDASARKAN ROLE
+     REDIRECT ROLE
      ========================================================= */
 
   function redirectByRole(
@@ -483,86 +465,34 @@
     }
 
 
-    /*
-     * Ambil URL Web App saat ini.
-     *
-     * Token TIDAK dimasukkan ke URL.
-     *
-     * ?page=DashboardAdmin hanya menentukan
-     * halaman yang dirender.
-     *
-     * Keamanan tetap dilakukan oleh
-     * verifySession() pada dashboard.
-     */
     var baseUrl =
       window.location.href
         .split('?')[0];
 
 
-    var targetUrl =
+    window.top.location.href =
       baseUrl +
       '?page=' +
       encodeURIComponent(
         targetPage
       );
 
-
-    /*
-     * Gunakan top location karena
-     * Apps Script Web App berjalan
-     * dalam userCodeAppPanel.
-     */
-    try {
-
-      window.top.location.href =
-        targetUrl;
-
-    } catch (error) {
-
-      window.location.href =
-        targetUrl;
-
-    }
-
   }
 
 
   /*
-   * Buat fungsi redirect dapat dipakai
-   * oleh script lain jika diperlukan.
+   * Expose supaya bisa digunakan
+   * jika diperlukan oleh halaman lain.
    */
   window.redirectByRole =
     redirectByRole;
 
 
   /* =========================================================
-     LOAD NAMA APLIKASI
+     APP NAME
      ========================================================= */
 
   function loadAppName() {
-
-    /*
-     * Jangan memanggil getNamaAppSafe_()
-     * langsung dari client karena fungsi
-     * yang diakhiri underscore merupakan
-     * fungsi private Apps Script.
-     *
-     * Coba gunakan fungsi public getNamaApp().
-     *
-     * Jika fungsi tersebut belum tersedia,
-     * abaikan dan gunakan nama default.
-     */
-
-    if (
-      typeof google === 'undefined' ||
-      !google.script ||
-      !google.script.run
-    ) {
-
-      return;
-
-    }
-
 
     google.script.run
 
@@ -570,7 +500,9 @@
         function (name) {
 
           if (!name) {
+
             return;
+
           }
 
 
@@ -583,7 +515,7 @@
           if (element) {
 
             element.textContent =
-              String(name);
+              name;
 
           }
 
@@ -594,8 +526,8 @@
         function () {
 
           /*
-           * Tidak fatal.
-           * Nama default dari HTML tetap digunakan.
+           * Tidak perlu menampilkan error.
+           * Nama default tetap digunakan.
            */
 
         }
@@ -607,7 +539,7 @@
 
 
   /* =========================================================
-     GET TOKEN
+     TOKEN
      ========================================================= */
 
   function getToken() {
@@ -630,7 +562,7 @@
 
 
   /* =========================================================
-     SAVE USER
+     USER
      ========================================================= */
 
   function saveUser(
@@ -646,47 +578,10 @@
         )
       );
 
-    } catch (error) {
-
-      /*
-       * Tidak fatal.
-       */
-
-    }
+    } catch (error) {}
 
   }
 
-
-  /* =========================================================
-     GET USER
-     ========================================================= */
-
-  function getUser() {
-
-    try {
-
-      var raw =
-        localStorage.getItem(
-          STORAGE_USER
-        );
-
-
-      return raw
-        ? JSON.parse(raw)
-        : null;
-
-    } catch (error) {
-
-      return null;
-
-    }
-
-  }
-
-
-  /* =========================================================
-     CLEAR SESSION
-     ========================================================= */
 
   function clearSession() {
 
@@ -696,18 +591,11 @@
         STORAGE_TOKEN
       );
 
-
       localStorage.removeItem(
         STORAGE_USER
       );
 
-    } catch (error) {
-
-      /*
-       * Tidak fatal.
-       */
-
-    }
+    } catch (error) {}
 
   }
 
@@ -751,7 +639,7 @@
 
 
   /* =========================================================
-     ERROR MESSAGE
+     MESSAGE
      ========================================================= */
 
   function showError(
@@ -776,10 +664,6 @@
   }
 
 
-  /* =========================================================
-     SUCCESS MESSAGE
-     ========================================================= */
-
   function showSuccess(
     message
   ) {
@@ -802,10 +686,6 @@
   }
 
 
-  /* =========================================================
-     CLEAR MESSAGE
-     ========================================================= */
-
   function clearMessage() {
 
     if (!loginMessage) {
@@ -826,7 +706,7 @@
 
 
   /* =========================================================
-     NORMALIZE ERROR
+     ERROR
      ========================================================= */
 
   function normalizeError(
@@ -869,7 +749,7 @@
 
 
   /* =========================================================
-     GLOBAL ABSENSI APP
+     GLOBAL API
      ========================================================= */
 
   window.AbsensiApp = {
@@ -878,10 +758,27 @@
       getToken,
 
     getUser:
-      getUser,
+      function () {
 
-    saveUser:
-      saveUser,
+        try {
+
+          var raw =
+            localStorage.getItem(
+              STORAGE_USER
+            );
+
+
+          return raw
+            ? JSON.parse(raw)
+            : null;
+
+        } catch (error) {
+
+          return null;
+
+        }
+
+      },
 
     clearSession:
       clearSession,

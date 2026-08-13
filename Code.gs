@@ -747,3 +747,15 @@ function testFileDashboardPegawai() {
   }
 
 }
+
+function getWebAppUrl() {
+  var url = ScriptApp.getService().getUrl();
+
+  if (!url) {
+    throw new Error(
+      'URL Web App belum tersedia. Deploy project sebagai Web App terlebih dahulu.'
+    );
+  }
+
+  return url;
+}

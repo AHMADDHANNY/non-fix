@@ -4,11 +4,6 @@
 
   'use strict';
 
-
-  /* =========================================================
-     STORAGE
-     ========================================================= */
-
   var STORAGE_TOKEN =
     'absensi_session_token';
 
@@ -16,49 +11,29 @@
     'absensi_session_user';
 
 
-  /* =========================================================
-     ELEMENT
-     ========================================================= */
-
   var form =
-    document.getElementById(
-      'loginForm'
-    );
+    document.getElementById('loginForm');
 
   var usernameInput =
-    document.getElementById(
-      'username'
-    );
+    document.getElementById('username');
 
   var passwordInput =
-    document.getElementById(
-      'password'
-    );
+    document.getElementById('password');
 
   var loginButton =
-    document.getElementById(
-      'loginButton'
-    );
+    document.getElementById('loginButton');
 
   var loginButtonText =
-    document.getElementById(
-      'loginButtonText'
-    );
+    document.getElementById('loginButtonText');
 
   var loginSpinner =
-    document.getElementById(
-      'loginSpinner'
-    );
+    document.getElementById('loginSpinner');
 
   var loginMessage =
-    document.getElementById(
-      'loginMessage'
-    );
+    document.getElementById('loginMessage');
 
   var togglePassword =
-    document.getElementById(
-      'togglePassword'
-    );
+    document.getElementById('togglePassword');
 
 
   /* =========================================================
@@ -94,9 +69,7 @@
       !togglePassword ||
       !passwordInput
     ) {
-
       return;
-
     }
 
 
@@ -105,8 +78,7 @@
       function () {
 
         var visible =
-          passwordInput.type ===
-          'text';
+          passwordInput.type === 'text';
 
 
         passwordInput.type =
@@ -133,9 +105,7 @@
   function setupLoginForm() {
 
     if (!form) {
-
       return;
-
     }
 
 
@@ -159,23 +129,15 @@
 
   function login() {
 
-    if (
-      !usernameInput ||
-      !passwordInput
-    ) {
-
-      return;
-
-    }
-
-
     var username =
-      usernameInput.value
-        .trim();
-
+      usernameInput
+        ? usernameInput.value.trim()
+        : '';
 
     var password =
-      passwordInput.value;
+      passwordInput
+        ? passwordInput.value
+        : '';
 
 
     clearMessage();
@@ -187,7 +149,9 @@
         'Username wajib diisi.'
       );
 
-      usernameInput.focus();
+      if (usernameInput) {
+        usernameInput.focus();
+      }
 
       return;
 
@@ -200,7 +164,9 @@
         'Password wajib diisi.'
       );
 
-      passwordInput.focus();
+      if (passwordInput) {
+        passwordInput.focus();
+      }
 
       return;
 
@@ -231,9 +197,10 @@
             );
 
 
-            passwordInput.value = '';
-
-            passwordInput.focus();
+            if (passwordInput) {
+              passwordInput.value = '';
+              passwordInput.focus();
+            }
 
             return;
 
@@ -254,8 +221,7 @@
 
 
           var user =
-            response.user ||
-            {};
+            response.user || {};
 
 
           var role =
@@ -286,15 +252,15 @@
 
             localStorage.setItem(
               STORAGE_TOKEN,
-              response.token
+              String(
+                response.token
+              )
             );
 
 
             localStorage.setItem(
               STORAGE_USER,
-              JSON.stringify(
-                user
-              )
+              JSON.stringify(user)
             );
 
           } catch (error) {
@@ -313,15 +279,20 @@
           );
 
 
-          setTimeout(
-            function () {
+          /*
+           * JANGAN lagi memakai:
+           *
+           * window.location.href
+           *
+           * untuk membentuk URL dari
+           * userCodeAppPanel.
+           *
+           * Ambil URL deployment Web App
+           * langsung dari server.
+           */
 
-              redirectByRole(
-                user
-              );
-
-            },
-            300
+          redirectByRole(
+            user
           );
 
         }
@@ -333,9 +304,7 @@
           setLoading(false);
 
           showError(
-            normalizeError(
-              error
-            )
+            normalizeError(error)
           );
 
         }
@@ -350,7 +319,129 @@
 
 
   /* =========================================================
-     CHECK EXISTING SESSION
+     REDIRECT BY ROLE
+     ========================================================= */
+
+  function redirectByRole(
+    user
+  ) {
+
+    if (!user) {
+
+      showError(
+        'Data pengguna tidak tersedia.'
+      );
+
+      return;
+
+    }
+
+
+    var role =
+      String(
+        user.role || ''
+      )
+      .trim()
+      .toLowerCase();
+
+
+    var targetPage = '';
+
+
+    if (
+      role === 'admin'
+    ) {
+
+      targetPage =
+        'DashboardAdmin';
+
+    } else if (
+      role === 'pegawai'
+    ) {
+
+      targetPage =
+        'DashboardPegawai';
+
+    } else {
+
+      clearSession();
+
+      showError(
+        'Role pengguna tidak dikenali.'
+      );
+
+      return;
+
+    }
+
+
+    setLoading(true);
+
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (webAppUrl) {
+
+          if (!webAppUrl) {
+
+            setLoading(false);
+
+            showError(
+              'URL Web App tidak tersedia.'
+            );
+
+            return;
+
+          }
+
+
+          var separator =
+            webAppUrl.indexOf('?') >= 0
+              ? '&'
+              : '?';
+
+
+          var targetUrl =
+            webAppUrl +
+            separator +
+            'page=' +
+            encodeURIComponent(
+              targetPage
+            );
+
+
+          /*
+           * URL ini adalah URL deployment
+           * Web App, bukan userCodeAppPanel.
+           */
+
+          window.top.location.href =
+            targetUrl;
+
+        }
+      )
+
+      .withFailureHandler(
+        function (error) {
+
+          setLoading(false);
+
+          showError(
+            'Gagal membuka aplikasi: ' +
+            normalizeError(error)
+          );
+
+        }
+      )
+
+      .getWebAppUrl();
+
+  }
+
+
+  /* =========================================================
+     EXISTING SESSION
      ========================================================= */
 
   function checkExistingSession() {
@@ -360,9 +451,7 @@
 
 
     if (!token) {
-
       return;
-
     }
 
 
@@ -400,7 +489,7 @@
 
           /*
            * Jangan tampilkan error
-           * ketika login pertama dibuka.
+           * saat login pertama dibuka.
            */
 
         }
@@ -408,87 +497,6 @@
 
       .verifySession(
         token
-      );
-
-  }
-
-
-  /* =========================================================
-     REDIRECT BY ROLE
-     ========================================================= */
-
-  function redirectByRole(
-    user
-  ) {
-
-    if (!user) {
-
-      showError(
-        'Data pengguna tidak tersedia.'
-      );
-
-      return;
-
-    }
-
-
-    var role =
-      String(
-        user.role || ''
-      )
-      .trim()
-      .toLowerCase();
-
-
-    var targetPage =
-      '';
-
-
-    if (
-      role === 'admin'
-    ) {
-
-      targetPage =
-        'DashboardAdmin';
-
-    } else if (
-      role === 'pegawai'
-    ) {
-
-      targetPage =
-        'DashboardPegawai';
-
-    } else {
-
-      clearSession();
-
-      showError(
-        'Role pengguna tidak dikenali.'
-      );
-
-      return;
-
-    }
-
-
-    /*
-     * Hanya gunakan page untuk routing.
-     *
-     * Token TIDAK dimasukkan ke URL.
-     *
-     * Dashboard tetap memvalidasi
-     * session melalui server.
-     */
-    var baseUrl =
-      window.location.href
-        .split('?')[0];
-
-
-    window.top.location.href =
-      baseUrl +
-      '?page=' +
-      encodeURIComponent(
-        targetPage
       );
 
   }
@@ -506,9 +514,7 @@
         function (name) {
 
           if (!name) {
-
             return;
-
           }
 
 
@@ -529,22 +535,16 @@
       )
 
       .withFailureHandler(
-        function () {
-
-          /*
-           * Nama default tetap digunakan.
-           */
-
-        }
+        function () {}
       )
 
-      .getNamaApp();
+      .getNamaAppSafe_();
 
   }
 
 
   /* =========================================================
-     TOKEN
+     STORAGE
      ========================================================= */
 
   function getToken() {
@@ -566,10 +566,6 @@
   }
 
 
-  /* =========================================================
-     SAVE USER
-     ========================================================= */
-
   function saveUser(
     user
   ) {
@@ -588,10 +584,6 @@
   }
 
 
-  /* =========================================================
-     CLEAR SESSION
-     ========================================================= */
-
   function clearSession() {
 
     try {
@@ -599,6 +591,7 @@
       localStorage.removeItem(
         STORAGE_TOKEN
       );
+
 
       localStorage.removeItem(
         STORAGE_USER
@@ -648,7 +641,7 @@
 
 
   /* =========================================================
-     ERROR
+     MESSAGE
      ========================================================= */
 
   function showError(
@@ -656,9 +649,7 @@
   ) {
 
     if (!loginMessage) {
-
       return;
-
     }
 
 
@@ -673,18 +664,12 @@
   }
 
 
-  /* =========================================================
-     SUCCESS
-     ========================================================= */
-
   function showSuccess(
     message
   ) {
 
     if (!loginMessage) {
-
       return;
-
     }
 
 
@@ -699,16 +684,10 @@
   }
 
 
-  /* =========================================================
-     CLEAR MESSAGE
-     ========================================================= */
-
   function clearMessage() {
 
     if (!loginMessage) {
-
       return;
-
     }
 
 
@@ -723,7 +702,7 @@
 
 
   /* =========================================================
-     NORMALIZE ERROR
+     ERROR
      ========================================================= */
 
   function normalizeError(
@@ -766,14 +745,13 @@
 
 
   /* =========================================================
-     GLOBAL APP
+     PUBLIC API
      ========================================================= */
 
   window.AbsensiApp = {
 
     getToken:
       getToken,
-
 
     getUser:
       function () {
@@ -798,15 +776,21 @@
 
       },
 
-
     clearSession:
       clearSession,
-
 
     redirectByRole:
       redirectByRole
 
   };
+
+
+  /*
+   * Kompatibilitas.
+   */
+
+  window.redirectByRole =
+    redirectByRole;
 
 
 })();

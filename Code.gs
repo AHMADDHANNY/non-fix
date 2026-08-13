@@ -530,3 +530,286 @@ function testFileDashboardPegawai() {
   }
 
 }
+
+/**
+ * ============================================================
+ * DATABASE SHEET HELPER
+ * ============================================================
+ *
+ * Semua modul backend menggunakan helper ini:
+ *
+ * - Auth.gs
+ * - Absensi.gs
+ * - Izin.gs
+ * - Admin.gs
+ *
+ * Nama sheet mengikuti struktur database:
+ *
+ * Users
+ * Absensi
+ * Izin
+ * Pengaturan
+ * Sessions
+ */
+
+/**
+ * Nama sheet database.
+ */
+var SHEET_USERS = 'Users';
+var SHEET_ABSENSI = 'Absensi';
+var SHEET_IZIN = 'Izin';
+var SHEET_PENGATURAN = 'Pengaturan';
+var SHEET_SESSIONS = 'Sessions';
+
+
+/**
+ * Durasi session dalam jam.
+ */
+var SESSION_DURASI_JAM = 12;
+
+
+/**
+ * ============================================================
+ * GET SPREADSHEET
+ * ============================================================
+ */
+function getDatabase_() {
+
+  var ss =
+    SpreadsheetApp.getActiveSpreadsheet();
+
+  if (!ss) {
+
+    throw new Error(
+      'Spreadsheet database tidak ditemukan.'
+    );
+
+  }
+
+  return ss;
+
+}
+
+
+/**
+ * ============================================================
+ * GET SHEET
+ * ============================================================
+ *
+ * Contoh:
+ *
+ * var sheet = getSheet('Users');
+ *
+ * Jika sheet tidak ada, fungsi akan memberikan error
+ * yang jelas daripada:
+ *
+ * TypeError: Cannot read properties of null
+ *
+ */
+function getSheet(
+  sheetName
+) {
+
+  var name =
+    String(
+      sheetName || ''
+    ).trim();
+
+
+  if (!name) {
+
+    throw new Error(
+      'Nama sheet tidak boleh kosong.'
+    );
+
+  }
+
+
+  var ss =
+    getDatabase_();
+
+
+  var sheet =
+    ss.getSheetByName(
+      name
+    );
+
+
+  if (!sheet) {
+
+    throw new Error(
+      'Sheet "' +
+      name +
+      '" tidak ditemukan.'
+    );
+
+  }
+
+
+  return sheet;
+
+}
+
+
+/**
+ * ============================================================
+ * GET SHEET AMAN
+ * ============================================================
+ *
+ * Digunakan jika pemanggil memang ingin menerima null
+ * ketika sheet belum tersedia.
+ */
+function getSheetSafe_(
+  sheetName
+) {
+
+  var name =
+    String(
+      sheetName || ''
+    ).trim();
+
+
+  if (!name) {
+    return null;
+  }
+
+
+  var ss =
+    SpreadsheetApp.getActiveSpreadsheet();
+
+
+  if (!ss) {
+    return null;
+  }
+
+
+  return ss.getSheetByName(
+    name
+  );
+
+}
+
+
+/**
+ * ============================================================
+ * HASH PASSWORD
+ * ============================================================
+ */
+function hashPassword(
+  password,
+  salt
+) {
+
+  password =
+    String(
+      password || ''
+    );
+
+  salt =
+    String(
+      salt || ''
+    );
+
+
+  var digest =
+    Utilities.computeDigest(
+      Utilities.DigestAlgorithm.SHA_256,
+      password + salt,
+      Utilities.Charset.UTF_8
+    );
+
+
+  return digest
+    .map(
+      function (byte) {
+
+        var value =
+          byte < 0
+            ? byte + 256
+            : byte;
+
+
+        return (
+          '0' +
+          value.toString(16)
+        ).slice(-2);
+
+      }
+    )
+    .join('');
+
+}
+
+
+/**
+ * ============================================================
+ * VERIFY PASSWORD
+ * ============================================================
+ */
+function verifyPassword_(
+  password,
+  passwordHash,
+  salt
+) {
+
+  password =
+    String(
+      password || ''
+    );
+
+  passwordHash =
+    String(
+      passwordHash || ''
+    );
+
+  salt =
+    String(
+      salt || ''
+    );
+
+
+  if (
+    !passwordHash ||
+    !salt
+  ) {
+
+    return false;
+
+  }
+
+
+  var calculatedHash =
+    hashPassword(
+      password,
+      salt
+    );
+
+
+  return calculatedHash ===
+    passwordHash;
+
+}
+
+
+/**
+ * ============================================================
+ * CREATE SESSION COMPATIBILITY
+ * ============================================================
+ *
+ * Auth.gs memanggil:
+ *
+ * createSession_()
+ *
+ * Implementasi utama berada pada:
+ *
+ * buatSessionToken_()
+ */
+function createSession_(
+  idUser
+) {
+
+  return buatSessionToken_(
+    idUser
+  );
+
+}

@@ -502,45 +502,43 @@
   }
 
 
-  /* =========================================================
-     APP NAME
-     ========================================================= */
-
   function loadAppName() {
 
-    google.script.run
+  google.script.run
 
-      .withSuccessHandler(
-        function (name) {
+    .withSuccessHandler(
+      function (name) {
 
-          if (!name) {
-            return;
-          }
+        var element =
+          document.getElementById(
+            'appName'
+          );
 
-
-          var element =
-            document.getElementById(
-              'appName'
-            );
-
-
-          if (element) {
-
-            element.textContent =
-              name;
-
-          }
-
+        if (!element) {
+          return;
         }
-      )
 
-      .withFailureHandler(
-        function () {}
-      )
+        element.textContent =
+          name ||
+          'Aplikasi Absensi';
 
-      .getNamaAppSafe_();
+      }
+    )
 
-  }
+    .withFailureHandler(
+      function (error) {
+
+        console.warn(
+          'Gagal mengambil nama aplikasi:',
+          error
+        );
+
+      }
+    )
+
+    .getNamaApp();
+
+}
 
 
   /* =========================================================

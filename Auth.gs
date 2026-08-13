@@ -25,169 +25,150 @@ const AUTH_USER = {
  * LOGIN
  * =================================================================== */
 
-function login(
-  username,
-  password
-) {
+function login(username, password) {
   try {
-    username =
-      String(
-        username || ''
-      ).trim();
+    username = String(username || '').trim();
+    password = String(password || '');
 
-    password =
-      String(
-        password || ''
-      );
-
-    if (
-      !username ||
-      !password
-    ) {
-      throw new Error(
-        'Username dan password wajib diisi.'
-      );
+    if (!username || !password) {
+      return {
+        success: false,
+        message: 'Username dan password wajib diisi.'
+      };
     }
 
-    var sheet =
-      getSheet(
-        SHEET_USERS
-      );
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Users');
 
-    var lastRow =
-      sheet.getLastRow();
+    if (!sheet) {
+      return {
+        success: false,
+        message: 'Sheet Users tidak ditemukan.'
+      };
+    }
 
-    if (lastRow < 2) {
-      throw new Error(
-        'Belum ada akun pengguna.'
-      );
+    var values = sheet.getDataRange().getValues();
+
+    if (values.length < 2) {
+      return {
+        success: false,
+        message: 'Belum ada data pengguna.'
+      };
+    }
+
+    var headers = values[0].map(function (h) {
+      return String(h).trim();
+    });
+
+    var idx = {};
+
+    headers.forEach(function (header, i) {
+      idx[header] = i;
+    });
+
+    var user = null;
+
+    for (var i = 1; i < values.length; i++) {
+      var row = values[i];
+
+      var rowUsername =
+        String(row[idx.username] || '').trim();
+
+      var statusAktif =
+        String(row[idx.status_aktif] || '')
+          .trim()
+          .toLowerCase();
+
+      if (
+        rowUsername === username &&
+        statusAktif === 'aktif'
+      ) {
+        user = {
+          row: i + 1,
+          id_user: String(row[idx.id_user] || ''),
+          nama: String(row[idx.nama] || ''),
+          username: rowUsername,
+          password_hash: String(row[idx.password_hash] || ''),
+          salt: String(row[idx.salt] || ''),
+          role: String(row[idx.role] || '').trim().toLowerCase(),
+          jabatan: String(row[idx.jabatan] || ''),
+          foto_profil: String(row[idx.foto_profil] || ''),
+          status_aktif: statusAktif
+        };
+
+        break;
+      }
+    }
+
+    if (!user) {
+      return {
+        success: false,
+        message: 'Username atau password salah.'
+      };
     }
 
     /*
-     * TextFinder menghindari pembacaan seluruh Users.
-     * Username tetap dicari pada kolom C saja.
+     * VERIFIKASI PASSWORD
      */
-    var finder =
-      sheet
-        .getRange(
-          2,
-          AUTH_USER.USERNAME + 1,
-          lastRow - 1,
-          1
-        )
-        .createTextFinder(
-          username
-        )
-        .matchCase(false)
-        .matchEntireCell(true);
-
-    var cell =
-      finder.findNext();
-
-    if (!cell) {
-      throw new Error(
-        'Username atau password salah.'
-      );
-    }
-
-    var rowNumber =
-      cell.getRow();
-
-    var row =
-      sheet
-        .getRange(
-          rowNumber,
-          1,
-          1,
-          11
-        )
-        .getValues()[0];
-
-    var status =
-      String(
-        row[
-          AUTH_USER.STATUS_AKTIF
-        ] || ''
-      ).toLowerCase();
-
-    if (
-      status !== 'aktif'
-    ) {
-      throw new Error(
-        'Akun Anda tidak aktif. Hubungi admin.'
-      );
-    }
-
-    var salt =
-      String(
-        row[
-          AUTH_USER.SALT
-        ] || ''
-      );
-
-    var storedHash =
-      String(
-        row[
-          AUTH_USER.PASSWORD_HASH
-        ] || ''
-      );
-
-    if (
-      !salt ||
-      !storedHash
-    ) {
-      throw new Error(
-        'Data autentikasi akun tidak valid. Hubungi admin.'
-      );
-    }
-
-    var inputHash =
-      hashPassword(
+    var validPassword =
+      verifyPassword_(
         password,
-        salt
+        user.password_hash,
+        user.salt
       );
 
-    if (
-      inputHash !== storedHash
-    ) {
-      throw new Error(
-        'Username atau password salah.'
-      );
+    if (!validPassword) {
+      return {
+        success: false,
+        message: 'Username atau password salah.'
+      };
     }
 
-    var user = {
-      id_user:
-        row[AUTH_USER.ID],
-      nama:
-        row[AUTH_USER.NAMA],
-      username:
-        row[AUTH_USER.USERNAME],
-      role:
-        row[AUTH_USER.ROLE],
-      jabatan:
-        row[AUTH_USER.JABATAN],
-      foto_profil:
-        row[AUTH_USER.FOTO_PROFIL]
-    };
-
+    /*
+     * BUAT SESSION
+     */
     var token =
-      buatSessionToken_(
+      createSession_(
         user.id_user
       );
 
-    return jsonResponse({
-      success: true,
-      token: token,
-      user: user
-    });
+    if (!token) {
+      return {
+        success: false,
+        message: 'Gagal membuat session.'
+      };
+    }
 
-  } catch (e) {
-    return jsonResponse({
+    /*
+     * JANGAN stringify.
+     * google.script.run akan menerima object ini
+     * langsung sebagai JavaScript object.
+     */
+    return {
+      success: true,
+
+      token: token,
+
+      user: {
+        id_user: user.id_user,
+        nama: user.nama,
+        username: user.username,
+        role: user.role,
+        jabatan: user.jabatan,
+        foto_profil: user.foto_profil
+      }
+    };
+
+  } catch (error) {
+
+    console.error(error);
+
+    return {
       success: false,
       message:
-        e.message ||
-        'Login gagal.'
-    });
+        'Terjadi kesalahan server: ' +
+        error.message
+    };
   }
 }
 
@@ -951,4 +932,40 @@ function bersihkanSessionExpired() {
       lock.releaseLock();
     } catch (ignore) {}
   }
+}
+
+/**
+ * ============================================================
+ * STANDARD JSON RESPONSE
+ * ============================================================
+ */
+function jsonResponse(success, message, data) {
+
+  var result = {
+    success: Boolean(success)
+  };
+
+  if (message !== undefined && message !== null) {
+    result.message = String(message);
+  }
+
+  if (data !== undefined && data !== null) {
+
+    if (
+      typeof data === 'object' &&
+      !Array.isArray(data)
+    ) {
+
+      Object.keys(data).forEach(function (key) {
+        result[key] = data[key];
+      });
+
+    } else {
+
+      result.data = data;
+
+    }
+  }
+
+  return result;
 }

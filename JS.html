@@ -1,0 +1,857 @@
+<script>
+
+(function () {
+
+  'use strict';
+
+
+  /* =========================================================
+     KONFIGURASI
+     ========================================================= */
+
+  var STORAGE_TOKEN =
+    'absensi_session_token';
+
+  var STORAGE_USER =
+    'absensi_session_user';
+
+
+  /* =========================================================
+     ELEMENT
+     ========================================================= */
+
+  var form =
+    document.getElementById(
+      'loginForm'
+    );
+
+  var usernameInput =
+    document.getElementById(
+      'username'
+    );
+
+  var passwordInput =
+    document.getElementById(
+      'password'
+    );
+
+  var loginButton =
+    document.getElementById(
+      'loginButton'
+    );
+
+  var loginButtonText =
+    document.getElementById(
+      'loginButtonText'
+    );
+
+  var loginSpinner =
+    document.getElementById(
+      'loginSpinner'
+    );
+
+  var loginMessage =
+    document.getElementById(
+      'loginMessage'
+    );
+
+  var togglePassword =
+    document.getElementById(
+      'togglePassword'
+    );
+
+
+  /* =========================================================
+     INITIAL
+     ========================================================= */
+
+  document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+      setupPasswordToggle();
+
+      setupLoginForm();
+
+      checkExistingSession();
+
+    }
+  );
+
+
+  /* =========================================================
+     PASSWORD TOGGLE
+     ========================================================= */
+
+  function setupPasswordToggle() {
+
+    if (
+      !togglePassword ||
+      !passwordInput
+    ) {
+      return;
+    }
+
+
+    togglePassword.addEventListener(
+      'click',
+      function () {
+
+        var isPassword =
+          passwordInput.type ===
+          'password';
+
+
+        passwordInput.type =
+          isPassword
+            ? 'text'
+            : 'password';
+
+
+        togglePassword.textContent =
+          isPassword
+            ? '🙈'
+            : '👁';
+
+
+        togglePassword.setAttribute(
+          'aria-pressed',
+          isPassword
+            ? 'true'
+            : 'false'
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     LOGIN FORM
+     ========================================================= */
+
+  function setupLoginForm() {
+
+    if (!form) {
+      return;
+    }
+
+
+    form.addEventListener(
+      'submit',
+      function (event) {
+
+        event.preventDefault();
+
+        login();
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     LOGIN
+     ========================================================= */
+
+  function login() {
+
+    if (
+      !usernameInput ||
+      !passwordInput
+    ) {
+
+      return;
+
+    }
+
+
+    var username =
+      usernameInput.value.trim();
+
+    var password =
+      passwordInput.value;
+
+
+    clearMessage();
+
+
+    if (!username) {
+
+      showError(
+        'Username wajib diisi.'
+      );
+
+      usernameInput.focus();
+
+      return;
+
+    }
+
+
+    if (!password) {
+
+      showError(
+        'Password wajib diisi.'
+      );
+
+      passwordInput.focus();
+
+      return;
+
+    }
+
+
+    setLoading(true);
+
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          setLoading(false);
+
+
+          if (
+            !response ||
+            response.success !== true
+          ) {
+
+            showError(
+              response &&
+              response.message
+                ? response.message
+                : 'Login gagal.'
+            );
+
+
+            passwordInput.value = '';
+
+            passwordInput.focus();
+
+            return;
+
+          }
+
+
+          if (!response.token) {
+
+            showError(
+              'Login berhasil tetapi token session tidak diterima.'
+            );
+
+            return;
+
+          }
+
+
+          /*
+           * Pastikan user juga dikembalikan
+           * oleh backend.
+           */
+
+          if (
+            !response.user
+          ) {
+
+            showError(
+              'Data pengguna tidak diterima dari server.'
+            );
+
+            return;
+
+          }
+
+
+          /*
+           * Simpan session.
+           */
+
+          try {
+
+            localStorage.setItem(
+              STORAGE_TOKEN,
+              response.token
+            );
+
+
+            localStorage.setItem(
+              STORAGE_USER,
+              JSON.stringify(
+                response.user
+              )
+            );
+
+          } catch (storageError) {
+
+            showError(
+              'Browser tidak mengizinkan penyimpanan session.'
+            );
+
+            return;
+
+          }
+
+
+          showSuccess(
+            'Login berhasil. Membuka aplikasi...'
+          );
+
+
+          /*
+           * =====================================================
+           * PENTING
+           * =====================================================
+           *
+           * TIDAK ADA REDIRECT URL.
+           *
+           * Tidak menggunakan:
+           *
+           * ?page=DashboardAdmin
+           *
+           * ?page=DashboardPegawai
+           *
+           * Dashboard akan dibuat/ditampilkan
+           * di dalam halaman aplikasi.
+           */
+
+          setTimeout(
+            function () {
+
+              redirectByRole(
+                response.user
+              );
+
+            },
+            250
+          );
+
+        }
+      )
+
+
+      .withFailureHandler(
+        function (error) {
+
+          setLoading(false);
+
+          showError(
+            normalizeError(
+              error
+            )
+          );
+
+        }
+      )
+
+
+      .login(
+        username,
+        password
+      );
+
+  }
+
+
+  /* =========================================================
+     CEK SESSION LAMA
+     ========================================================= */
+
+  function checkExistingSession() {
+
+    var token =
+      getToken();
+
+
+    if (!token) {
+
+      return;
+
+    }
+
+
+    /*
+     * Token harus diverifikasi server.
+     */
+
+    google.script.run
+
+      .withSuccessHandler(
+        function (response) {
+
+          if (
+            response &&
+            response.valid === true &&
+            response.user
+          ) {
+
+            saveUser(
+              response.user
+            );
+
+
+            /*
+             * Jangan redirect URL.
+             */
+
+            redirectByRole(
+              response.user
+            );
+
+          } else {
+
+            clearSession();
+
+          }
+
+        }
+      )
+
+
+      .withFailureHandler(
+        function () {
+
+          /*
+           * Jangan hapus token jika
+           * server sementara tidak dapat dihubungi.
+           */
+
+        }
+      )
+
+
+      .verifySession(
+        token
+      );
+
+  }
+
+
+  /* =========================================================
+     ROUTING BERDASARKAN ROLE
+     =========================================================
+     
+     PENTING:
+     
+     Fungsi ini TIDAK mengubah URL.
+     
+     Admin:
+       -> showAdminDashboard()
+     
+     Pegawai:
+       -> showEmployeeDashboard()
+     
+     ========================================================= */
+
+  function redirectByRole(
+    user
+  ) {
+
+    if (!user) {
+
+      showError(
+        'Data pengguna tidak tersedia.'
+      );
+
+      return;
+
+    }
+
+
+    var role =
+      String(
+        user.role || ''
+      )
+      .trim()
+      .toLowerCase();
+
+
+    /*
+     * =====================================================
+     * ADMIN
+     * =====================================================
+     */
+
+    if (
+      role === 'admin'
+    ) {
+
+      /*
+       * Jika fungsi dashboard admin
+       * sudah tersedia di file JS lain,
+       * gunakan fungsi tersebut.
+       */
+
+      if (
+        typeof window.showAdminDashboard ===
+        'function'
+      ) {
+
+        window.showAdminDashboard();
+
+        return;
+
+      }
+
+
+      if (
+        typeof window.tampilkanDashboardAdmin ===
+        'function'
+      ) {
+
+        window.tampilkanDashboardAdmin();
+
+        return;
+
+      }
+
+
+      /*
+       * Jika belum ada frontend dashboard,
+       * tampilkan pesan yang jelas.
+       */
+
+      showError(
+        'Login admin berhasil, tetapi Dashboard Admin belum terhubung.'
+      );
+
+      console.error(
+        'Fungsi showAdminDashboard() / tampilkanDashboardAdmin() belum tersedia.'
+      );
+
+      return;
+
+    }
+
+
+    /*
+     * =====================================================
+     * PEGAWAI
+     * =====================================================
+     */
+
+    if (
+      role === 'pegawai'
+    ) {
+
+      if (
+        typeof window.showEmployeeDashboard ===
+        'function'
+      ) {
+
+        window.showEmployeeDashboard();
+
+        return;
+
+      }
+
+
+      if (
+        typeof window.tampilkanDashboardPegawai ===
+        'function'
+      ) {
+
+        window.tampilkanDashboardPegawai();
+
+        return;
+
+      }
+
+
+      showError(
+        'Login pegawai berhasil, tetapi Dashboard Pegawai belum terhubung.'
+      );
+
+      console.error(
+        'Fungsi showEmployeeDashboard() / tampilkanDashboardPegawai() belum tersedia.'
+      );
+
+      return;
+
+    }
+
+
+    /*
+     * =====================================================
+     * ROLE TIDAK VALID
+     * =====================================================
+     */
+
+    clearSession();
+
+    showError(
+      'Role pengguna tidak dikenali.'
+    );
+
+  }
+
+
+  /* =========================================================
+     SESSION HELPER
+     ========================================================= */
+
+  function getToken() {
+
+    try {
+
+      return (
+        localStorage.getItem(
+          STORAGE_TOKEN
+        ) || ''
+      );
+
+    } catch (e) {
+
+      return '';
+
+    }
+
+  }
+
+
+  function saveUser(
+    user
+  ) {
+
+    try {
+
+      localStorage.setItem(
+        STORAGE_USER,
+        JSON.stringify(
+          user || {}
+        )
+      );
+
+    } catch (e) {}
+
+  }
+
+
+  function clearSession() {
+
+    try {
+
+      localStorage.removeItem(
+        STORAGE_TOKEN
+      );
+
+
+      localStorage.removeItem(
+        STORAGE_USER
+      );
+
+    } catch (e) {}
+
+  }
+
+
+  /* =========================================================
+     UI - LOADING
+     ========================================================= */
+
+  function setLoading(
+    loading
+  ) {
+
+    if (loginButton) {
+
+      loginButton.disabled =
+        loading;
+
+    }
+
+
+    if (loginSpinner) {
+
+      loginSpinner.classList.toggle(
+        'hidden',
+        !loading
+      );
+
+    }
+
+
+    if (loginButtonText) {
+
+      loginButtonText.textContent =
+        loading
+          ? 'Memproses...'
+          : 'Masuk';
+
+    }
+
+  }
+
+
+  /* =========================================================
+     UI - ERROR
+     ========================================================= */
+
+  function showError(
+    message
+  ) {
+
+    if (!loginMessage) {
+
+      console.error(
+        message
+      );
+
+      return;
+
+    }
+
+
+    loginMessage.textContent =
+      message ||
+      'Terjadi kesalahan.';
+
+
+    loginMessage.className =
+      'message error';
+
+  }
+
+
+  /* =========================================================
+     UI - SUCCESS
+     ========================================================= */
+
+  function showSuccess(
+    message
+  ) {
+
+    if (!loginMessage) {
+
+      return;
+
+    }
+
+
+    loginMessage.textContent =
+      message ||
+      'Berhasil.';
+
+
+    loginMessage.className =
+      'message success';
+
+  }
+
+
+  /* =========================================================
+     UI - CLEAR MESSAGE
+     ========================================================= */
+
+  function clearMessage() {
+
+    if (!loginMessage) {
+
+      return;
+
+    }
+
+
+    loginMessage.textContent =
+      '';
+
+
+    loginMessage.className =
+      'message hidden';
+
+  }
+
+
+  /* =========================================================
+     ERROR NORMALIZER
+     ========================================================= */
+
+  function normalizeError(
+    error
+  ) {
+
+    if (!error) {
+
+      return (
+        'Terjadi kesalahan pada server.'
+      );
+
+    }
+
+
+    if (
+      typeof error ===
+      'string'
+    ) {
+
+      return error;
+
+    }
+
+
+    if (
+      error.message
+    ) {
+
+      return error.message;
+
+    }
+
+
+    return (
+      'Terjadi kesalahan pada server.'
+    );
+
+  }
+
+
+  /* =========================================================
+     GLOBAL API
+     ========================================================= */
+
+  window.AbsensiApp = {
+
+    getToken:
+      getToken,
+
+
+    getUser:
+      function () {
+
+        try {
+
+          var raw =
+            localStorage.getItem(
+              STORAGE_USER
+            );
+
+
+          return raw
+            ? JSON.parse(raw)
+            : null;
+
+        } catch (e) {
+
+          return null;
+
+        }
+
+      },
+
+
+    clearSession:
+      clearSession,
+
+
+    logoutLocal:
+      clearSession
+
+  };
+
+
+})();
+
+</script>

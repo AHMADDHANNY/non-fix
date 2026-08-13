@@ -3,8 +3,36 @@
  * CODE.GS
  * ROUTING UTAMA WEB APP
  * ============================================================
+ *
+ * FILE HTML YANG DIGUNAKAN:
+ *
+ * Login.html
+ * DashboardAdmin.html
+ * DashboardPegawai.html
+ *
+ * CATATAN KEAMANAN:
+ *
+ * parameter ?page= hanya menentukan halaman yang dirender.
+ *
+ * Keamanan dashboard TIDAK bergantung pada URL.
+ *
+ * DashboardAdmin melakukan:
+ *   verifySession()
+ *   role === admin
+ *
+ * DashboardPegawai melakukan:
+ *   verifySession()
+ *   role === pegawai
+ *
+ * ============================================================
  */
 
+
+/**
+ * ============================================================
+ * WEB APP ENTRY
+ * ============================================================
+ */
 function doGet(e) {
 
   var page = 'Login';
@@ -18,17 +46,22 @@ function doGet(e) {
       e.parameter &&
       e.parameter.page
     ) {
-      requestedPage = String(e.parameter.page)
+
+      requestedPage =
+        String(
+          e.parameter.page
+        )
         .trim()
-        .replace(/[^a-zA-Z0-9_-]/g, '');
+        .replace(
+          /[^a-zA-Z0-9_-]/g,
+          ''
+        );
+
     }
 
+
     /*
-     * URL page hanya digunakan untuk RENDER.
-     *
-     * KEAMANAN TETAP DI SERVER:
-     * DashboardAdmin dan DashboardPegawai
-     * WAJIB melakukan verifySession().
+     * Halaman yang boleh dirender.
      */
     var allowedPages = [
       'Login',
@@ -36,11 +69,18 @@ function doGet(e) {
       'DashboardPegawai'
     ];
 
+
     if (
-      allowedPages.indexOf(requestedPage) !== -1
+      allowedPages.indexOf(
+        requestedPage
+      ) !== -1
     ) {
-      page = requestedPage;
+
+      page =
+        requestedPage;
+
     }
+
 
     return renderPage_(page);
 
@@ -64,7 +104,11 @@ function doGet(e) {
 function renderPage_(page) {
 
   var template =
-    HtmlService.createTemplateFromFile(page);
+    HtmlService
+      .createTemplateFromFile(
+        page
+      );
+
 
   return template
     .evaluate()
@@ -94,26 +138,31 @@ function renderPage_(page) {
  * <?!= include('AdminCSS'); ?>
  * <?!= include('AdminJS'); ?>
  *
- * Nama file:
- *
- * CSS.html
- * JS.html
- * AdminCSS.html
- * AdminJS.html
+ * ============================================================
  */
 function include(filename) {
 
   if (!filename) {
+
     throw new Error(
       'include(): nama file kosong.'
     );
+
   }
 
-  var name = String(filename)
-    .trim()
-    .replace(/\.html$/i, '');
 
-  if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+  var name =
+    String(filename)
+      .trim()
+      .replace(
+        /\.html$/i,
+        ''
+      );
+
+
+  if (
+    !/^[a-zA-Z0-9_-]+$/.test(name)
+  ) {
 
     throw new Error(
       'Nama file include tidak valid: ' +
@@ -122,10 +171,13 @@ function include(filename) {
 
   }
 
+
   try {
 
     return HtmlService
-      .createHtmlOutputFromFile(name)
+      .createHtmlOutputFromFile(
+        name
+      )
       .getContent();
 
   } catch (error) {
@@ -136,8 +188,8 @@ function include(filename) {
       '" tidak ditemukan. ' +
       'Pastikan file "' +
       name +
-      '.html" benar-benar ada di project Apps Script. ' +
-      'Error: ' +
+      '.html" ada di project Apps Script. ' +
+      'Error asli: ' +
       error.message
     );
 
@@ -156,38 +208,53 @@ function getNamaAppSafe_() {
   var defaultName =
     'Aplikasi Absensi';
 
+
   try {
 
     var ss =
-      SpreadsheetApp.getActiveSpreadsheet();
+      SpreadsheetApp
+        .getActiveSpreadsheet();
+
 
     if (!ss) {
       return defaultName;
     }
+
 
     var sheet =
       ss.getSheetByName(
         'Pengaturan'
       );
 
+
     if (!sheet) {
       return defaultName;
     }
 
+
     if (
       sheet.getLastRow() < 2
     ) {
+
       return defaultName;
+
     }
+
 
     var value =
       sheet
-        .getRange(2, 1)
+        .getRange(
+          2,
+          1
+        )
         .getDisplayValue()
         .trim();
 
-    return value ||
-      defaultName;
+
+    return (
+      value ||
+      defaultName
+    );
 
   } catch (error) {
 
@@ -203,22 +270,34 @@ function getNamaAppSafe_() {
  * ERROR PAGE
  * ============================================================
  */
-function renderErrorPage_(page, error) {
+function renderErrorPage_(
+  page,
+  error
+) {
 
   var message =
-    error && error.message
+    error &&
+    error.message
       ? error.message
       : String(error);
+
 
   return HtmlService
     .createHtmlOutput(
       '<!DOCTYPE html>' +
       '<html lang="id">' +
+
       '<head>' +
+
       '<meta charset="UTF-8">' +
-      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+
+      '<meta name="viewport" ' +
+      'content="width=device-width,initial-scale=1">' +
+
       '<title>Gagal Memuat Aplikasi</title>' +
+
       '<style>' +
+
       'body{' +
       'margin:0;' +
       'padding:30px;' +
@@ -226,6 +305,7 @@ function renderErrorPage_(page, error) {
       'background:#f5f7fb;' +
       'color:#222;' +
       '}' +
+
       '.box{' +
       'max-width:720px;' +
       'margin:40px auto;' +
@@ -234,7 +314,12 @@ function renderErrorPage_(page, error) {
       'border-radius:16px;' +
       'box-shadow:0 10px 30px rgba(0,0,0,.08);' +
       '}' +
-      'h2{color:#d32f2f;margin-top:0}' +
+
+      'h2{' +
+      'color:#d32f2f;' +
+      'margin-top:0;' +
+      '}' +
+
       'pre{' +
       'background:#f1f1f1;' +
       'padding:15px;' +
@@ -242,21 +327,33 @@ function renderErrorPage_(page, error) {
       'white-space:pre-wrap;' +
       'word-break:break-word;' +
       '}' +
+
       '</style>' +
+
       '</head>' +
+
       '<body>' +
+
       '<div class="box">' +
-      '<h2>Gagal memuat aplikasi</h2>' +
+
+      '<h2>Gagal Memuat Aplikasi</h2>' +
+
       '<p>Halaman yang dicoba:</p>' +
+
       '<pre>' +
       escapeHtml_(page) +
       '</pre>' +
+
       '<p>Error asli:</p>' +
+
       '<pre>' +
       escapeHtml_(message) +
       '</pre>' +
+
       '</div>' +
+
       '</body>' +
+
       '</html>'
     )
     .setTitle(
@@ -273,19 +370,36 @@ function renderErrorPage_(page, error) {
  */
 function escapeHtml_(value) {
 
-  return String(value || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+  return String(
+    value || ''
+  )
+  .replace(
+    /&/g,
+    '&amp;'
+  )
+  .replace(
+    /</g,
+    '&lt;'
+  )
+  .replace(
+    />/g,
+    '&gt;'
+  )
+  .replace(
+    /"/g,
+    '&quot;'
+  )
+  .replace(
+    /'/g,
+    '&#039;'
+  );
 
 }
 
 
 /**
  * ============================================================
- * TEST LOGIN PAGE
+ * TEST LOGIN
  * ============================================================
  */
 function testFileLogin() {
@@ -293,11 +407,15 @@ function testFileLogin() {
   try {
 
     HtmlService
-      .createTemplateFromFile('Login');
+      .createTemplateFromFile(
+        'Login'
+      );
+
 
     Logger.log(
       'BERHASIL: Login.html ditemukan.'
     );
+
 
     return {
       success: true,
@@ -311,6 +429,7 @@ function testFileLogin() {
       'GAGAL: ' +
       error.message
     );
+
 
     return {
       success: false,
@@ -337,9 +456,11 @@ function testFileDashboardAdmin() {
         'DashboardAdmin'
       );
 
+
     Logger.log(
       'BERHASIL: DashboardAdmin.html ditemukan.'
     );
+
 
     return {
       success: true,
@@ -353,6 +474,7 @@ function testFileDashboardAdmin() {
       'GAGAL: ' +
       error.message
     );
+
 
     return {
       success: false,
@@ -379,9 +501,11 @@ function testFileDashboardPegawai() {
         'DashboardPegawai'
       );
 
+
     Logger.log(
       'BERHASIL: DashboardPegawai.html ditemukan.'
     );
+
 
     return {
       success: true,
@@ -395,6 +519,7 @@ function testFileDashboardPegawai() {
       'GAGAL: ' +
       error.message
     );
+
 
     return {
       success: false,

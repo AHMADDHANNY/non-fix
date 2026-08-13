@@ -1,7 +1,7 @@
 /**
  * ============================================================
  * CODE.GS
- * ROUTING + HELPER UTAMA
+ * ROUTING UTAMA + HELPER DATABASE
  * ============================================================
  */
 
@@ -11,9 +11,6 @@ var SHEET_IZIN = 'Izin';
 var SHEET_PENGATURAN = 'Pengaturan';
 var SHEET_SESSIONS = 'Sessions';
 
-/*
- * Durasi session: 12 jam
- */
 var SESSION_DURASI_JAM = 12;
 
 
@@ -28,38 +25,45 @@ function doGet(e) {
 
   try {
 
+    var requestedPage = '';
+
     if (
       e &&
       e.parameter &&
       e.parameter.page
     ) {
 
-      var requestedPage =
-        String(e.parameter.page)
-          .trim()
-          .replace(
-            /[^a-zA-Z0-9_-]/g,
-            ''
-          );
-
-      var allowedPages = [
-        'Login',
-        'DashboardAdmin',
-        'DashboardPegawai'
-      ];
-
-      if (
-        allowedPages.indexOf(
-          requestedPage
-        ) !== -1
-      ) {
-
-        page =
-          requestedPage;
-
-      }
+      requestedPage =
+        String(
+          e.parameter.page
+        )
+        .trim()
+        .replace(
+          /[^a-zA-Z0-9_-]/g,
+          ''
+        );
 
     }
+
+
+    var allowedPages = [
+      'Login',
+      'DashboardAdmin',
+      'DashboardPegawai'
+    ];
+
+
+    if (
+      allowedPages.indexOf(
+        requestedPage
+      ) !== -1
+    ) {
+
+      page =
+        requestedPage;
+
+    }
+
 
     return renderPage_(page);
 
@@ -79,57 +83,42 @@ function doGet(e) {
  * ============================================================
  * RENDER PAGE
  * ============================================================
- *
- * DashboardAdmin.html adalah FRAGMENT.
- * Karena itu harus dibungkus CSS + AdminCSS + AdminJS.
  */
 function renderPage_(page) {
 
+  /*
+   * DashboardAdmin adalah FRAGMENT.
+   *
+   * Jadi jangan memakai:
+   *
+   * createTemplateFromFile('DashboardAdmin')
+   *
+   * secara langsung.
+   *
+   * Kita bungkus dengan HTML lengkap,
+   * CSS, AdminCSS dan AdminJS.
+   */
   if (
-    page ===
-    'DashboardAdmin'
+    page === 'DashboardAdmin'
   ) {
 
-    return renderAdminPage_();
+    return renderDashboardAdmin_();
 
   }
 
 
   /*
-   * DashboardPegawai.html saat ini
-   * merupakan halaman HTML lengkap.
+   * Login dan DashboardPegawai
+   * adalah halaman HTML lengkap.
    */
-  if (
-    page ===
-    'DashboardPegawai'
-  ) {
-
-    return HtmlService
+  var template =
+    HtmlService
       .createTemplateFromFile(
-        'DashboardPegawai'
-      )
-      .evaluate()
-      .setTitle(
-        getNamaAppSafe_()
-      )
-      .addMetaTag(
-        'viewport',
-        'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover'
-      )
-      .setXFrameOptionsMode(
-        HtmlService.XFrameOptionsMode.ALLOWALL
+        page
       );
 
-  }
 
-
-  /*
-   * Login.html
-   */
-  return HtmlService
-    .createTemplateFromFile(
-      'Login'
-    )
+  return template
     .evaluate()
     .setTitle(
       getNamaAppSafe_()
@@ -150,14 +139,22 @@ function renderPage_(page) {
  * RENDER DASHBOARD ADMIN
  * ============================================================
  */
-function renderAdminPage_() {
+function renderDashboardAdmin_() {
 
   var html =
     '<!DOCTYPE html>' +
+
     '<html lang="id">' +
+
     '<head>' +
+
+    '<base target="_top">' +
+
     '<meta charset="UTF-8">' +
-    '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">' +
+
+    '<meta name="viewport" ' +
+    'content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">' +
+
     '<title>' +
     escapeHtml_(
       getNamaAppSafe_()
@@ -165,9 +162,11 @@ function renderAdminPage_() {
     '</title>' +
 
     include('CSS') +
+
     include('AdminCSS') +
 
     '</head>' +
+
     '<body>' +
 
     include(
@@ -178,7 +177,32 @@ function renderAdminPage_() {
       'AdminJS'
     ) +
 
+    /*
+     * AdminJS mendefinisikan:
+     *
+     * window.AdminApp
+     *
+     * tetapi tidak otomatis menjalankan init().
+     */
+    '<script>' +
+
+    'document.addEventListener("DOMContentLoaded", function () {' +
+
+    '  if (' +
+    '    window.AdminApp && ' +
+    '    typeof window.AdminApp.init === "function"' +
+    '  ) {' +
+
+    '    window.AdminApp.init();' +
+
+    '  }' +
+
+    '});' +
+
+    '</script>' +
+
     '</body>' +
+
     '</html>';
 
 
@@ -202,10 +226,12 @@ function renderAdminPage_() {
 
 /**
  * ============================================================
- * INCLUDE
+ * INCLUDE HTML
  * ============================================================
  */
-function include(filename) {
+function include(
+  filename
+) {
 
   if (!filename) {
 
@@ -215,13 +241,16 @@ function include(filename) {
 
   }
 
+
   var name =
-    String(filename)
-      .trim()
-      .replace(
-        /\.html$/i,
-        ''
-      );
+    String(
+      filename
+    )
+    .trim()
+    .replace(
+      /\.html$/i,
+      ''
+    );
 
 
   if (
@@ -252,10 +281,38 @@ function include(filename) {
       'File HTML "' +
       name +
       '.html" tidak ditemukan. ' +
+      'Pastikan file tersebut ada di project Apps Script. ' +
+      'Error asli: ' +
       error.message
     );
 
   }
+
+}
+
+
+/**
+ * ============================================================
+ * DATABASE
+ * ============================================================
+ */
+function getDatabase_() {
+
+  var ss =
+    SpreadsheetApp
+      .getActiveSpreadsheet();
+
+
+  if (!ss) {
+
+    throw new Error(
+      'Spreadsheet database tidak ditemukan.'
+    );
+
+  }
+
+
+  return ss;
 
 }
 
@@ -272,30 +329,21 @@ function getSheet(
   var name =
     String(
       sheetName || ''
-    ).trim();
+    )
+    .trim();
 
 
   if (!name) {
 
     throw new Error(
-      'Nama sheet kosong.'
+      'Nama sheet tidak boleh kosong.'
     );
 
   }
 
 
   var ss =
-    SpreadsheetApp
-      .getActiveSpreadsheet();
-
-
-  if (!ss) {
-
-    throw new Error(
-      'Spreadsheet aktif tidak ditemukan.'
-    );
-
-  }
+    getDatabase_();
 
 
   var sheet =
@@ -322,7 +370,49 @@ function getSheet(
 
 /**
  * ============================================================
- * NAMA APLIKASI
+ * GET SHEET SAFE
+ * ============================================================
+ */
+function getSheetSafe_(
+  sheetName
+) {
+
+  var name =
+    String(
+      sheetName || ''
+    )
+    .trim();
+
+
+  if (!name) {
+
+    return null;
+
+  }
+
+
+  var ss =
+    SpreadsheetApp
+      .getActiveSpreadsheet();
+
+
+  if (!ss) {
+
+    return null;
+
+  }
+
+
+  return ss.getSheetByName(
+    name
+  );
+
+}
+
+
+/**
+ * ============================================================
+ * NAMA APLIKASI - PRIVATE
  * ============================================================
  */
 function getNamaAppSafe_() {
@@ -378,8 +468,10 @@ function getNamaAppSafe_() {
         .trim();
 
 
-    return value ||
-      defaultName;
+    return (
+      value ||
+      defaultName
+    );
 
   } catch (error) {
 
@@ -392,54 +484,126 @@ function getNamaAppSafe_() {
 
 /**
  * ============================================================
- * ERROR PAGE
+ * NAMA APLIKASI - PUBLIC
+ *
+ * JS.html tidak memanggil fungsi yang berakhiran "_".
  * ============================================================
  */
-function renderErrorPage_(
-  page,
-  error
+function getNamaApp() {
+
+  return getNamaAppSafe_();
+
+}
+
+
+/**
+ * ============================================================
+ * DASHBOARD PEGAWAI
+ * ============================================================
+ *
+ * Endpoint ini dipakai oleh:
+ *
+ * DashboardPegawai.html
+ *
+ * Endpoint sebelumnya belum tersedia.
+ */
+function getDashboardPegawai(
+  token
 ) {
 
-  var message =
-    error &&
-    error.message
-      ? error.message
-      : String(error);
+  try {
+
+    var session =
+      verifySession(
+        token
+      );
 
 
-  return HtmlService
-    .createHtmlOutput(
-      '<!DOCTYPE html>' +
-      '<html lang="id">' +
-      '<head>' +
-      '<meta charset="UTF-8">' +
-      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
-      '<title>Gagal Memuat Aplikasi</title>' +
-      '<style>' +
-      'body{margin:0;padding:30px;font-family:Arial;background:#f5f7fb}' +
-      '.box{max-width:720px;margin:40px auto;background:#fff;padding:30px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.08)}' +
-      'h2{color:#d32f2f}' +
-      'pre{background:#f1f1f1;padding:15px;border-radius:8px;white-space:pre-wrap;word-break:break-word}' +
-      '</style>' +
-      '</head>' +
-      '<body>' +
-      '<div class="box">' +
-      '<h2>Gagal Memuat Aplikasi</h2>' +
-      '<p>Halaman:</p>' +
-      '<pre>' +
-      escapeHtml_(page) +
-      '</pre>' +
-      '<p>Error:</p>' +
-      '<pre>' +
-      escapeHtml_(message) +
-      '</pre>' +
-      '</div>' +
-      '</body>' +
-      '</html>'
-    )
-    .setTitle(
-      'Gagal Memuat Aplikasi'
-    );
+    if (
+      !session ||
+      session.valid !== true
+    ) {
+
+      throw new Error(
+        session &&
+        session.message
+          ? session.message
+          : 'Sesi tidak valid.'
+      );
+
+    }
+
+
+    var user =
+      session.user ||
+      {};
+
+
+    var role =
+      String(
+        user.role || ''
+      )
+      .trim()
+      .toLowerCase();
+
+
+    if (
+      role !== 'pegawai'
+    ) {
+
+      throw new Error(
+        'Akses hanya untuk pegawai.'
+      );
+
+    }
+
+
+    /*
+     * Gunakan endpoint absensi
+     * yang sudah tersedia.
+     */
+    var status =
+      getStatusAbsensiHariIni(
+        token
+      );
+
+
+    if (
+      status &&
+      status.success === true
+    ) {
+
+      return status;
+
+    }
+
+
+    return {
+      success: true,
+
+      data: {
+        tanggal: '',
+        status: '',
+        jam_masuk: '',
+        jam_pulang: ''
+      }
+
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+
+      message:
+        error &&
+        error.message
+          ? error.message
+          : String(error)
+
+    };
+
+  }
 
 }
 
@@ -456,33 +620,33 @@ function escapeHtml_(
   return String(
     value || ''
   )
-    .replace(
-      /&/g,
-      '&amp;'
-    )
-    .replace(
-      /</g,
-      '&lt;'
-    )
-    .replace(
-      />/g,
-      '&gt;'
-    )
-    .replace(
-      /"/g,
-      '&quot;'
-    )
-    .replace(
-      /'/g,
-      '&#039;'
-    );
+  .replace(
+    /&/g,
+    '&amp;'
+  )
+  .replace(
+    /</g,
+    '&lt;'
+  )
+  .replace(
+    />/g,
+    '&gt;'
+  )
+  .replace(
+    /"/g,
+    '&quot;'
+  )
+  .replace(
+    /'/g,
+    '&#039;'
+  );
 
 }
 
 
 /**
  * ============================================================
- * TEST
+ * TEST FILE LOGIN
  * ============================================================
  */
 function testFileLogin() {
@@ -494,11 +658,13 @@ function testFileLogin() {
         'Login'
       );
 
+
     return {
       success: true,
       message:
-        'Login.html ditemukan.'
+        'Login.html berhasil ditemukan.'
     };
+
 
   } catch (error) {
 
@@ -513,6 +679,11 @@ function testFileLogin() {
 }
 
 
+/**
+ * ============================================================
+ * TEST FILE DASHBOARD ADMIN
+ * ============================================================
+ */
 function testFileDashboardAdmin() {
 
   try {
@@ -522,11 +693,13 @@ function testFileDashboardAdmin() {
         'DashboardAdmin'
       );
 
+
     return {
       success: true,
       message:
-        'DashboardAdmin.html ditemukan.'
+        'DashboardAdmin.html berhasil ditemukan.'
     };
+
 
   } catch (error) {
 
@@ -541,6 +714,11 @@ function testFileDashboardAdmin() {
 }
 
 
+/**
+ * ============================================================
+ * TEST FILE DASHBOARD PEGAWAI
+ * ============================================================
+ */
 function testFileDashboardPegawai() {
 
   try {
@@ -550,11 +728,13 @@ function testFileDashboardPegawai() {
         'DashboardPegawai'
       );
 
+
     return {
       success: true,
       message:
-        'DashboardPegawai.html ditemukan.'
+        'DashboardPegawai.html berhasil ditemukan.'
     };
+
 
   } catch (error) {
 

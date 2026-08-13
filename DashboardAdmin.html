@@ -1,570 +1,959 @@
-<div
-  id="adminApp"
-  class="admin-app"
->
+<!DOCTYPE html>
+<html lang="id">
 
-  <aside
-    class="sidebar"
-    id="sidebar"
+<head>
+
+  <base target="_top">
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
   >
 
-    <div class="sidebar-brand">
+  <title>Dashboard Admin</title>
 
-      <div class="sidebar-logo">
-        ✓
-      </div>
+  <?!= include('CSS'); ?>
 
-      <div>
+  <?!= include('AdminCSS'); ?>
 
-        <div
-          class="sidebar-title"
-          id="sidebarAppName"
-        >
-          Absensi
+</head>
+
+
+<body>
+
+  <div id="adminApp" class="admin-app">
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside
+      class="sidebar"
+      id="sidebar"
+    >
+
+      <div class="sidebar-brand">
+
+        <div class="sidebar-logo">
+          ✓
         </div>
 
-        <div class="sidebar-subtitle">
-          Administrator
-        </div>
+        <div>
 
-      </div>
+          <div
+            class="sidebar-title"
+            id="sidebarAppName"
+          >
+            Absensi
+          </div>
 
-    </div>
-
-
-    <nav class="sidebar-nav">
-
-      <button
-        type="button"
-        class="nav-item active"
-        data-page="dashboard"
-      >
-        📊
-        <span>Dashboard</span>
-      </button>
-
-      <button
-        type="button"
-        class="nav-item"
-        data-page="rekap"
-      >
-        📋
-        <span>Rekap Absensi</span>
-      </button>
-
-      <button
-        type="button"
-        class="nav-item"
-        data-page="izin"
-      >
-        📝
-        <span>Pengajuan Izin</span>
-      </button>
-
-      <button
-        type="button"
-        class="nav-item"
-        data-page="users"
-      >
-        👥
-        <span>Manajemen User</span>
-      </button>
-
-      <button
-        type="button"
-        class="nav-item"
-        data-page="pengaturan"
-      >
-        ⚙️
-        <span>Pengaturan</span>
-      </button>
-
-    </nav>
-
-
-    <div class="sidebar-bottom">
-
-      <button
-        type="button"
-        class="nav-item logout-nav"
-        id="sidebarLogout"
-      >
-        🚪
-        <span>Keluar</span>
-      </button>
-
-    </div>
-
-  </aside>
-
-
-  <div
-    class="sidebar-overlay"
-    id="sidebarOverlay"
-  ></div>
-
-
-  <main class="main-content">
-
-    <header class="topbar">
-
-      <button
-        type="button"
-        class="menu-button"
-        id="menuButton"
-      >
-        ☰
-      </button>
-
-
-      <div class="topbar-title">
-
-        <div
-          id="pageTitle"
-          class="page-title"
-        >
-          Dashboard
-        </div>
-
-        <div
-          id="pageSubtitle"
-          class="page-subtitle"
-        >
-          Ringkasan aktivitas hari ini
-        </div>
-
-      </div>
-
-
-      <div class="topbar-user">
-
-        <div
-          class="topbar-avatar"
-          id="topbarAvatar"
-        >
-          A
-        </div>
-
-        <div class="topbar-user-info">
-
-          <strong id="topbarUserName">
+          <div class="sidebar-subtitle">
             Administrator
-          </strong>
+          </div>
 
-          <span id="topbarUserRole">
-            Administrator
+        </div>
+
+      </div>
+
+
+      <nav class="sidebar-nav">
+
+        <button
+          type="button"
+          class="nav-item active"
+          data-page="dashboard"
+        >
+
+          <span class="nav-icon">
+            📊
           </span>
 
-        </div>
+          <span>
+            Dashboard
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="rekap"
+        >
+
+          <span class="nav-icon">
+            📋
+          </span>
+
+          <span>
+            Rekap Absensi
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="izin"
+        >
+
+          <span class="nav-icon">
+            📝
+          </span>
+
+          <span>
+            Pengajuan Izin
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="users"
+        >
+
+          <span class="nav-icon">
+            👥
+          </span>
+
+          <span>
+            Manajemen User
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="nav-item"
+          data-page="pengaturan"
+        >
+
+          <span class="nav-icon">
+            ⚙️
+          </span>
+
+          <span>
+            Pengaturan
+          </span>
+
+        </button>
+
+      </nav>
+
+
+      <div class="sidebar-bottom">
+
+        <button
+          type="button"
+          class="nav-item logout-nav"
+          id="sidebarLogout"
+        >
+
+          <span class="nav-icon">
+            🚪
+          </span>
+
+          <span>
+            Keluar
+          </span>
+
+        </button>
 
       </div>
 
-    </header>
+    </aside>
 
 
-    <div class="content">
+    <!-- MOBILE OVERLAY -->
+
+    <div
+      class="sidebar-overlay"
+      id="sidebarOverlay"
+    ></div>
 
 
-      <!-- DASHBOARD -->
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
 
-      <section
-        id="page-dashboard"
-        class="app-page active"
-      >
+    <main class="main-content">
 
-        <div class="welcome-card">
 
-          <div>
+      <!-- TOPBAR -->
 
-            <div class="welcome-label">
-              Selamat datang 👋
-            </div>
+      <header class="topbar">
 
-            <h1 id="welcomeName">
+        <button
+          type="button"
+          class="menu-button"
+          id="menuButton"
+          aria-label="Menu"
+        >
+          ☰
+        </button>
+
+
+        <div class="topbar-title">
+
+          <div
+            id="pageTitle"
+            class="page-title"
+          >
+            Dashboard
+          </div>
+
+          <div
+            id="pageSubtitle"
+            class="page-subtitle"
+          >
+            Ringkasan aktivitas hari ini
+          </div>
+
+        </div>
+
+
+        <div class="topbar-user">
+
+          <div
+            class="topbar-avatar"
+            id="topbarAvatar"
+          >
+            A
+          </div>
+
+
+          <div class="topbar-user-info">
+
+            <strong
+              id="topbarUserName"
+            >
               Administrator
-            </h1>
+            </strong>
 
-            <p>
-              Berikut ringkasan aktivitas absensi hari ini.
-            </p>
-
-          </div>
-
-          <div class="welcome-date">
-
-            <div id="todayDate">
-              -
-            </div>
-
-            <div id="todayClock">
-              --
-            </div>
+            <span
+              id="topbarUserRole"
+            >
+              Administrator
+            </span>
 
           </div>
 
         </div>
 
-
-        <div class="stats-grid">
-
-          <div class="stat-card blue">
-            <div class="stat-icon">👥</div>
-            <div class="stat-content">
-              <span>Pegawai Aktif</span>
-              <strong id="statPegawai">0</strong>
-            </div>
-          </div>
+      </header>
 
 
-          <div class="stat-card green">
-            <div class="stat-icon">✓</div>
-            <div class="stat-content">
-              <span>Hadir Hari Ini</span>
-              <strong id="statHadir">0</strong>
-            </div>
-          </div>
+      <!-- =====================================================
+           CONTENT
+           ===================================================== -->
+
+      <div class="content">
 
 
-          <div class="stat-card orange">
-            <div class="stat-icon">⏰</div>
-            <div class="stat-content">
-              <span>Terlambat</span>
-              <strong id="statTerlambat">0</strong>
-            </div>
-          </div>
+        <!-- ===================================================
+             DASHBOARD
+             =================================================== -->
+
+        <section
+          id="page-dashboard"
+          class="app-page active"
+        >
 
 
-          <div class="stat-card red">
-            <div class="stat-icon">!</div>
-            <div class="stat-content">
-              <span>Belum Absen</span>
-              <strong id="statBelumAbsen">0</strong>
-            </div>
-          </div>
+          <!-- WELCOME -->
 
-
-          <div class="stat-card purple">
-            <div class="stat-icon">📝</div>
-            <div class="stat-content">
-              <span>Izin Pending</span>
-              <strong id="statIzinPending">0</strong>
-            </div>
-          </div>
-
-
-          <div class="stat-card cyan">
-            <div class="stat-icon">👨‍💼</div>
-            <div class="stat-content">
-              <span>Admin Aktif</span>
-              <strong id="statAdmin">0</strong>
-            </div>
-          </div>
-
-        </div>
-
-
-        <div class="section-card">
-
-          <div class="section-header">
+          <div class="welcome-card">
 
             <div>
 
-              <h2>
-                Menu Cepat
-              </h2>
+              <div class="welcome-label">
+                Selamat datang 👋
+              </div>
+
+
+              <h1 id="welcomeName">
+                Administrator
+              </h1>
+
 
               <p>
-                Akses fitur administrasi
+                Berikut ringkasan aktivitas absensi hari ini.
               </p>
 
             </div>
 
-          </div>
 
+            <div class="welcome-date">
 
-          <div class="quick-grid">
+              <div id="todayDate">
+                -
+              </div>
 
-            <button
-              type="button"
-              class="quick-card"
-              data-go="rekap"
-            >
-              📋
-              <span>
-                <strong>Rekap Absensi</strong>
-                <small>Lihat seluruh absensi</small>
-              </span>
-            </button>
-
-
-            <button
-              type="button"
-              class="quick-card"
-              data-go="izin"
-            >
-              📝
-              <span>
-                <strong>Pengajuan Izin</strong>
-                <small>Periksa pengajuan pegawai</small>
-              </span>
-            </button>
-
-
-            <button
-              type="button"
-              class="quick-card"
-              data-go="users"
-            >
-              👥
-              <span>
-                <strong>Manajemen User</strong>
-                <small>Kelola akun pengguna</small>
-              </span>
-            </button>
-
-
-            <button
-              type="button"
-              class="quick-card"
-              data-go="pengaturan"
-            >
-              ⚙️
-              <span>
-                <strong>Pengaturan</strong>
-                <small>Konfigurasi aplikasi</small>
-              </span>
-            </button>
-
-          </div>
-
-        </div>
-
-
-        <div class="section-card">
-
-          <div class="section-header">
-
-            <div>
-
-              <h2>
-                Ringkasan Hari Ini
-              </h2>
-
-              <p>
-                Status kehadiran pegawai
-              </p>
+              <div id="todayClock">
+                --:--:--
+              </div>
 
             </div>
-
-            <button
-              type="button"
-              class="btn-small"
-              id="refreshDashboard"
-            >
-              ↻ Refresh
-            </button>
 
           </div>
 
 
-          <div class="summary-list">
+          <!-- STATISTICS -->
 
-            <div class="summary-row">
-              <div class="summary-label">
-                <span class="dot green-dot"></span>
-                Hadir
+          <div class="stats-grid">
+
+
+            <div class="stat-card blue">
+
+              <div class="stat-icon">
+                👥
               </div>
-              <strong id="summaryHadir">0</strong>
+
+              <div class="stat-content">
+
+                <span>
+                  Pegawai Aktif
+                </span>
+
+                <strong id="statPegawai">
+                  0
+                </strong>
+
+              </div>
+
             </div>
 
-            <div class="summary-row">
-              <div class="summary-label">
-                <span class="dot orange-dot"></span>
-                Terlambat
+
+            <div class="stat-card green">
+
+              <div class="stat-icon">
+                ✓
               </div>
-              <strong id="summaryTerlambat">0</strong>
+
+              <div class="stat-content">
+
+                <span>
+                  Hadir Hari Ini
+                </span>
+
+                <strong id="statHadir">
+                  0
+                </strong>
+
+              </div>
+
             </div>
 
-            <div class="summary-row">
-              <div class="summary-label">
-                <span class="dot red-dot"></span>
-                Belum Absen
+
+            <div class="stat-card orange">
+
+              <div class="stat-icon">
+                ⏰
               </div>
-              <strong id="summaryBelumAbsen">0</strong>
+
+              <div class="stat-content">
+
+                <span>
+                  Terlambat
+                </span>
+
+                <strong id="statTerlambat">
+                  0
+                </strong>
+
+              </div>
+
             </div>
 
-            <div class="summary-row">
-              <div class="summary-label">
-                <span class="dot purple-dot"></span>
-                Izin Pending
+
+            <div class="stat-card red">
+
+              <div class="stat-icon">
+                !
               </div>
-              <strong id="summaryIzin">0</strong>
+
+              <div class="stat-content">
+
+                <span>
+                  Belum Absen
+                </span>
+
+                <strong id="statBelumAbsen">
+                  0
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div class="stat-card purple">
+
+              <div class="stat-icon">
+                📝
+              </div>
+
+              <div class="stat-content">
+
+                <span>
+                  Izin Pending
+                </span>
+
+                <strong id="statIzinPending">
+                  0
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div class="stat-card cyan">
+
+              <div class="stat-icon">
+                👨‍💼
+              </div>
+
+              <div class="stat-content">
+
+                <span>
+                  Admin Aktif
+                </span>
+
+                <strong id="statAdmin">
+                  0
+                </strong>
+
+              </div>
+
             </div>
 
           </div>
 
-        </div>
 
-      </section>
+          <!-- QUICK ACTION -->
 
+          <div class="section-card">
 
-      <!-- REKAP -->
+            <div class="section-header">
 
-      <section
-        id="page-rekap"
-        class="app-page"
-      >
+              <div>
 
-        <div class="section-card">
+                <h2>
+                  Menu Cepat
+                </h2>
 
-          <h2>Rekap Absensi</h2>
+                <p>
+                  Akses fitur administrasi
+                </p>
 
-          <p>
-            Gunakan modul rekap absensi untuk melihat data kehadiran seluruh pegawai.
-          </p>
+              </div>
 
-          <div id="rekapContent"></div>
-
-        </div>
-
-      </section>
+            </div>
 
 
-      <!-- IZIN -->
-
-      <section
-        id="page-izin"
-        class="app-page"
-      >
-
-        <div class="section-card">
-
-          <h2>Pengajuan Izin</h2>
-
-          <p>
-            Kelola pengajuan izin, sakit dan cuti pegawai.
-          </p>
-
-          <div id="izinContent"></div>
-
-        </div>
-
-      </section>
+            <div class="quick-grid">
 
 
-      <!-- USERS -->
+              <button
+                type="button"
+                class="quick-card"
+                data-go="rekap"
+              >
 
-      <section
-        id="page-users"
-        class="app-page"
-      >
+                <span class="quick-icon blue-bg">
+                  📋
+                </span>
 
-        <div class="section-card">
+                <span>
 
-          <h2>Manajemen User</h2>
+                  <strong>
+                    Rekap Absensi
+                  </strong>
 
-          <p>
-            Kelola akun admin dan pegawai.
-          </p>
+                  <small>
+                    Lihat seluruh absensi
+                  </small>
 
-          <div id="usersContent"></div>
+                </span>
 
-        </div>
-
-      </section>
+              </button>
 
 
-      <!-- PENGATURAN -->
+              <button
+                type="button"
+                class="quick-card"
+                data-go="izin"
+              >
 
-      <section
-        id="page-pengaturan"
-        class="app-page"
-      >
+                <span class="quick-icon purple-bg">
+                  📝
+                </span>
 
-        <div class="section-card">
+                <span>
 
-          <h2>Pengaturan</h2>
+                  <strong>
+                    Pengajuan Izin
+                  </strong>
 
-          <p>
-            Konfigurasi aplikasi, GPS dan jam kerja.
-          </p>
+                  <small>
+                    Periksa pengajuan pegawai
+                  </small>
 
-          <div id="pengaturanContent"></div>
+                </span>
 
-        </div>
+              </button>
 
-      </section>
+
+              <button
+                type="button"
+                class="quick-card"
+                data-go="users"
+              >
+
+                <span class="quick-icon green-bg">
+                  👥
+                </span>
+
+                <span>
+
+                  <strong>
+                    Manajemen User
+                  </strong>
+
+                  <small>
+                    Kelola akun pengguna
+                  </small>
+
+                </span>
+
+              </button>
+
+
+              <button
+                type="button"
+                class="quick-card"
+                data-go="pengaturan"
+              >
+
+                <span class="quick-icon orange-bg">
+                  ⚙️
+                </span>
+
+                <span>
+
+                  <strong>
+                    Pengaturan
+                  </strong>
+
+                  <small>
+                    Konfigurasi aplikasi
+                  </small>
+
+                </span>
+
+              </button>
+
+
+            </div>
+
+          </div>
+
+
+          <!-- SUMMARY -->
+
+          <div class="section-card">
+
+            <div class="section-header">
+
+              <div>
+
+                <h2>
+                  Ringkasan Hari Ini
+                </h2>
+
+                <p>
+                  Status kehadiran pegawai
+                </p>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="btn-small"
+                id="refreshDashboard"
+              >
+                ↻ Refresh
+              </button>
+
+            </div>
+
+
+            <div class="summary-list">
+
+
+              <div class="summary-row">
+
+                <div class="summary-label">
+
+                  <span class="dot green-dot"></span>
+
+                  Hadir
+
+                </div>
+
+                <strong id="summaryHadir">
+                  0
+                </strong>
+
+              </div>
+
+
+              <div class="summary-row">
+
+                <div class="summary-label">
+
+                  <span class="dot orange-dot"></span>
+
+                  Terlambat
+
+                </div>
+
+                <strong id="summaryTerlambat">
+                  0
+                </strong>
+
+              </div>
+
+
+              <div class="summary-row">
+
+                <div class="summary-label">
+
+                  <span class="dot red-dot"></span>
+
+                  Belum Absen
+
+                </div>
+
+                <strong id="summaryBelumAbsen">
+                  0
+                </strong>
+
+              </div>
+
+
+              <div class="summary-row">
+
+                <div class="summary-label">
+
+                  <span class="dot purple-dot"></span>
+
+                  Izin Pending
+
+                </div>
+
+                <strong id="summaryIzin">
+                  0
+                </strong>
+
+              </div>
+
+
+            </div>
+
+          </div>
+
+
+        </section>
+
+
+        <!-- ===================================================
+             REKAP
+             =================================================== -->
+
+        <section
+          id="page-rekap"
+          class="app-page"
+        >
+
+          <div class="section-card">
+
+            <div class="section-header">
+
+              <div>
+
+                <h2>
+                  Rekap Absensi
+                </h2>
+
+                <p>
+                  Rekap kehadiran seluruh pegawai
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div id="rekapContent"></div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             IZIN
+             =================================================== -->
+
+        <section
+          id="page-izin"
+          class="app-page"
+        >
+
+          <div class="section-card">
+
+            <div class="section-header">
+
+              <div>
+
+                <h2>
+                  Pengajuan Izin
+                </h2>
+
+                <p>
+                  Kelola pengajuan izin pegawai
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div id="izinContent"></div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             USERS
+             =================================================== -->
+
+        <section
+          id="page-users"
+          class="app-page"
+        >
+
+          <div class="section-card">
+
+            <div class="section-header">
+
+              <div>
+
+                <h2>
+                  Manajemen User
+                </h2>
+
+                <p>
+                  Kelola akun admin dan pegawai
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div id="usersContent"></div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===================================================
+             PENGATURAN
+             =================================================== -->
+
+        <section
+          id="page-pengaturan"
+          class="app-page"
+        >
+
+          <div class="section-card">
+
+            <div class="section-header">
+
+              <div>
+
+                <h2>
+                  Pengaturan
+                </h2>
+
+                <p>
+                  Konfigurasi aplikasi
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div id="pengaturanContent"></div>
+
+          </div>
+
+        </section>
+
+
+      </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         LOADING
+         ===================================================== -->
+
+    <div
+      id="globalLoading"
+      class="global-loading hidden"
+    >
+
+      <div class="loading-box">
+
+        <span class="loading-spinner"></span>
+
+        <span id="loadingText">
+          Memuat...
+        </span>
+
+      </div>
 
     </div>
 
-  </main>
+
+    <!-- =====================================================
+         TOAST
+         ===================================================== -->
+
+    <div
+      id="toast"
+      class="toast"
+    ></div>
 
 
-  <div
-    id="globalLoading"
-    class="global-loading hidden"
-  >
+    <!-- =====================================================
+         LOGOUT MODAL
+         ===================================================== -->
 
-    <div class="loading-box">
+    <div
+      id="logoutModal"
+      class="modal-overlay hidden"
+    >
 
-      <span class="loading-spinner"></span>
+      <div class="modal-card">
 
-      <span id="loadingText">
-        Memuat...
-      </span>
+        <div class="modal-icon">
+          🚪
+        </div>
+
+        <h3>
+          Keluar dari aplikasi?
+        </h3>
+
+        <p>
+          Sesi Anda akan diakhiri.
+        </p>
+
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="btn-secondary"
+            id="cancelLogout"
+          >
+            Batal
+          </button>
+
+
+          <button
+            type="button"
+            class="btn-danger"
+            id="confirmLogout"
+          >
+            Keluar
+          </button>
+
+        </div>
+
+      </div>
 
     </div>
+
 
   </div>
 
 
-  <div
-    id="toast"
-    class="toast"
-  ></div>
+  <!-- =======================================================
+       ADMIN JAVASCRIPT
+       ======================================================= -->
+
+  <?!= include('AdminJS'); ?>
 
 
-  <div
-    id="logoutModal"
-    class="modal-overlay hidden"
-  >
+  <!-- =======================================================
+       START ADMIN APPLICATION
+       ======================================================= -->
 
-    <div class="modal-card">
+  <script>
 
-      <div class="modal-icon">
-        🚪
-      </div>
+    document.addEventListener(
+      'DOMContentLoaded',
+      function () {
 
-      <h3>
-        Keluar dari aplikasi?
-      </h3>
+        try {
 
-      <p>
-        Sesi Anda akan diakhiri.
-      </p>
+          if (
+            window.AdminApp &&
+            typeof window.AdminApp.init === 'function'
+          ) {
 
-      <div class="modal-actions">
+            window.AdminApp.init();
 
-        <button
-          type="button"
-          class="btn-secondary"
-          id="cancelLogout"
-        >
-          Batal
-        </button>
+          } else {
 
-        <button
-          type="button"
-          class="btn-danger"
-          id="confirmLogout"
-        >
-          Keluar
-        </button>
+            console.error(
+              'AdminApp.init tidak ditemukan.'
+            );
 
-      </div>
+          }
 
-    </div>
+        } catch (error) {
 
-  </div>
+          console.error(
+            'Gagal menjalankan Dashboard Admin:',
+            error
+          );
 
-</div>
+        }
+
+      }
+    );
+
+  </script>
+
+
+</body>
+
+</html>

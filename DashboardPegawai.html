@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+  <base target="_top">
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1"
+  >
+
+  <title>Dashboard Pegawai</title>
+
+  <?!= include('CSS'); ?>
+
+</head>
+
+
+<body>
+
+  <main
+    style="
+      min-height:100vh;
+      padding:24px;
+      box-sizing:border-box;
+    "
+  >
+
+    <div
+      style="
+        max-width:900px;
+        margin:0 auto;
+      "
+    >
+
+      <div
+        style="
+          background:#fff;
+          border-radius:16px;
+          padding:24px;
+          box-shadow:0 10px 30px rgba(0,0,0,.08);
+        "
+      >
+
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:20px;
+            flex-wrap:wrap;
+          "
+        >
+
+          <div>
+
+            <div
+              style="
+                font-size:14px;
+                color:#667085;
+                margin-bottom:6px;
+              "
+            >
+              Dashboard Pegawai
+            </div>
+
+            <h1
+              id="pegawaiName"
+              style="
+                margin:0;
+                font-size:28px;
+              "
+            >
+              Memuat...
+            </h1>
+
+            <p
+              id="pegawaiJabatan"
+              style="
+                margin:8px 0 0;
+                color:#667085;
+              "
+            >
+              -
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            id="logoutButton"
+            class="btn btn-primary"
+          >
+            Keluar
+          </button>
+
+        </div>
+
+
+        <hr
+          style="
+            border:0;
+            border-top:1px solid #e5e7eb;
+            margin:24px 0;
+          "
+        >
+
+
+        <div
+          style="
+            display:grid;
+            grid-template-columns:
+              repeat(auto-fit,minmax(220px,1fr));
+            gap:16px;
+          "
+        >
+
+          <div
+            style="
+              border:1px solid #e5e7eb;
+              border-radius:12px;
+              padding:20px;
+            "
+          >
+
+            <div
+              style="
+                color:#667085;
+                font-size:14px;
+              "
+            >
+              Status Hari Ini
+            </div>
+
+            <strong
+              id="statusHariIni"
+              style="
+                display:block;
+                margin-top:8px;
+                font-size:22px;
+              "
+            >
+              Memuat...
+            </strong>
+
+          </div>
+
+
+          <div
+            style="
+              border:1px solid #e5e7eb;
+              border-radius:12px;
+              padding:20px;
+            "
+          >
+
+            <div
+              style="
+                color:#667085;
+                font-size:14px;
+              "
+            >
+              Jam Masuk
+            </div>
+
+            <strong
+              id="jamMasuk"
+              style="
+                display:block;
+                margin-top:8px;
+                font-size:22px;
+              "
+            >
+              -
+            </strong>
+
+          </div>
+
+
+          <div
+            style="
+              border:1px solid #e5e7eb;
+              border-radius:12px;
+              padding:20px;
+            "
+          >
+
+            <div
+              style="
+                color:#667085;
+                font-size:14px;
+              "
+            >
+              Jam Pulang
+            </div>
+
+            <strong
+              id="jamPulang"
+              style="
+                display:block;
+                margin-top:8px;
+                font-size:22px;
+              "
+            >
+              -
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="message"
+          style="
+            margin-top:20px;
+            padding:12px 14px;
+            border-radius:8px;
+            display:none;
+          "
+        ></div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <script>
+
+  (function () {
+
+    'use strict';
+
+
+    var TOKEN_KEY =
+      'absensi_session_token';
+
+    var USER_KEY =
+      'absensi_session_user';
+
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      init
+    );
+
+
+    function init() {
+
+      var token =
+        getToken();
+
+
+      if (!token) {
+
+        redirectLogin();
+
+        return;
+
+      }
+
+
+      loadStoredUser();
+
+      verifyPegawai(token);
+
+    }
+
+
+    function verifyPegawai(token) {
+
+      google.script.run
+
+        .withSuccessHandler(
+          function (response) {
+
+            if (
+              !response ||
+              response.valid !== true
+            ) {
+
+              clearSession();
+
+              redirectLogin();
+
+              return;
+
+            }
+
+
+            var user =
+              response.user || {};
+
+
+            var role =
+              String(
+                user.role || ''
+              )
+              .trim()
+              .toLowerCase();
+
+
+            if (
+              role !== 'pegawai'
+            ) {
+
+              clearSession();
+
+              redirectLogin();
+
+              return;
+
+            }
+
+
+            saveUser(user);
+
+            applyUser(user);
+
+            loadAttendance(token);
+
+          }
+        )
+
+        .withFailureHandler(
+          function (error) {
+
+            showMessage(
+              normalizeError(error),
+              true
+            );
+
+          }
+        )
+
+        .verifySession(
+          token
+        );
+
+    }
+
+
+    function loadStoredUser() {
+
+      try {
+
+        var raw =
+          localStorage.getItem(
+            USER_KEY
+          );
+
+
+        if (!raw) {
+          return;
+        }
+
+
+        var user =
+          JSON.parse(raw);
+
+        applyUser(user);
+
+      } catch (error) {}
+
+    }
+
+
+    function applyUser(user) {
+
+      if (!user) {
+        return;
+      }
+
+
+      var name =
+        user.nama ||
+        user.username ||
+        'Pegawai';
+
+
+      var jabatan =
+        user.jabatan ||
+        'Pegawai';
+
+
+      setText(
+        'pegawaiName',
+        name
+      );
+
+      setText(
+        'pegawaiJabatan',
+        jabatan
+      );
+
+    }
+
+
+    /*
+     * Jika fungsi backend getDashboardPegawai()
+     * sudah tersedia, data akan digunakan.
+     *
+     * Jika belum tersedia, halaman tetap aman
+     * dan tidak crash.
+     */
+    function loadAttendance(token) {
+
+      if (
+        typeof google === 'undefined' ||
+        !google.script ||
+        !google.script.run
+      ) {
+        return;
+      }
+
+
+      google.script.run
+
+        .withSuccessHandler(
+          function (response) {
+
+            if (
+              !response ||
+              response.success !== true
+            ) {
+
+              return;
+
+            }
+
+
+            var data =
+              response.data || {};
+
+
+            setText(
+              'statusHariIni',
+              data.status ||
+              data.status_hari_ini ||
+              'Belum Absen'
+            );
+
+
+            setText(
+              'jamMasuk',
+              data.jam_masuk ||
+              '-'
+            );
+
+
+            setText(
+              'jamPulang',
+              data.jam_pulang ||
+              '-'
+            );
+
+          }
+        )
+
+        .withFailureHandler(
+          function () {
+
+            /*
+             * Dashboard dasar tetap tampil
+             * walaupun endpoint absensi pegawai
+             * belum tersedia.
+             */
+
+          }
+        )
+
+        .getDashboardPegawai(
+          token
+        );
+
+    }
+
+
+    function getToken() {
+
+      try {
+
+        return (
+          localStorage.getItem(
+            TOKEN_KEY
+          ) || ''
+        );
+
+      } catch (error) {
+
+        return '';
+
+      }
+
+    }
+
+
+    function saveUser(user) {
+
+      try {
+
+        localStorage.setItem(
+          USER_KEY,
+          JSON.stringify(
+            user || {}
+          )
+        );
+
+      } catch (error) {}
+
+    }
+
+
+    function clearSession() {
+
+      try {
+
+        localStorage.removeItem(
+          TOKEN_KEY
+        );
+
+        localStorage.removeItem(
+          USER_KEY
+        );
+
+      } catch (error) {}
+
+    }
+
+
+    function redirectLogin() {
+
+      var base =
+        window.location.href
+          .split('?')[0];
+
+
+      window.top.location.href =
+        base + '?page=Login';
+
+    }
+
+
+    function setText(id, value) {
+
+      var element =
+        document.getElementById(id);
+
+
+      if (element) {
+
+        element.textContent =
+          value == null
+            ? ''
+            : String(value);
+
+      }
+
+    }
+
+
+    function showMessage(
+      message,
+      error
+    ) {
+
+      var element =
+        document.getElementById(
+          'message'
+        );
+
+
+      if (!element) {
+        return;
+      }
+
+
+      element.style.display =
+        'block';
+
+      element.style.background =
+        error
+          ? '#fff1f2'
+          : '#ecfdf3';
+
+      element.style.color =
+        error
+          ? '#b42318'
+          : '#027a48';
+
+      element.textContent =
+        message || '';
+
+    }
+
+
+    function normalizeError(error) {
+
+      if (!error) {
+        return 'Terjadi kesalahan server.';
+      }
+
+      if (
+        typeof error === 'string'
+      ) {
+        return error;
+      }
+
+      return (
+        error.message ||
+        'Terjadi kesalahan server.'
+      );
+
+    }
+
+
+    document
+      .getElementById('logoutButton')
+      .addEventListener(
+        'click',
+        function () {
+
+          var token =
+            getToken();
+
+
+          clearSession();
+
+
+          if (token) {
+
+            google.script.run
+              .withSuccessHandler(
+                redirectLogin
+              )
+              .withFailureHandler(
+                redirectLogin
+              )
+              .logout(token);
+
+          } else {
+
+            redirectLogin();
+
+          }
+
+        }
+      );
+
+  })();
+
+  </script>
+
+</body>
+
+</html>

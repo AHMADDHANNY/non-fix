@@ -85,7 +85,7 @@
 
 
   /* =========================================================
-     PASSWORD
+     PASSWORD TOGGLE
      ========================================================= */
 
   function setupPasswordToggle() {
@@ -127,7 +127,7 @@
 
 
   /* =========================================================
-     FORM
+     LOGIN FORM
      ========================================================= */
 
   function setupLoginForm() {
@@ -159,15 +159,23 @@
 
   function login() {
 
+    if (
+      !usernameInput ||
+      !passwordInput
+    ) {
+
+      return;
+
+    }
+
+
     var username =
-      usernameInput
-        ? usernameInput.value.trim()
-        : '';
+      usernameInput.value
+        .trim();
+
 
     var password =
-      passwordInput
-        ? passwordInput.value
-        : '';
+      passwordInput.value;
 
 
     clearMessage();
@@ -179,9 +187,7 @@
         'Username wajib diisi.'
       );
 
-      if (usernameInput) {
-        usernameInput.focus();
-      }
+      usernameInput.focus();
 
       return;
 
@@ -194,9 +200,7 @@
         'Password wajib diisi.'
       );
 
-      if (passwordInput) {
-        passwordInput.focus();
-      }
+      passwordInput.focus();
 
       return;
 
@@ -227,20 +231,18 @@
             );
 
 
-            if (passwordInput) {
+            passwordInput.value = '';
 
-              passwordInput.value = '';
-
-              passwordInput.focus();
-
-            }
+            passwordInput.focus();
 
             return;
 
           }
 
 
-          if (!response.token) {
+          if (
+            !response.token
+          ) {
 
             showError(
               'Login berhasil tetapi token session tidak diterima.'
@@ -252,7 +254,8 @@
 
 
           var user =
-            response.user || {};
+            response.user ||
+            {};
 
 
           var role =
@@ -267,6 +270,8 @@
             role !== 'admin' &&
             role !== 'pegawai'
           ) {
+
+            clearSession();
 
             showError(
               'Role akun tidak valid.'
@@ -345,7 +350,7 @@
 
 
   /* =========================================================
-     EXISTING SESSION
+     CHECK EXISTING SESSION
      ========================================================= */
 
   function checkExistingSession() {
@@ -394,8 +399,8 @@
         function () {
 
           /*
-           * Jangan ganggu halaman login
-           * jika validasi session gagal.
+           * Jangan tampilkan error
+           * ketika login pertama dibuka.
            */
 
         }
@@ -409,7 +414,7 @@
 
 
   /* =========================================================
-     REDIRECT ROLE
+     REDIRECT BY ROLE
      ========================================================= */
 
   function redirectByRole(
@@ -435,7 +440,8 @@
       .toLowerCase();
 
 
-    var targetPage = '';
+    var targetPage =
+      '';
 
 
     if (
@@ -465,6 +471,14 @@
     }
 
 
+    /*
+     * Hanya gunakan page untuk routing.
+     *
+     * Token TIDAK dimasukkan ke URL.
+     *
+     * Dashboard tetap memvalidasi
+     * session melalui server.
+     */
     var baseUrl =
       window.location.href
         .split('?')[0];
@@ -478,14 +492,6 @@
       );
 
   }
-
-
-  /*
-   * Expose supaya bisa digunakan
-   * jika diperlukan oleh halaman lain.
-   */
-  window.redirectByRole =
-    redirectByRole;
 
 
   /* =========================================================
@@ -526,7 +532,6 @@
         function () {
 
           /*
-           * Tidak perlu menampilkan error.
            * Nama default tetap digunakan.
            */
 
@@ -562,7 +567,7 @@
 
 
   /* =========================================================
-     USER
+     SAVE USER
      ========================================================= */
 
   function saveUser(
@@ -582,6 +587,10 @@
 
   }
 
+
+  /* =========================================================
+     CLEAR SESSION
+     ========================================================= */
 
   function clearSession() {
 
@@ -639,7 +648,7 @@
 
 
   /* =========================================================
-     MESSAGE
+     ERROR
      ========================================================= */
 
   function showError(
@@ -664,6 +673,10 @@
   }
 
 
+  /* =========================================================
+     SUCCESS
+     ========================================================= */
+
   function showSuccess(
     message
   ) {
@@ -686,6 +699,10 @@
   }
 
 
+  /* =========================================================
+     CLEAR MESSAGE
+     ========================================================= */
+
   function clearMessage() {
 
     if (!loginMessage) {
@@ -706,7 +723,7 @@
 
 
   /* =========================================================
-     ERROR
+     NORMALIZE ERROR
      ========================================================= */
 
   function normalizeError(
@@ -749,13 +766,14 @@
 
 
   /* =========================================================
-     GLOBAL API
+     GLOBAL APP
      ========================================================= */
 
   window.AbsensiApp = {
 
     getToken:
       getToken,
+
 
     getUser:
       function () {
@@ -780,8 +798,10 @@
 
       },
 
+
     clearSession:
       clearSession,
+
 
     redirectByRole:
       redirectByRole

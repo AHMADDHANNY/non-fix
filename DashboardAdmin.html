@@ -5,6 +5,11 @@
 
   <base target="_top">
 
+  <script>
+  window.ABSENSI_WEB_APP_URL =
+    <?!= JSON.stringify(webAppUrl || '') ?>;
+</script>
+
   <meta charset="UTF-8">
 
   <meta
@@ -903,48 +908,6 @@
 
 
   </div>
-  
-  <!-- =======================================================
-       START ADMIN APPLICATION
-       ======================================================= -->
-
-  <script>
-
-    document.addEventListener(
-      'DOMContentLoaded',
-      function () {
-
-        try {
-
-          if (
-            window.AdminApp &&
-            typeof window.AdminApp.init === 'function'
-          ) {
-
-            window.AdminApp.init();
-
-          } else {
-
-            console.error(
-              'AdminApp.init tidak ditemukan.'
-            );
-
-          }
-
-        } catch (error) {
-
-          console.error(
-            'Gagal menjalankan Dashboard Admin:',
-            error
-          );
-
-        }
-
-      }
-    );
-
-  </script>
-
 
 </body>
 

@@ -1,0 +1,465 @@
+<style>
+
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --background: #f1f5f9;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  color: var(--text);
+  background: var(--background);
+}
+
+body {
+  min-height: 100vh;
+}
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.login-page {
+
+  min-height: 100vh;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 20px;
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(37, 99, 235, .12),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      #eff6ff 0%,
+      #f8fafc 50%,
+      #eef2ff 100%
+    );
+}
+
+
+.login-card {
+
+  width: 100%;
+
+  max-width: 420px;
+
+  background: var(--card);
+
+  border-radius: var(--radius);
+
+  padding: 32px 28px;
+
+  box-shadow:
+    0 20px 50px rgba(15, 23, 42, .10);
+
+  border: 1px solid rgba(226, 232, 240, .8);
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.brand {
+
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+.brand-logo {
+
+  width: 72px;
+
+  height: 72px;
+
+  margin: 0 auto 16px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 20px;
+
+  color: white;
+
+  font-size: 32px;
+
+  font-weight: 800;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      #4f46e5
+    );
+
+  box-shadow:
+    0 12px 25px rgba(37, 99, 235, .25);
+}
+
+.brand-logo img {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  border-radius: inherit;
+}
+
+.brand h1 {
+
+  margin: 0;
+
+  font-size: 24px;
+
+  line-height: 1.25;
+
+  font-weight: 750;
+}
+
+.brand p {
+
+  margin: 8px 0 0;
+
+  color: var(--muted);
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.form-group {
+
+  margin-bottom: 18px;
+}
+
+.form-group label {
+
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 14px;
+
+  font-weight: 600;
+}
+
+
+.input-wrap {
+
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+}
+
+.input-icon {
+
+  position: absolute;
+
+  left: 13px;
+
+  font-size: 17px;
+
+  pointer-events: none;
+
+  opacity: .7;
+}
+
+.input-wrap input {
+
+  width: 100%;
+
+  height: 48px;
+
+  padding:
+    0 44px
+    0 42px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 12px;
+
+  background: #fff;
+
+  color: var(--text);
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition:
+    border-color .2s,
+    box-shadow .2s;
+}
+
+.input-wrap input:focus {
+
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(37, 99, 235, .10);
+}
+
+
+.password-toggle {
+
+  position: absolute;
+
+  right: 7px;
+
+  width: 36px;
+
+  height: 36px;
+
+  border: 0;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  border-radius: 8px;
+
+  font-size: 16px;
+}
+
+.password-toggle:hover {
+
+  background: #f1f5f9;
+}
+
+
+/* =========================================================
+   BUTTON
+   ========================================================= */
+
+.btn {
+
+  width: 100%;
+
+  height: 48px;
+
+  border: 0;
+
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  font-size: 15px;
+
+  font-weight: 700;
+
+  transition:
+    transform .15s,
+    opacity .15s,
+    background .15s;
+}
+
+.btn:active {
+
+  transform: scale(.99);
+}
+
+.btn:disabled {
+
+  cursor: not-allowed;
+
+  opacity: .65;
+}
+
+.btn-primary {
+
+  color: #fff;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      #4f46e5
+    );
+}
+
+.btn-primary:hover {
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary-dark),
+      #4338ca
+    );
+}
+
+.btn-login {
+
+  margin-top: 6px;
+}
+
+
+/* =========================================================
+   MESSAGE
+   ========================================================= */
+
+.message {
+
+  padding: 11px 13px;
+
+  margin-bottom: 14px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+
+  line-height: 1.4;
+}
+
+.message.error {
+
+  color: #991b1b;
+
+  background: #fef2f2;
+
+  border: 1px solid #fecaca;
+}
+
+.message.success {
+
+  color: #166534;
+
+  background: #f0fdf4;
+
+  border: 1px solid #bbf7d0;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.spinner {
+
+  display: inline-block;
+
+  width: 18px;
+
+  height: 18px;
+
+  border:
+    2px solid
+    rgba(255,255,255,.4);
+
+  border-top-color: #fff;
+
+  border-radius: 50%;
+
+  animation:
+    spin .7s linear infinite;
+
+  vertical-align: middle;
+}
+
+@keyframes spin {
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.login-footer {
+
+  margin-top: 24px;
+
+  text-align: center;
+
+  color: #94a3b8;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   UTILITIES
+   ========================================================= */
+
+.hidden {
+  display: none !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .login-page {
+    padding: 14px;
+  }
+
+  .login-card {
+
+    padding:
+      28px 20px;
+
+    border-radius: 16px;
+  }
+
+  .brand h1 {
+
+    font-size: 22px;
+  }
+
+}
+
+</style>

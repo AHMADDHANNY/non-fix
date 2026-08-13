@@ -969,3 +969,105 @@ function jsonResponse(success, message, data) {
 
   return result;
 }
+
+/**
+ * ============================================================
+ * PASSWORD HASH
+ * ============================================================
+ *
+ * Password disimpan sebagai SHA-256(password + salt)
+ */
+function hashPassword(password, salt) {
+
+  password = String(password || '');
+  salt = String(salt || '');
+
+  var input =
+    password +
+    salt;
+
+  var digest =
+    Utilities.computeDigest(
+      Utilities.DigestAlgorithm.SHA_256,
+      input,
+      Utilities.Charset.UTF_8
+    );
+
+  return digest
+    .map(function (byte) {
+
+      var value =
+        byte < 0
+          ? byte + 256
+          : byte;
+
+      return ('0' + value.toString(16))
+        .slice(-2);
+
+    })
+    .join('');
+
+}
+
+
+/**
+ * ============================================================
+ * VERIFY PASSWORD
+ * ============================================================
+ */
+function verifyPassword_(
+  password,
+  passwordHash,
+  salt
+) {
+
+  password =
+    String(password || '');
+
+  passwordHash =
+    String(passwordHash || '');
+
+  salt =
+    String(salt || '');
+
+  if (
+    !passwordHash ||
+    !salt
+  ) {
+
+    return false;
+
+  }
+
+  var calculatedHash =
+    hashPassword(
+      password,
+      salt
+    );
+
+  return calculatedHash ===
+    passwordHash;
+
+}
+
+
+/**
+ * ============================================================
+ * CREATE SESSION
+ * ============================================================
+ *
+ * Auth.gs lama memanggil createSession_()
+ * sedangkan fungsi session yang tersedia bernama
+ * buatSessionToken_().
+ *
+ * Wrapper ini menyatukan keduanya.
+ */
+function createSession_(
+  idUser
+) {
+
+  return buatSessionToken_(
+    idUser
+  );
+
+}

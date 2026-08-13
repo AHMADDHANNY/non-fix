@@ -405,17 +405,6 @@ function getDetailAbsensiAdmin(token, idAbsen) {
 
     var user = null;
 
-    for (var i = 1; i < users.length; i++) {
-      if (
-        String(users[i][KOLOM_USERS_ADMIN.ID]) ===
-        String(
-          absensi.length > 0 ? '' : ''
-        )
-      ) {
-        // Tidak digunakan.
-      }
-    }
-
     for (var j = 1; j < absensi.length; j++) {
       var row = absensi[j];
 

@@ -1,11 +1,9 @@
 <script>
+
 (function () {
 
   'use strict';
 
-  /* =========================================================
-     STORAGE
-     ========================================================= */
 
   var STORAGE_TOKEN =
     'absensi_session_token';
@@ -14,38 +12,53 @@
     'absensi_session_user';
 
 
-  /* =========================================================
-     ELEMENT
-     ========================================================= */
-
   var form =
-    document.getElementById('loginForm');
+    document.getElementById(
+      'loginForm'
+    );
 
   var usernameInput =
-    document.getElementById('username');
+    document.getElementById(
+      'username'
+    );
 
   var passwordInput =
-    document.getElementById('password');
+    document.getElementById(
+      'password'
+    );
 
   var loginButton =
-    document.getElementById('loginButton');
+    document.getElementById(
+      'loginButton'
+    );
 
   var loginButtonText =
-    document.getElementById('loginButtonText');
+    document.getElementById(
+      'loginButtonText'
+    );
 
   var loginSpinner =
-    document.getElementById('loginSpinner');
+    document.getElementById(
+      'loginSpinner'
+    );
 
   var loginMessage =
-    document.getElementById('loginMessage');
+    document.getElementById(
+      'loginMessage'
+    );
 
   var togglePassword =
-    document.getElementById('togglePassword');
+    document.getElementById(
+      'togglePassword'
+    );
 
 
-  /* =========================================================
-     INIT
-     ========================================================= */
+  var pendingTargetUrl =
+    '';
+
+  var redirectReady =
+    false;
+
 
   document.addEventListener(
     'DOMContentLoaded',
@@ -66,30 +79,32 @@
   }
 
 
-  /* =========================================================
-     PASSWORD TOGGLE
-     ========================================================= */
-
   function setupPasswordToggle() {
 
     if (
       !togglePassword ||
       !passwordInput
     ) {
+
       return;
+
     }
+
 
     togglePassword.addEventListener(
       'click',
       function () {
 
         var visible =
-          passwordInput.type === 'text';
+          passwordInput.type ===
+          'text';
+
 
         passwordInput.type =
           visible
             ? 'password'
             : 'text';
+
 
         togglePassword.textContent =
           visible
@@ -102,24 +117,32 @@
   }
 
 
-  /* =========================================================
-     LOGIN FORM
-     ========================================================= */
-
   function setupLoginForm() {
 
     if (!form) {
       return;
     }
 
+
     form.addEventListener(
       'submit',
       function (event) {
 
-        /*
-         * WAJIB untuk Apps Script IFRAME.
-         */
         event.preventDefault();
+
+        if (
+          redirectReady &&
+          pendingTargetUrl
+        ) {
+
+          navigateTop(
+            pendingTargetUrl
+          );
+
+          return;
+
+        }
+
 
         login();
 
@@ -129,25 +152,17 @@
   }
 
 
-  /* =========================================================
-     LOGIN
-     ========================================================= */
-
   function login() {
 
-    if (
-      !usernameInput ||
-      !passwordInput
-    ) {
-      return;
-    }
-
-
     var username =
-      usernameInput.value.trim();
+      usernameInput
+        ? usernameInput.value.trim()
+        : '';
 
     var password =
-      passwordInput.value;
+      passwordInput
+        ? passwordInput.value
+        : '';
 
 
     clearMessage();
@@ -159,9 +174,12 @@
         'Username wajib diisi.'
       );
 
-      usernameInput.focus();
+      if (usernameInput) {
+        usernameInput.focus();
+      }
 
       return;
+
     }
 
 
@@ -171,9 +189,12 @@
         'Password wajib diisi.'
       );
 
-      passwordInput.focus();
+      if (passwordInput) {
+        passwordInput.focus();
+      }
 
       return;
+
     }
 
 
@@ -185,17 +206,12 @@
       .withSuccessHandler(
         function (response) {
 
-          /*
-           * SELALU hentikan loading
-           * begitu server membalas.
-           */
-          setLoading(false);
-
-
           if (
             !response ||
             response.success !== true
           ) {
+
+            setLoading(false);
 
             showError(
               response &&
@@ -204,21 +220,29 @@
                 : 'Username atau password salah.'
             );
 
-            passwordInput.value = '';
+            if (passwordInput) {
 
-            passwordInput.focus();
+              passwordInput.value = '';
+
+              passwordInput.focus();
+
+            }
 
             return;
+
           }
 
 
           if (!response.token) {
+
+            setLoading(false);
 
             showError(
               'Login berhasil tetapi token session tidak diterima.'
             );
 
             return;
+
           }
 
 
@@ -241,28 +265,32 @@
 
             clearSession();
 
+            setLoading(false);
+
             showError(
               'Role akun tidak valid.'
             );
 
             return;
+
           }
 
-
-          /*
-           * SIMPAN SESSION
-           */
 
           try {
 
             localStorage.setItem(
               STORAGE_TOKEN,
-              String(response.token)
+              String(
+                response.token
+              )
             );
+
 
             localStorage.setItem(
               STORAGE_USER,
-              JSON.stringify(user)
+              JSON.stringify(
+                user
+              )
             );
 
           } catch (error) {
@@ -274,18 +302,13 @@
             );
 
             return;
+
           }
 
 
-          showSuccess(
-            'Login berhasil. Membuka aplikasi...'
+          prepareRedirect(
+            user
           );
-
-          showSuccess(
-  'Login berhasil. Menyiapkan dashboard...'
-);
-
-redirectByRole(user);
 
         }
       )
@@ -296,7 +319,9 @@ redirectByRole(user);
           setLoading(false);
 
           showError(
-            normalizeError(error)
+            normalizeError(
+              error
+            )
           );
 
         }
@@ -310,9 +335,241 @@ redirectByRole(user);
   }
 
 
-  /* =========================================================
-     CHECK EXISTING SESSION
-     ========================================================= */
+  /*
+   * ==========================================================
+   * REDIRECT
+   * ==========================================================
+   *
+   * Tidak menggunakan window.top.location.
+   *
+   * Apps Script IFRAME membutuhkan navigasi top-level
+   * melalui aksi user dengan target="_top".
+   */
+  function prepareRedirect(
+    user
+  ) {
+
+    var role =
+      String(
+        user &&
+        user.role || ''
+      )
+      .trim()
+      .toLowerCase();
+
+
+    var targetPage =
+      '';
+
+
+    if (
+      role === 'admin'
+    ) {
+
+      targetPage =
+        'DashboardAdmin';
+
+    } else if (
+      role === 'pegawai'
+    ) {
+
+      targetPage =
+        'DashboardPegawai';
+
+    } else {
+
+      clearSession();
+
+      setLoading(false);
+
+      showError(
+        'Role pengguna tidak dikenali.'
+      );
+
+      return;
+
+    }
+
+
+    var base =
+      String(
+        window.ABSENSI_WEB_APP_URL ||
+        ''
+      ).trim();
+
+
+    if (!base) {
+
+      google.script.run
+
+        .withSuccessHandler(
+          function (url) {
+
+            if (!url) {
+
+              setLoading(false);
+
+              showError(
+                'URL Web App tidak tersedia.'
+              );
+
+              return;
+
+            }
+
+
+            finishRedirect(
+              url,
+              targetPage
+            );
+
+          }
+        )
+
+        .withFailureHandler(
+          function (error) {
+
+            setLoading(false);
+
+            showError(
+              normalizeError(
+                error
+              )
+            );
+
+          }
+        )
+
+        .getWebAppUrl();
+
+      return;
+
+    }
+
+
+    finishRedirect(
+      base,
+      targetPage
+    );
+
+  }
+
+
+  function finishRedirect(
+    base,
+    page
+  ) {
+
+    var separator =
+      base.indexOf('?') >= 0
+        ? '&'
+        : '?';
+
+
+    pendingTargetUrl =
+      base +
+      separator +
+      'page=' +
+      encodeURIComponent(
+        page
+      );
+
+
+    redirectReady =
+      true;
+
+
+    setLoading(false);
+
+
+    if (loginButton) {
+
+      loginButton.disabled =
+        false;
+
+      loginButton.type =
+        'button';
+
+      loginButton.onclick =
+        function () {
+
+          navigateTop(
+            pendingTargetUrl
+          );
+
+        };
+
+    }
+
+
+    if (loginButtonText) {
+
+      loginButtonText.textContent =
+        page === 'DashboardAdmin'
+          ? 'Buka Dashboard Admin'
+          : 'Buka Dashboard Pegawai';
+
+    }
+
+
+    if (loginSpinner) {
+
+      loginSpinner.classList.add(
+        'hidden'
+      );
+
+    }
+
+
+    showSuccess(
+      'Login berhasil. Klik tombol untuk membuka aplikasi.'
+    );
+
+  }
+
+
+  function navigateTop(
+    url
+  ) {
+
+    if (!url) {
+      return;
+    }
+
+
+    /*
+     * Link dibuat dan diklik dari aksi user.
+     * target="_top" diizinkan oleh Apps Script IFRAME.
+     */
+    var link =
+      document.createElement(
+        'a'
+      );
+
+
+    link.href =
+      url;
+
+    link.target =
+      '_top';
+
+    link.rel =
+      'noopener';
+
+
+    link.style.display =
+      'none';
+
+
+    document.body.appendChild(
+      link
+    );
+
+
+    link.click();
+
+  }
+
 
   function checkExistingSession() {
 
@@ -324,11 +581,6 @@ redirectByRole(user);
       return;
     }
 
-
-    /*
-     * Jangan menampilkan loading login
-     * hanya karena session lama sedang diperiksa.
-     */
 
     google.script.run
 
@@ -345,26 +597,22 @@ redirectByRole(user);
               response.user
             );
 
-            redirectByRole(
+
+            prepareRedirect(
               response.user
             );
 
-            return;
+          } else {
+
+            clearSession();
+
           }
-
-
-          clearSession();
 
         }
       )
 
       .withFailureHandler(
         function () {
-
-          /*
-           * Jika gagal validasi session lama,
-           * biarkan user tetap berada di Login.
-           */
 
           clearSession();
 
@@ -378,633 +626,6 @@ redirectByRole(user);
   }
 
 
-  /* =========================================================
-     REDIRECT BY ROLE
-     ========================================================= */
-
-  function redirectByRole(user) {
-
-  if (!user) {
-
-    setLoading(false);
-
-    showError(
-      'Data pengguna tidak tersedia.'
-    );
-
-    return;
-  }
-
-
-  var role =
-    String(
-      user.role || ''
-    )
-    .trim()
-    .toLowerCase();
-
-
-  var targetPage = '';
-
-
-  if (role === 'admin') {
-
-    targetPage =
-      'DashboardAdmin';
-
-  } else if (role === 'pegawai') {
-
-    targetPage =
-      'DashboardPegawai';
-
-  } else {
-
-    clearSession();
-
-    setLoading(false);
-
-    showError(
-      'Role pengguna tidak dikenali.'
-    );
-
-    return;
-  }
-
-
-  /*
-   * Ambil URL Web App asli dari server.
-   */
-  google.script.run
-
-    .withSuccessHandler(
-      function (webAppUrl) {
-
-        setLoading(false);
-
-
-        if (!webAppUrl) {
-
-          showError(
-            'URL Web App tidak ditemukan.'
-          );
-
-          return;
-        }
-
-
-        var targetUrl =
-          String(webAppUrl) +
-          '?page=' +
-          encodeURIComponent(
-            targetPage
-          );
-
-
-        /*
-         * Hapus tombol lama jika ada.
-         */
-        var old =
-          document.getElementById(
-            'openDashboardButton'
-          );
-
-        if (old) {
-          old.remove();
-        }
-
-
-        /*
-         * Buat LINK ASLI.
-         *
-         * Bukan window.top.location.
-         *
-         * target="_top" diperlukan oleh
-         * Apps Script IFRAME sandbox.
-         */
-        var link =
-          document.createElement('a');
-
-
-        link.id =
-          'openDashboardButton';
-
-        link.href =
-          targetUrl;
-
-        link.target =
-          '_top';
-
-        link.textContent =
-          targetPage === 'DashboardAdmin'
-            ? 'Buka Dashboard Admin'
-            : 'Buka Dashboard Pegawai';
-
-
-        link.style.display =
-          'block';
-
-        link.style.width =
-          '100%';
-
-        link.style.boxSizing =
-          'border-box';
-
-        link.style.marginTop =
-          '12px';
-
-        link.style.padding =
-          '13px 16px';
-
-        link.style.borderRadius =
-          '10px';
-
-        link.style.background =
-          '#2563eb';
-
-        link.style.color =
-          '#ffffff';
-
-        link.style.textAlign =
-          'center';
-
-        link.style.textDecoration =
-          'none';
-
-        link.style.fontWeight =
-          '700';
-
-
-        /*
-         * Sembunyikan tombol login.
-         */
-        if (loginButton) {
-
-          loginButton.style.display =
-            'none';
-
-        }
-
-
-        /*
-         * Tampilkan pesan.
-         */
-        showSuccess(
-          'Login berhasil. Klik tombol di bawah untuk membuka aplikasi.'
-        );
-
-
-        /*
-         * Letakkan tombol setelah form.
-         */
-        if (form) {
-
-          form.appendChild(
-            link
-          );
-
-        }
-
-      }
-    )
-
-    .withFailureHandler(
-      function (error) {
-
-        setLoading(false);
-
-        showError(
-          normalizeError(error)
-        );
-
-      }
-    )
-
-    .getWebAppUrl();
-
-}
-
-
-    /*
-     * JANGAN lagi menggunakan:
-     *
-     * window.top.location.href =
-     *
-     * langsung dari callback google.script.run.
-     *
-     * Apps Script HTML Service berjalan
-     * di sandbox iframe.
-     */
-
-
-    google.script.run
-
-      .withSuccessHandler(
-        function (webAppUrl) {
-
-          var baseUrl =
-            String(
-              webAppUrl || ''
-            )
-            .trim();
-
-
-          /*
-           * Jika ScriptApp.getService().getUrl()
-           * gagal, gunakan URL halaman saat ini
-           * sebagai fallback.
-           */
-          if (!baseUrl) {
-
-            baseUrl =
-              getCurrentWebAppUrl();
-
-          }
-
-
-          if (!baseUrl) {
-
-            setLoading(false);
-
-            showRedirectButton(
-              targetPage
-            );
-
-            return;
-          }
-
-
-          var targetUrl =
-            baseUrl +
-            (
-              baseUrl.indexOf('?') >= 0
-                ? '&'
-                : '?'
-            ) +
-            'page=' +
-            encodeURIComponent(
-              targetPage
-            );
-
-
-          /*
-           * Buat link target="_top".
-           *
-           * Ini mengikuti mekanisme yang direkomendasikan
-           * Apps Script untuk keluar dari iframe sandbox.
-           */
-
-          createTopNavigation(
-            targetUrl
-          );
-
-        }
-      )
-
-      .withFailureHandler(
-        function () {
-
-          var fallback =
-            getCurrentWebAppUrl();
-
-
-          if (fallback) {
-
-            createTopNavigation(
-              fallback +
-              (
-                fallback.indexOf('?') >= 0
-                  ? '&'
-                  : '?'
-              ) +
-              'page=' +
-              encodeURIComponent(
-                targetPage
-              )
-            );
-
-            return;
-          }
-
-
-          setLoading(false);
-
-          showRedirectButton(
-            targetPage
-          );
-
-        }
-      )
-
-      .getWebAppUrl();
-
-  }
-
-
-  /* =========================================================
-     TOP NAVIGATION
-     ========================================================= */
-
-  function createTopNavigation(
-    url
-  ) {
-
-    /*
-     * Hapus link redirect lama.
-     */
-
-    var old =
-      document.getElementById(
-        'absensiRedirectLink'
-      );
-
-    if (old) {
-      old.remove();
-    }
-
-
-    /*
-     * Link asli target="_top".
-     */
-
-    var link =
-      document.createElement('a');
-
-    link.id =
-      'absensiRedirectLink';
-
-    link.href =
-      url;
-
-    link.target =
-      '_top';
-
-    link.rel =
-      'noopener';
-
-    link.textContent =
-      'Membuka aplikasi...';
-
-    link.style.position =
-      'fixed';
-
-    link.style.left =
-      '-9999px';
-
-    link.style.top =
-      '-9999px';
-
-
-    document.body.appendChild(
-      link
-    );
-
-
-    /*
-     * Coba navigasi.
-     */
-
-    try {
-
-      link.click();
-
-    } catch (error) {
-
-      /*
-       * Jika browser menolak navigasi,
-       * tampilkan tombol manual.
-       */
-
-      showManualRedirect(
-        url
-      );
-
-    }
-
-
-    /*
-     * Jangan biarkan UI terjebak
-     * "Memproses..." selamanya.
-     */
-
-    setTimeout(
-      function () {
-
-        setLoading(false);
-
-      },
-      1000
-    );
-
-  }
-
-
-  /* =========================================================
-     FALLBACK CURRENT URL
-     ========================================================= */
-
-  function getCurrentWebAppUrl() {
-
-    try {
-
-      var url =
-        window.location.href;
-
-
-      /*
-       * Jika sedang berada di halaman
-       * userCodeAppPanel, ambil bagian sebelum
-       * query string.
-       */
-
-      if (
-        url.indexOf('?') !== -1
-      ) {
-
-        url =
-          url.split('?')[0];
-
-      }
-
-
-      /*
-       * Jangan menggunakan URL kosong.
-       */
-
-      if (
-        url &&
-        (
-          url.indexOf(
-            'script.google.com'
-          ) !== -1 ||
-          url.indexOf(
-            'googleusercontent.com'
-          ) !== -1
-        )
-      ) {
-
-        return url;
-
-      }
-
-    } catch (error) {}
-
-    return '';
-
-  }
-
-
-  /* =========================================================
-     MANUAL REDIRECT
-     ========================================================= */
-
-  function showRedirectButton(
-    targetPage
-  ) {
-
-    setLoading(false);
-
-
-    var url =
-      '';
-
-
-    google.script.run
-
-      .withSuccessHandler(
-        function (webAppUrl) {
-
-          url =
-            String(
-              webAppUrl || ''
-            )
-            .trim();
-
-
-          if (!url) {
-
-            showError(
-              'URL aplikasi tidak dapat ditemukan. Silakan buka ulang Web App.'
-            );
-
-            return;
-          }
-
-
-          showManualRedirect(
-            url +
-            (
-              url.indexOf('?') >= 0
-                ? '&'
-                : '?'
-            ) +
-            'page=' +
-            encodeURIComponent(
-              targetPage
-            )
-          );
-
-        }
-      )
-
-      .withFailureHandler(
-        function () {
-
-          showError(
-            'Gagal mendapatkan URL aplikasi.'
-          );
-
-        }
-      )
-
-      .getWebAppUrl();
-
-  }
-
-
-  function showManualRedirect(
-    url
-  ) {
-
-    setLoading(false);
-
-
-    var old =
-      document.getElementById(
-        'absensiManualRedirect'
-      );
-
-    if (old) {
-      old.remove();
-    }
-
-
-    var wrapper =
-      document.createElement('div');
-
-    wrapper.id =
-      'absensiManualRedirect';
-
-    wrapper.style.marginTop =
-      '12px';
-
-    wrapper.style.textAlign =
-      'center';
-
-
-    var link =
-      document.createElement('a');
-
-    link.href =
-      url;
-
-    link.target =
-      '_top';
-
-    link.textContent =
-      'Klik di sini untuk membuka Dashboard';
-
-    link.style.display =
-      'inline-block';
-
-    link.style.padding =
-      '10px 16px';
-
-    link.style.borderRadius =
-      '8px';
-
-    link.style.background =
-      '#2563eb';
-
-    link.style.color =
-      '#fff';
-
-    link.style.textDecoration =
-      'none';
-
-    link.style.fontWeight =
-      '600';
-
-
-    wrapper.appendChild(
-      link
-    );
-
-
-    if (form) {
-
-      form.appendChild(
-        wrapper
-      );
-
-    }
-
-  }
-
-
-  /* =========================================================
-     APP NAME
-     ========================================================= */
-
   function loadAppName() {
 
     google.script.run
@@ -1012,23 +633,20 @@ redirectByRole(user);
       .withSuccessHandler(
         function (name) {
 
-          if (!name) {
-            return;
-          }
-
-
           var element =
             document.getElementById(
               'appName'
             );
 
 
-          if (element) {
-
-            element.textContent =
-              name;
-
+          if (!element) {
+            return;
           }
+
+
+          element.textContent =
+            name ||
+            'Aplikasi Absensi';
 
         }
       )
@@ -1037,7 +655,7 @@ redirectByRole(user);
         function () {
 
           /*
-           * Nama default tetap digunakan.
+           * Nama default tetap dipakai.
            */
 
         }
@@ -1047,10 +665,6 @@ redirectByRole(user);
 
   }
 
-
-  /* =========================================================
-     TOKEN
-     ========================================================= */
 
   function getToken() {
 
@@ -1071,10 +685,6 @@ redirectByRole(user);
   }
 
 
-  /* =========================================================
-     SAVE USER
-     ========================================================= */
-
   function saveUser(
     user
   ) {
@@ -1093,10 +703,6 @@ redirectByRole(user);
   }
 
 
-  /* =========================================================
-     CLEAR SESSION
-     ========================================================= */
-
   function clearSession() {
 
     try {
@@ -1114,10 +720,6 @@ redirectByRole(user);
   }
 
 
-  /* =========================================================
-     LOADING
-     ========================================================= */
-
   function setLoading(
     loading
   ) {
@@ -1125,7 +727,7 @@ redirectByRole(user);
     if (loginButton) {
 
       loginButton.disabled =
-        !!loading;
+        loading;
 
     }
 
@@ -1152,10 +754,6 @@ redirectByRole(user);
   }
 
 
-  /* =========================================================
-     ERROR
-     ========================================================= */
-
   function showError(
     message
   ) {
@@ -1175,10 +773,6 @@ redirectByRole(user);
 
   }
 
-
-  /* =========================================================
-     SUCCESS
-     ========================================================= */
 
   function showSuccess(
     message
@@ -1200,10 +794,6 @@ redirectByRole(user);
   }
 
 
-  /* =========================================================
-     CLEAR MESSAGE
-     ========================================================= */
-
   function clearMessage() {
 
     if (!loginMessage) {
@@ -1214,15 +804,12 @@ redirectByRole(user);
     loginMessage.textContent =
       '';
 
+
     loginMessage.className =
       'message hidden';
 
   }
 
-
-  /* =========================================================
-     NORMALIZE ERROR
-     ========================================================= */
 
   function normalizeError(
     error
@@ -1238,7 +825,8 @@ redirectByRole(user);
 
 
     if (
-      typeof error === 'string'
+      typeof error ===
+      'string'
     ) {
 
       return error;
@@ -1262,15 +850,10 @@ redirectByRole(user);
   }
 
 
-  /* =========================================================
-     GLOBAL APP
-     ========================================================= */
-
   window.AbsensiApp = {
 
     getToken:
       getToken,
-
 
     getUser:
       function () {
@@ -1295,16 +878,19 @@ redirectByRole(user);
 
       },
 
-
     clearSession:
       clearSession,
 
-
     redirectByRole:
-      redirectByRole
+      prepareRedirect
 
   };
 
 
+  window.redirectByRole =
+    prepareRedirect;
+
+
 })();
+
 </script>

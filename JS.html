@@ -327,55 +327,117 @@
   }
 
 
-  function redirectByRole(user) {
+ function redirectByRole(user) {
 
-    if (!user) {
+  if (!user) {
+    showError('Data pengguna tidak tersedia.');
+    return;
+  }
 
-      clearSession();
+  var role = String(
+    user.role || ''
+  ).trim().toLowerCase();
 
-      showError(
-        'Data pengguna tidak tersedia.'
-      );
+  var targetPage = '';
 
-      return;
+  if (role === 'admin') {
 
-    }
+    targetPage = 'DashboardAdmin';
+
+  } else if (role === 'pegawai') {
+
+    targetPage = 'DashboardPegawai';
+
+  } else {
+
+    clearSession();
+
+    showError(
+      'Role pengguna tidak dikenali.'
+    );
+
+    return;
+  }
+
+  var baseUrl =
+    window.location.href.split('?')[0];
+
+  window.top.location.href =
+    baseUrl +
+    '?page=' +
+    encodeURIComponent(targetPage);
+}
 
 
-    var role =
-      String(
-        user.role || ''
-      )
-      .trim()
-      .toLowerCase();
+    /*
+     * Ambil URL aplikasi saat ini.
+     *
+     * Contoh:
+     *
+     * https://script.googleusercontent.com/.../userCodeAppPanel
+     *
+     * Kita hanya menambahkan ?page=...
+     *
+     * Token TIDAK dimasukkan ke URL.
+     */
+
+    var baseUrl =
+      window.location.href
+        .split('?')[0];
 
 
-    var targetPage;
-
+    /*
+     * ADMIN
+     */
 
     if (role === 'admin') {
 
-      targetPage =
-        'DashboardAdmin';
-
-    } else if (
-      role === 'pegawai'
-    ) {
-
-      targetPage =
-        'DashboardPegawai';
-
-    } else {
-
-      clearSession();
-
-      showError(
-        'Role pengguna tidak dikenali.'
-      );
+      window.top.location.href =
+        baseUrl +
+        '?page=DashboardAdmin';
 
       return;
 
     }
+
+
+    /*
+     * PEGAWAI
+     */
+
+    if (role === 'pegawai') {
+
+      window.top.location.href =
+        baseUrl +
+        '?page=DashboardPegawai';
+
+      return;
+
+    }
+
+
+    /*
+     * ROLE TIDAK DIKENALI
+     */
+
+    clearSession();
+
+    showError(
+      'Role pengguna tidak dikenali.'
+    );
+
+  }
+
+
+  /*
+   * Pastikan fungsi bisa dipanggil
+   * oleh kode login.
+   */
+
+  window.redirectByRole =
+    redirectByRole;
+
+})();
 
 
     /*

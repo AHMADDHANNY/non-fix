@@ -748,14 +748,50 @@ function testFileDashboardPegawai() {
 
 }
 
-function getWebAppUrl() {
-  var url = ScriptApp.getService().getUrl();
+/**
+ * ============================================================
+ * COMPATIBILITY FUNCTIONS
+ * ============================================================
+ */
 
-  if (!url) {
-    throw new Error(
-      'URL Web App belum tersedia. Deploy project sebagai Web App terlebih dahulu.'
-    );
+/**
+ * Mengembalikan URL Web App aktif.
+ *
+ * Dipakai oleh Login.html / JS.html
+ * untuk redirect setelah login.
+ */
+function getWebAppUrl() {
+
+  try {
+
+    var url =
+      ScriptApp
+        .getService()
+        .getUrl();
+
+    if (url) {
+      return url;
+    }
+
+  } catch (error) {
+    // lanjut ke fallback
   }
 
-  return url;
+  /*
+   * Fallback jika ScriptApp.getService().getUrl()
+   * tidak tersedia saat fungsi dipanggil.
+   */
+  return '';
+}
+
+
+/**
+ * Nama aplikasi untuk frontend.
+ *
+ * JS.html memanggil getNamaApp().
+ */
+function getNamaApp() {
+
+  return getNamaAppSafe_();
+
 }

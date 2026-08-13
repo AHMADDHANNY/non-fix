@@ -1462,5 +1462,154 @@ button {
   }
 
 }
+<style>
+
+.admin-module {
+  width: 100%;
+}
+
+.module-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.module-toolbar input,
+.module-toolbar select,
+.admin-form input,
+.admin-form select {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d7deeb;
+  border-radius: 9px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.module-toolbar input {
+  flex: 1 1 220px;
+}
+
+.module-toolbar select {
+  min-width: 150px;
+}
+
+.module-toolbar button,
+.admin-form button {
+  border: 0;
+  border-radius: 9px;
+  padding: 10px 16px;
+  cursor: pointer;
+  background: #315bea;
+  color: #fff;
+  font-weight: 600;
+}
+
+.admin-form {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  margin-bottom: 18px;
+  border: 1px solid #e0e6f0;
+  border-radius: 12px;
+  background: #fafbfe;
+}
+
+.admin-form h3 {
+  margin: 0 0 8px;
+}
+
+.admin-form label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid #e8edf5;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-table th {
+  background: #f7f9fc;
+  font-size: 13px;
+}
+
+.btn-mini {
+  border: 0;
+  border-radius: 7px;
+  padding: 6px 9px;
+  cursor: pointer;
+  background: #315bea;
+  color: #fff;
+  font-size: 12px;
+}
+
+.btn-mini.success {
+  background: #198754;
+}
+
+.btn-mini.danger {
+  background: #dc3545;
+}
+
+.empty-state {
+  padding: 30px;
+  text-align: center;
+  color: #777;
+}
+
+.module-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.module-pagination button {
+  border: 1px solid #d7deeb;
+  background: #fff;
+  border-radius: 7px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.module-pagination button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.message.error {
+  padding: 12px;
+  border-radius: 9px;
+  background: #fff0f0;
+  border: 1px solid #ffcaca;
+  color: #d22;
+}
+
+@media (max-width: 700px) {
+
+  .module-toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .module-toolbar input,
+  .module-toolbar select,
+  .module-toolbar button {
+    width: 100%;
+  }
+
+}
 
 </style>

@@ -512,6 +512,20 @@ function buatSessionToken_(
     var now =
       new Date();
 
+/**
+ * Alias kompatibilitas.
+ *
+ * login() menggunakan createSession_()
+ * sedangkan implementasi session bernama
+ * buatSessionToken_().
+ */
+function createSession_(id_user) {
+
+  return buatSessionToken_(
+    id_user
+  );
+
+}
     /*
      * Login baru menggantikan token user lama.
      * Session expired juga dibersihkan.
@@ -938,36 +952,77 @@ function bersihkanSessionExpired() {
  * ============================================================
  * STANDARD JSON RESPONSE
  * ============================================================
+ *
+ * Mendukung dua bentuk:
+ *
+ * jsonResponse({
+ *   success: true,
+ *   data: {}
+ * })
+ *
+ * maupun:
+ *
+ * jsonResponse(
+ *   true,
+ *   'Berhasil',
+ *   {}
+ * )
  */
-function jsonResponse(success, message, data) {
+function jsonResponse(
+  success,
+  message,
+  data
+) {
 
+  /*
+   * Bentuk object:
+   */
+  if (
+    arguments.length === 1 &&
+    success &&
+    typeof success ===
+      'object' &&
+    !Array.isArray(success)
+  ) {
+
+    return success;
+
+  }
+
+
+  /*
+   * Bentuk parameter biasa:
+   */
   var result = {
-    success: Boolean(success)
+    success:
+      Boolean(success)
   };
 
-  if (message !== undefined && message !== null) {
-    result.message = String(message);
+
+  if (
+    message !== undefined &&
+    message !== null
+  ) {
+
+    result.message =
+      String(message);
+
   }
 
-  if (data !== undefined && data !== null) {
 
-    if (
-      typeof data === 'object' &&
-      !Array.isArray(data)
-    ) {
+  if (
+    data !== undefined &&
+    data !== null
+  ) {
 
-      Object.keys(data).forEach(function (key) {
-        result[key] = data[key];
-      });
+    result.data =
+      data;
 
-    } else {
-
-      result.data = data;
-
-    }
   }
+
 
   return result;
+
 }
 
 /**

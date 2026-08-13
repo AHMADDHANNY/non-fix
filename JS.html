@@ -281,21 +281,11 @@
             'Login berhasil. Membuka aplikasi...'
           );
 
+          showSuccess(
+  'Login berhasil. Menyiapkan dashboard...'
+);
 
-          /*
-           * Beri waktu browser memperbarui UI
-           * sebelum navigasi.
-           */
-          setTimeout(
-            function () {
-
-              redirectByRole(
-                user
-              );
-
-            },
-            200
-          );
+redirectByRole(user);
 
         }
       )
@@ -392,61 +382,206 @@
      REDIRECT BY ROLE
      ========================================================= */
 
-  function redirectByRole(
-    user
-  ) {
+  function redirectByRole(user) {
 
-    if (!user) {
+  if (!user) {
 
-      setLoading(false);
+    setLoading(false);
 
-      showError(
-        'Data pengguna tidak tersedia.'
-      );
+    showError(
+      'Data pengguna tidak tersedia.'
+    );
 
-      return;
-    }
+    return;
+  }
 
 
-    var role =
-      String(
-        user.role || ''
-      )
-      .trim()
-      .toLowerCase();
+  var role =
+    String(
+      user.role || ''
+    )
+    .trim()
+    .toLowerCase();
 
 
-    var targetPage =
-      '';
+  var targetPage = '';
 
 
-    if (
-      role === 'admin'
-    ) {
+  if (role === 'admin') {
 
-      targetPage =
-        'DashboardAdmin';
+    targetPage =
+      'DashboardAdmin';
 
-    } else if (
-      role === 'pegawai'
-    ) {
+  } else if (role === 'pegawai') {
 
-      targetPage =
-        'DashboardPegawai';
+    targetPage =
+      'DashboardPegawai';
 
-    } else {
+  } else {
 
-      clearSession();
+    clearSession();
 
-      setLoading(false);
+    setLoading(false);
 
-      showError(
-        'Role pengguna tidak dikenali.'
-      );
+    showError(
+      'Role pengguna tidak dikenali.'
+    );
 
-      return;
+    return;
+  }
 
-    }
+
+  /*
+   * Ambil URL Web App asli dari server.
+   */
+  google.script.run
+
+    .withSuccessHandler(
+      function (webAppUrl) {
+
+        setLoading(false);
+
+
+        if (!webAppUrl) {
+
+          showError(
+            'URL Web App tidak ditemukan.'
+          );
+
+          return;
+        }
+
+
+        var targetUrl =
+          String(webAppUrl) +
+          '?page=' +
+          encodeURIComponent(
+            targetPage
+          );
+
+
+        /*
+         * Hapus tombol lama jika ada.
+         */
+        var old =
+          document.getElementById(
+            'openDashboardButton'
+          );
+
+        if (old) {
+          old.remove();
+        }
+
+
+        /*
+         * Buat LINK ASLI.
+         *
+         * Bukan window.top.location.
+         *
+         * target="_top" diperlukan oleh
+         * Apps Script IFRAME sandbox.
+         */
+        var link =
+          document.createElement('a');
+
+
+        link.id =
+          'openDashboardButton';
+
+        link.href =
+          targetUrl;
+
+        link.target =
+          '_top';
+
+        link.textContent =
+          targetPage === 'DashboardAdmin'
+            ? 'Buka Dashboard Admin'
+            : 'Buka Dashboard Pegawai';
+
+
+        link.style.display =
+          'block';
+
+        link.style.width =
+          '100%';
+
+        link.style.boxSizing =
+          'border-box';
+
+        link.style.marginTop =
+          '12px';
+
+        link.style.padding =
+          '13px 16px';
+
+        link.style.borderRadius =
+          '10px';
+
+        link.style.background =
+          '#2563eb';
+
+        link.style.color =
+          '#ffffff';
+
+        link.style.textAlign =
+          'center';
+
+        link.style.textDecoration =
+          'none';
+
+        link.style.fontWeight =
+          '700';
+
+
+        /*
+         * Sembunyikan tombol login.
+         */
+        if (loginButton) {
+
+          loginButton.style.display =
+            'none';
+
+        }
+
+
+        /*
+         * Tampilkan pesan.
+         */
+        showSuccess(
+          'Login berhasil. Klik tombol di bawah untuk membuka aplikasi.'
+        );
+
+
+        /*
+         * Letakkan tombol setelah form.
+         */
+        if (form) {
+
+          form.appendChild(
+            link
+          );
+
+        }
+
+      }
+    )
+
+    .withFailureHandler(
+      function (error) {
+
+        setLoading(false);
+
+        showError(
+          normalizeError(error)
+        );
+
+      }
+    )
+
+    .getWebAppUrl();
+
+}
 
 
     /*

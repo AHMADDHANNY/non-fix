@@ -795,3 +795,322 @@ function getNamaApp() {
   return getNamaAppSafe_();
 
 }
+
+/**
+ * ============================================================
+ * PUBLIC APP NAME
+ * ============================================================
+ *
+ * getNamaAppSafe_() tidak boleh dipanggil langsung
+ * dari google.script.run karena nama berakhiran "_"
+ * dianggap private oleh Apps Script.
+ */
+function getNamaApp() {
+  return getNamaAppSafe_();
+}
+
+
+/**
+ * ============================================================
+ * PENGATURAN CACHE
+ * ============================================================
+ */
+
+var CACHE_PENGATURAN_KEY =
+  'ABSENSI_PENGATURAN_CACHE_V1';
+
+
+function getPengaturanCache() {
+
+  var cache =
+    CacheService.getScriptCache();
+
+  var cached =
+    cache.get(
+      CACHE_PENGATURAN_KEY
+    );
+
+  if (cached) {
+
+    try {
+
+      return JSON.parse(
+        cached
+      );
+
+    } catch (e) {}
+
+  }
+
+
+  var hasil = {
+    nama_app: 'Aplikasi Absensi',
+    logo_url: '',
+    lat_kantor: '',
+    long_kantor: '',
+    radius_meter: 100,
+    jam_masuk: '08:00',
+    jam_pulang: '17:00',
+    toleransi_menit: 15
+  };
+
+
+  try {
+
+    var sheet =
+      getSheetSafe_(
+        SHEET_PENGATURAN
+      );
+
+
+    if (
+      sheet &&
+      sheet.getLastRow() >= 2
+    ) {
+
+      var row =
+        sheet
+          .getRange(
+            2,
+            1,
+            1,
+            8
+          )
+          .getValues()[0];
+
+
+      hasil = {
+
+        nama_app:
+          String(
+            row[0] ||
+            'Aplikasi Absensi'
+          ),
+
+        logo_url:
+          String(
+            row[1] ||
+            ''
+          ),
+
+        lat_kantor:
+          row[2] === '' ||
+          row[2] == null
+            ? ''
+            : Number(row[2]),
+
+        long_kantor:
+          row[3] === '' ||
+          row[3] == null
+            ? ''
+            : Number(row[3]),
+
+        radius_meter:
+          row[4] === '' ||
+          row[4] == null
+            ? 100
+            : Number(row[4]),
+
+        jam_masuk:
+          String(
+            row[5] ||
+            '08:00'
+          ),
+
+        jam_pulang:
+          String(
+            row[6] ||
+            '17:00'
+          ),
+
+        toleransi_menit:
+          row[7] === '' ||
+          row[7] == null
+            ? 15
+            : Number(row[7])
+
+      };
+
+    }
+
+  } catch (e) {
+
+    /*
+     * Biarkan validasi absensi yang menangani
+     * konfigurasi yang belum lengkap.
+     */
+
+  }
+
+
+  cache.put(
+    CACHE_PENGATURAN_KEY,
+    JSON.stringify(hasil),
+    21600
+  );
+
+
+  return hasil;
+
+}
+
+
+/**
+ * ============================================================
+ * BERSIHKAN CACHE PENGATURAN
+ * ============================================================
+ */
+
+function bersihkanCachePengaturan() {
+
+  CacheService
+    .getScriptCache()
+    .remove(
+      CACHE_PENGATURAN_KEY
+    );
+
+}
+
+
+/**
+ * ============================================================
+ * GENERATE SEQUENTIAL ID
+ * ============================================================
+ *
+ * Contoh:
+ *
+ * USR-000001
+ * USR-000002
+ *
+ * ABS-000001
+ * IZN-000001
+ */
+
+function generateSequentialId(
+  prefix,
+  sheetName,
+  idColumnIndex
+) {
+
+  prefix =
+    String(
+      prefix || ''
+    )
+    .trim()
+    .toUpperCase();
+
+
+  if (!prefix) {
+
+    throw new Error(
+      'Prefix ID tidak boleh kosong.'
+    );
+
+  }
+
+
+  var sheet =
+    getSheet(
+      sheetName
+    );
+
+
+  var lastRow =
+    sheet.getLastRow();
+
+
+  var nextNumber =
+    1;
+
+
+  if (lastRow >= 2) {
+
+    var values =
+      sheet
+        .getRange(
+          2,
+          Number(idColumnIndex) + 1,
+          lastRow - 1,
+          1
+        )
+        .getDisplayValues();
+
+
+    var regex =
+      new RegExp(
+        '^' +
+        prefix.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          '\\$&'
+        ) +
+        '-(\\d+)$',
+        'i'
+      );
+
+
+    var maxNumber =
+      0;
+
+
+    for (
+      var i = 0;
+      i < values.length;
+      i++
+    ) {
+
+      var value =
+        String(
+          values[i][0] ||
+          ''
+        )
+        .trim();
+
+
+      var match =
+        value.match(
+          regex
+        );
+
+
+      if (match) {
+
+        var number =
+          parseInt(
+            match[1],
+            10
+          );
+
+
+        if (
+          !isNaN(number) &&
+          number > maxNumber
+        ) {
+
+          maxNumber =
+            number;
+
+        }
+
+      }
+
+    }
+
+
+    nextNumber =
+      maxNumber + 1;
+
+  }
+
+
+  return (
+    prefix +
+    '-' +
+    String(
+      nextNumber
+    ).padStart(
+      6,
+      '0'
+    )
+  );
+
+}

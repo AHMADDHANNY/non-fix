@@ -67,6 +67,18 @@ function bersihkanCachePengaturan() {
  * ID SEQUENTIAL
  * =================================================================== */
 
+/**
+ * Generates IDs such as ABS-000001.
+ *
+ * The previous implementation scanned the sheet and returned max+1.
+ * That is unsafe when several IDs are generated before their rows are
+ * appended (for example tandaiAlpaHarian), because every call can see
+ * the same max and return the same ID.
+ *
+ * A script-property counter is therefore used as the authoritative
+ * sequence after it has been synchronized with existing data.
+ * Calls made inside an existing ScriptLock remain serialized.
+ */
 function generateSequentialId(prefix, sheetName, columnIndex) {
   prefix = String(prefix || '').trim().toUpperCase();
 
@@ -75,38 +87,46 @@ function generateSequentialId(prefix, sheetName, columnIndex) {
   }
 
   var sheet = getSheet(sheetName);
+  var properties = PropertiesService.getScriptProperties();
+  var key = 'SEQ_' + prefix + '_' + String(sheetName).replace(/[^A-Za-z0-9_]/g, '_').toUpperCase();
+  var stored = parseInt(properties.getProperty(key) || '0', 10);
+  if (!isFinite(stored) || stored < 0) {
+    stored = 0;
+  }
+
+  /* Sinkronkan sekali/ketika counter tertinggal dari data yang sudah ada. */
   var lastRow = sheet.getLastRow();
+  var maxNumber = stored;
 
-  if (lastRow < 2) {
-    return prefix + '-000001';
-  }
+  if (lastRow >= 2) {
+    var values = sheet
+      .getRange(2, Number(columnIndex) + 1, lastRow - 1, 1)
+      .getDisplayValues();
 
-  var values = sheet
-    .getRange(2, Number(columnIndex) + 1, lastRow - 1, 1)
-    .getDisplayValues();
+    var pattern = new RegExp(
+      '^' + escapeRegExp_(prefix) + '[-_]?(\\d+)$',
+      'i'
+    );
 
-  var maxNumber = 0;
-  var pattern = new RegExp(
-    '^' + escapeRegExp_(prefix) + '[-_]?(\\d+)$',
-    'i'
-  );
+    for (var i = 0; i < values.length; i++) {
+      var text = String(values[i][0] || '').trim();
+      var match = text.match(pattern);
 
-  for (var i = 0; i < values.length; i++) {
-    var text = String(values[i][0] || '').trim();
-    var match = text.match(pattern);
+      if (!match) {
+        continue;
+      }
 
-    if (!match) {
-      continue;
-    }
-
-    var number = parseInt(match[1], 10);
-
-    if (isFinite(number) && number > maxNumber) {
-      maxNumber = number;
+      var number = parseInt(match[1], 10);
+      if (isFinite(number) && number > maxNumber) {
+        maxNumber = number;
+      }
     }
   }
 
-  return prefix + '-' + padNumber_(maxNumber + 1, 6);
+  var nextNumber = maxNumber + 1;
+  properties.setProperty(key, String(nextNumber));
+
+  return prefix + '-' + padNumber_(nextNumber, 6);
 }
 
 
